@@ -1,0 +1,118 @@
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link href="css/style.css" rel="stylesheet" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  </head>
+
+  <body class="bg-[#FCFEFF]">
+    <header>
+      <div class="m-[15px]">
+        <img src="image/badelha.png" alt="" />
+      </div>
+    </header>
+
+    <main>
+      <div class="min-h-screen flex justify-center items-center px-4">
+        <div class="w-full max-w-[500px] border border-[#ccc] rounded-[15px] p-[10px] sm:p-[15px]">
+          <!-- Logo -->
+          <div class="flex justify-center items-center m-[30px]">
+            <img src="image/badelha.png" alt="" class="sm:w-[250px] sm:h-[150px] object-contain" />
+          </div>
+
+          <!-- Title -->
+          <div class="block my-[5px]">
+            <h2 class="text-center m-[3px] font-bold text-[#013b59] text-[20px] sm:text-[25px]">
+              تسجيل الدخول إلى الحساب
+            </h2>
+
+            <p class="text-center mt-[5px] text-[#817f7f] text-[13px] sm:text-[15px]">
+              ادخل البريد الإلكتروني أو رقم الهاتف وكلمة المرور
+            </p>
+          </div>
+
+          <!-- Form -->
+          <form action="" class="px-[5px] sm:px-[10px] mt-[20px]">
+            <!-- Email -->
+            <label for="email" class="block text-[14px] sm:text-[15px]">
+              عنوان البريد الإلكتروني
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              placeholder="user.2004@gmail.com"
+              class="w-full p-[8px] my-[10px] bg-[#f1f4f9] border border-[#D8D8D8] rounded-[10px] outline-none focus:border-none focus:border-[#013b59] focus:shadow-[0_0_8px_rgba(0,0,0,0.15)]" />
+
+            <!-- Password -->
+            <div class="relative">
+              <div class="flex justify-between items-center">
+                <label for="password" class="block text-[14px] sm:text-[15px]"> كلمة المرور </label>
+
+                <a href="#" class="text-[13px] text-[#929191]"> هل نسيت كلمة المرور؟ </a>
+              </div>
+
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                class="w-full p-[8px] my-[10px] bg-[#f1f4f9] border border-[#D8D8D8] rounded-[10px] outline-none focus:border-none focus:border-[#013b59] focus:shadow-[0_0_8px_rgba(0,0,0,0.15)]" />
+
+              <i
+                class="fa-solid fa-eye absolute left-[10px] bottom-[23px] text-[#b7b4b4] cursor-pointer"></i>
+
+              <i
+                class="fa-solid fa-eye-slash absolute left-[10px] bottom-[23px] text-[#b7b4b4] !hidden cursor-pointer"></i>
+            </div>
+
+            <!-- Terms & Conditions -->
+            <div class="cheak flex items-start mb-[10px]">
+              <i class="fa-solid fa-square-check text-[#5CBA9D] text-[25px] border-[#4F9D9E]"></i>
+              <p class="inline mr-[8px] text-[#a09c9c] text-[16px]">تذكر كلمة المرور</p>
+            </div>
+
+            <!-- Register Button -->
+            <button
+              class="block mx-auto cursor-pointer transition-[all] duration-800 hover:from-[#4f8ac1] hover:to-[#6ccacc] bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] w-full p-[10px] rounded-[10px] mt-[20px] text-[#fff]">
+              تسجيل الدخول
+            </button>
+          </form>
+
+          <!-- Login -->
+          <div class="flex text-center items-center justify-center mt-[20px] mb-[18px] gap-[5px]">
+            <p class="text-[#828181]">ليس لديك حساب؟</p>
+            <a href="signin.html" class="line-clamp-1 text-[#041167] underline text-[700]">
+              إنشاء حساب
+            </a>
+          </div>
+
+          <!-- Social Login -->
+          <div class="flex justify-center items-center gap-[15px] m-[11px]">
+            <!-- Facebook -->
+            <div
+              class="border border-[#e1e1e1] rounded-[11px] cursor-pointer px-[27px] py-[8px] gap-[5px] flex justify-center items-center hover:scale-[1.03] transition-all duration-300">
+              <i
+                class="fa-brands fa-facebook text-[24px] bg-gradient-to-b from-[#00B2FF] to-[#006AFF] bg-clip-text text-transparent"></i>
+
+              <p class="text-[12px] text-[#00B2FF]">الدخول باستخدام فيسبوك</p>
+            </div>
+
+            <!-- Google -->
+            <div
+              class="border border-[#e1e1e1] rounded-[11px] px-[27px] py-[10px] gap-[6px] cursor-pointer flex justify-center items-center hover:scale-[1.03] transition-all">
+              <img src="image/search 1.png" class="w-[20px] h-[20px]" alt="" />
+
+              <p class="text-[12px] text-[#6f6d6d]">Google الدخول باستخدام</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Code injected by live-server -->
+  </body>
+</html>
