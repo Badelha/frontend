@@ -445,15 +445,8 @@ function Home() {
         </section>
         {/*the end section six */}
       </main>
-      <section>
-        <div>
-          menagehad
-          <p>menagehad</p>
-          <p>kroemn</p>
-        </div>
-      </section>
+
       <Footer />
-      kiaden
       <link rel="stylesheet" href="menagehad" />
     </>
   );
