@@ -116,7 +116,11 @@ function Sigin() {
           ">
           {/* ================= LOGO ================= */}
           <div className="flex justify-center mb-[15px]">
-            <img src={badelhaLogo} alt="Badelha" />
+            <img
+              src={badelhaLogo}
+              alt="Badelha"
+              className="sm:w-[250px] sm:h-[150px] object-contain"
+            />
           </div>
 
           {/* ================= TITLE ================= */}
