@@ -119,7 +119,7 @@ function Sigin() {
             <img
               src={badelhaLogo}
               alt="Badelha"
-              className="sm:w-[250px] sm:h-[150px] object-contain"
+              className="sm:w-[250px] sm:h-[150px] w-[150px] h-[100px] object-contain"
             />
           </div>
 
@@ -379,9 +379,11 @@ function Sigin() {
 
             {/* Facebook */}
             {/* Social Login */}
-            <div className="flex justify-center items-center gap-[15px] m-[11px]">
+            <div className="sm:flex sm:justify-center sm:items-center gap-[15px] m-[11px]">
               {/* Facebook */}
-              <div className="border border-[#e1e1e1] rounded-[11px] cursor-pointer px-[27px] py-[8px] gap-[5px] flex justify-center items-center hover:scale-[1.03] transition-all duration-300">
+              <div
+                className="border border-[#e1e1e1] rounded-[11px] cursor-pointer px-[27px] py-[8px] gap-[5px] flex justify-center items-center hover:scale-[1.03] transition-all duration-300  sm:mb-[0]
+                  mb-[10px]">
                 <i className="fa-brands fa-facebook text-[24px] bg-gradient-to-b from-[#00B2FF] to-[#006AFF] bg-clip-text text-transparent"></i>
 
                 <p className="text-[12px] text-[#00B2FF]">الدخول باستخدام فيسبوك</p>

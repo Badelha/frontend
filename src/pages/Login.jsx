@@ -4,6 +4,7 @@ import googleIcon from '../assets/images/search 1.png';
 import { Link, useNavigate } from 'react-router-dom';
 
 function Login() {
+  const [rememberPassword, setRememberPassword] = useState(false);
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -152,7 +153,7 @@ function Login() {
               <img
                 src={badelhaLogo}
                 alt="Badelha"
-                className="sm:w-[250px] sm:h-[150px] object-contain"
+                className="sm:w-[250px] sm:h-[150px] w-[150px] h-[100px] object-contain"
               />
             </div>
 
@@ -296,10 +297,18 @@ function Login() {
 
               {/* Remember Password */}
               <div className="relative flex justify-between items-center">
-                <div className="flex items-start mb-[10px]">
-                  <i className="fa-solid fa-square-check text-[#5CBA9D] text-[25px] border-[#4F9D9E]"></i>
+                <div
+                  onClick={() => setRememberPassword(!rememberPassword)}
+                  className="flex items-center mb-[10px] cursor-pointer select-none">
+                  <i
+                    className={`fa-solid ${
+                      rememberPassword
+                        ? 'fa-square-check text-[#5CBA9D]'
+                        : 'fa-square text-transparent'
+                    } text-[25px]`}
+                    style={rememberPassword ? {} : { WebkitTextStroke: '1px #4F9D9E' }}></i>
 
-                  <p className="inline mr-[8px] text-[#a09c9c] text-[16px]">تذكر كلمة المرور</p>
+                  <p className="mr-[8px] text-[#a09c9c] text-[16px]">تذكر كلمة المرور</p>
                 </div>
 
                 <Link to="/forgot-password" className="text-[13px] text-[#929191]">
@@ -360,7 +369,7 @@ function Login() {
             </div>
 
             {/* Social Login */}
-            <div className="flex justify-center items-center gap-[15px] m-[11px]">
+            <div className="sm:flex sm:justify-center sm:items-center  gap-[15px] m-[11px]">
               {/* Facebook */}
               <div
                 className="
@@ -377,6 +386,8 @@ function Login() {
                   hover:scale-[1.03]
                   transition-all
                   duration-300
+                  sm:mb-[0]
+                  mb-[10px]
                 ">
                 <i
                   className="
