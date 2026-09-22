@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   const quickLinks = [
     { title: 'من نحن', path: '/about' },
-    { title: 'السوق', path: '#market' },
+    { title: 'السوق', path: '/#market' },
     { title: 'كيف تعمل المنصة', path: '/how-it-works' },
     { title: 'الأسئلة الشائعة', path: '/faq' },
   ];
@@ -24,17 +24,17 @@ const Footer = () => {
         <svg
           viewBox="0 0 24 24"
           fill="none"
-          className="h-6 w-6"
+          className="h-5 w-5 sm:h-6 sm:w-6"
           stroke="currentColor"
           strokeWidth="1.6"
           strokeLinecap="round"
           strokeLinejoin="round">
           <path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20l1.2-5.2A8.4 8.4 0 1 1 21 11.5Z" />
-
           <path d="M8.5 8.5c.5 2.5 2.5 4.5 5 5l1.2-1.2 2 1c-.2 1.5-1.5 2.5-3 2.2-3.5-.8-6.2-3.5-7-7-.3-1.5.7-2.8 2.2-3l1 2-1.4 1Z" />
         </svg>
       ),
     },
+
     {
       name: 'Instagram',
       href: 'https://www.instagram.com/',
@@ -54,6 +54,7 @@ const Footer = () => {
         </svg>
       ),
     },
+
     {
       name: 'Facebook',
       href: 'https://www.facebook.com/',
@@ -67,18 +68,44 @@ const Footer = () => {
   ];
 
   const appButtonClass =
-    'group flex min-h-11 items-center justify-center gap-3 rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm text-white shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/20 hover:shadow-md';
+    'group flex min-h-[46px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2.5 text-[12px] font-medium text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-white/50 hover:bg-white/20 hover:shadow-lg sm:text-[13px] md:flex-none md:px-4';
 
   return (
-    <footer dir="rtl" className="w-full bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] text-white">
-      {/* Main Footer */}
-      <div className="mx-auto max-w-[1480px] px-6 py-8 sm:px-10 lg:px-12 lg:py-10">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-          {/* Brand */}
-          <div className="flex flex-col items-start">
-            {/* Logo */}
-            <Link to="/" className="mb-4 flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/15 text-white shadow-sm transition-all duration-300 hover:rotate-6 hover:bg-white/25">
+    <footer
+      dir="rtl"
+      className="w-full overflow-hidden bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] text-white">
+      {/* ================= MAIN FOOTER ================= */}
+      <div className="mx-auto max-w-[1280px] px-5 py-10 sm:px-7 sm:py-12 md:px-10 lg:px-12 lg:py-14">
+        <div
+          className="
+            grid grid-cols-1 gap-10
+
+            sm:grid-cols-2
+            sm:gap-x-10
+            sm:gap-y-12
+
+            md:grid-cols-2
+            md:gap-x-14
+            md:gap-y-12
+
+            lg:grid-cols-4
+            lg:gap-10
+          ">
+          {/* ================= BRAND ================= */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link to="/" className="group mb-4 flex w-fit items-center gap-3">
+              <span
+                className="
+                  flex h-11 w-11 shrink-0 items-center justify-center
+                  rounded-xl
+                  border border-white/20
+                  bg-white/15
+                  text-white
+                  shadow-sm
+                  transition-all duration-300
+                  group-hover:-rotate-6
+                  group-hover:bg-white/25
+                ">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -94,20 +121,19 @@ const Footer = () => {
                 </svg>
               </span>
 
-              <span className="text-3xl font-bold text-white">بدّلها</span>
+              <span className="text-[28px] font-bold sm:text-[30px]">بدّلها</span>
             </Link>
 
-            {/* Description */}
-            <p className="max-w-sm text-sm leading-7 text-white/85">
+            <p className="max-w-[390px] text-[13px] leading-7 text-white/85 sm:text-[14px]">
               أول منصة فلسطينية للتبادل والبيع.
               <br />
               اتصنعت بايد أهل غزة لأهل غزة، عشان
-              <br className="hidden xl:block" />
+              <br className="hidden sm:block" />
               نوصل احتياجاتنا لبعض بأسرع طريق.
             </p>
 
-            {/* Social Media */}
-            <div className="mt-5 flex items-center gap-3">
+            {/* Social */}
+            <div className="mt-5 flex items-center gap-2.5">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -115,23 +141,44 @@ const Footer = () => {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={social.name}
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 bg-white/10 text-white shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${social.hover}`}>
+                  className={`
+                    flex h-10 w-10 items-center justify-center
+                    rounded-xl
+                    border border-white/25
+                    bg-white/10
+                    text-white
+                    shadow-sm
+                    backdrop-blur-sm
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:shadow-lg
+                    sm:h-11 sm:w-11
+                    ${social.hover}
+                  `}>
                   {social.icon}
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* ================= QUICK LINKS ================= */}
           <div>
-            <h3 className="mb-4 text-lg font-bold text-white">روابط سريعة</h3>
+            <h3 className="mb-5 text-[16px] font-bold sm:text-[18px]">روابط سريعة</h3>
 
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-3.5">
               {quickLinks.map((link) => (
                 <li key={link.title}>
                   <Link
                     to={link.path}
-                    className="inline-block text-sm text-white/80 transition-all duration-300 hover:translate-x-[-3px] hover:text-white">
+                    className="
+                      inline-flex items-center
+                      text-[13px] text-white/80
+                      transition-all duration-300
+                      hover:translate-x-[-3px]
+                      hover:text-white
+                      sm:text-[14px]
+                    ">
+                    <span className="ml-2 text-white/40">←</span>
                     {link.title}
                   </Link>
                 </li>
@@ -139,16 +186,24 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
+          {/* ================= SUPPORT ================= */}
           <div>
-            <h3 className="mb-4 text-lg font-bold text-white">الدعم والأمان</h3>
+            <h3 className="mb-5 text-[16px] font-bold sm:text-[18px]">الدعم والأمان</h3>
 
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-3.5">
               {supportLinks.map((link) => (
                 <li key={link.title}>
                   <Link
                     to={link.path}
-                    className="inline-block text-sm text-white/80 transition-all duration-300 hover:translate-x-[-3px] hover:text-white">
+                    className="
+                      inline-flex items-center
+                      text-[13px] text-white/80
+                      transition-all duration-300
+                      hover:translate-x-[-3px]
+                      hover:text-white
+                      sm:text-[14px]
+                    ">
+                    <span className="ml-2 text-white/40">←</span>
                     {link.title}
                   </Link>
                 </li>
@@ -156,14 +211,18 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="mb-4 text-lg font-bold text-white">تواصل معنا</h3>
+          {/* ================= CONTACT ================= */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <h3 className="mb-5 text-[16px] font-bold sm:text-[18px]">تواصل معنا</h3>
 
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-3.5">
               {/* Phone */}
               <li className="flex items-center gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-[#FFE0B2]">
+                <span
+                  className="
+                    flex h-8 w-8 shrink-0 items-center justify-center
+                    rounded-lg bg-white/15 text-[#FFE0B2]
+                  ">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -179,14 +238,18 @@ const Footer = () => {
                 <a
                   href="tel:0599999999"
                   dir="ltr"
-                  className="text-sm text-white/85 transition-colors hover:text-white">
+                  className="text-[13px] text-white/85 transition-colors hover:text-white sm:text-[14px]">
                   0599999999
                 </a>
               </li>
 
               {/* Email */}
               <li className="flex items-center gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-[#FFE0B2]">
+                <span
+                  className="
+                    flex h-8 w-8 shrink-0 items-center justify-center
+                    rounded-lg bg-white/15 text-[#FFE0B2]
+                  ">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -203,14 +266,18 @@ const Footer = () => {
                 <a
                   href="mailto:support@badelha.ps"
                   dir="ltr"
-                  className="break-all text-sm text-white/85 transition-colors hover:text-white">
+                  className="break-all text-[13px] text-white/85 transition-colors hover:text-white sm:text-[14px]">
                   support@badelha.ps
                 </a>
               </li>
 
               {/* Location */}
               <li className="flex items-center gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-[#FFE0B2]">
+                <span
+                  className="
+                    flex h-8 w-8 shrink-0 items-center justify-center
+                    rounded-lg bg-white/15 text-[#FFE0B2]
+                  ">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -224,12 +291,12 @@ const Footer = () => {
                   </svg>
                 </span>
 
-                <span className="text-sm text-white/85">غزة، فلسطين</span>
+                <span className="text-[13px] text-white/85 sm:text-[14px]">غزة، فلسطين</span>
               </li>
             </ul>
 
             {/* App Buttons */}
-            <div className="mt-5 flex flex-col gap-2">
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row lg:flex-col">
               {/* App Store */}
               <a href="#" className={appButtonClass}>
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 shrink-0">
@@ -252,12 +319,27 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Footer */}
+      {/* ================= BOTTOM FOOTER ================= */}
       <div className="border-t border-white/20 bg-black/5">
-        <div className="mx-auto flex max-w-[1480px] flex-col items-center justify-between gap-3 px-6 py-4 text-xs text-white/80 sm:px-10 md:flex-row lg:px-12">
-          <p className="text-center">© جميع الحقوق محفوظة – صنعت بحب في غزة.</p>
+        <div
+          className="
+            mx-auto flex max-w-[1280px]
+            flex-col items-center
+            gap-3
+            px-5 py-4
+            text-center text-[11px] text-white/75
 
-          <div className="flex items-center gap-5">
+            sm:px-7 sm:text-[12px]
+
+            md:flex-row
+            md:justify-between
+            md:text-right
+
+            lg:px-12
+          ">
+          <p>© جميع الحقوق محفوظة – صنعت بحب في غزة.</p>
+
+          <div className="flex items-center gap-4 sm:gap-5">
             <Link to="/terms" className="transition-colors hover:text-white">
               الشروط والأحكام
             </Link>
