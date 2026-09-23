@@ -1,7 +1,7 @@
-import Profile from "./Profile";
+import Notifications from "./pages/components/Notifications";
 
 function App() {
-  return <Profile />;
+    return <Notifications />;
 }
 
 export default App;
