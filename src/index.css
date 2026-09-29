@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-dark: #1e3a5f;
+  --color-brand: #2c7a8a;
+  --color-brand-light: #4a9ba8;
+  --color-brand-sky: #7dd3fc;
+  --color-brand-bg: #f0f4f8;
+  --color-brand-border: #d6e4ec;
+  --color-brand-input: #f8fafc;
+  --font-sans: 'Tajawal', sans-serif;
+}
+
+body {
+  direction: rtl;
+  font-family: 'Tajawal', sans-serif;
+  background-color: #f0f4f8;
+}

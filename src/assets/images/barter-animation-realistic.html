@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>خلفية متحركة - مقايضة (أشخاص واقعيين)</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #3A73AA 0%, #4F9D9E 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 1400px;
+    aspect-ratio: 7 / 2;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ألوان الشخصين */
+  .skin-a   { fill: #FFE3C4; }
+  .skin-b   { fill: #F2CFA0; }
+  .hair-a   { fill: #3B2A20; }
+  .hair-b   { fill: #241a14; }
+  .cloth-a  { fill: #FFFFFF; }
+  .cloth-a-dark { fill: #E9F2FA; }
+  .cloth-b  { fill: rgba(255,255,255,0.82); }
+  .cloth-b-dark { fill: rgba(233,242,250,0.82); }
+  .item     { fill: #FFFFFF; }
+  .item-stroke { stroke: #E8F1FA; stroke-width: 1.5; }
+  .ground {
+    stroke: rgba(255,255,255,0.2);
+    stroke-width: 1;
+  }
+  .shadow { fill: rgba(0,0,0,0.12); }
+
+  /* --- ذراع الشخص A (الممدودة نحو B) --- */
+  .arm-a {
+    transform-origin: 160px 190px;
+    animation: armA 3s ease-in-out infinite;
+  }
+  @keyframes armA {
+    0%   { transform: rotate(0deg); }
+    20%  { transform: rotate(-22deg); }
+    50%  { transform: rotate(-22deg); }
+    70%  { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* --- ذراع الشخص B (الممدودة نحو A) --- */
+  .arm-b {
+    transform-origin: 1240px 190px;
+    animation: armB 3s ease-in-out infinite;
+  }
+  @keyframes armB {
+    0%   { transform: rotate(0deg); }
+    20%  { transform: rotate(22deg); }
+    50%  { transform: rotate(22deg); }
+    70%  { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* --- الغرض المتبادل: من عند A إلى عند B --- */
+  .item-1 {
+    animation: moveItem1 3s ease-in-out infinite;
+  }
+  @keyframes moveItem1 {
+    0%   { transform: translate(0, 0);         opacity: 0; }
+    14%  { opacity: 1; }
+    45%  { transform: translate(915px, -55px); opacity: 1; }
+    50%  { transform: translate(915px, -55px); opacity: 1; }
+    56%  { opacity: 0; transform: translate(915px, -55px); }
+    100% { opacity: 0; transform: translate(0,0); }
+  }
+
+  /* --- الغرض الثاني: من عند B إلى عند A --- */
+  .item-2 {
+    animation: moveItem2 3s ease-in-out infinite;
+  }
+  @keyframes moveItem2 {
+    0%   { transform: translate(0, 0);           opacity: 0; }
+    14%  { opacity: 1; }
+    45%  { transform: translate(-915px, -20px); opacity: 1; }
+    50%  { transform: translate(-915px, -20px); opacity: 1; }
+    56%  { opacity: 0; transform: translate(-915px, -20px); }
+    100% { opacity: 0; transform: translate(0,0); }
+  }
+
+  /* نبضة خفيفة حول نقطة التبادل */
+  .pulse {
+    animation: pulse 3s ease-in-out infinite;
+    transform-origin: 700px 190px;
+  }
+  @keyframes pulse {
+    0%, 40%   { opacity: 0; transform: scale(0.6); }
+    48%       { opacity: 0.5; transform: scale(1); }
+    58%       { opacity: 0; transform: scale(1.4); }
+    100%      { opacity: 0; transform: scale(0.6); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+<svg viewBox="0 0 1400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="أنيميشن يمثل شخصين يتبادلان أغراضا (مقايضة)">
+
+  <!-- خط أرضية -->
+  <line x1="60" y1="330" x2="1340" y2="330" class="ground"/>
+
+  <!-- ظلال الأرجل -->
+  <ellipse class="shadow" cx="130" cy="333" rx="42" ry="7"/>
+  <ellipse class="shadow" cx="1270" cy="333" rx="42" ry="7"/>
+
+  <!-- نبضة التبادل -->
+  <circle class="pulse" cx="700" cy="190" r="34" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- ================= الشخص A ================= -->
+  <g>
+    <!-- الأرجل -->
+    <rect class="cloth-a-dark" x="110" y="256" width="17" height="76" rx="8"/>
+    <rect class="cloth-a-dark" x="135" y="256" width="17" height="76" rx="8"/>
+    <ellipse class="skin-a" cx="118.5" cy="330" rx="11" ry="5"/>
+    <ellipse class="skin-a" cx="143.5" cy="330" rx="11" ry="5"/>
+
+    <!-- الذراع الخلفية (ثابتة) -->
+    <rect class="cloth-a" x="92" y="188" width="15" height="58" rx="7"/>
+    <circle class="skin-a" cx="99.5" cy="250" r="8"/>
+
+    <!-- الجسم / القميص -->
+    <path class="cloth-a" d="M100,182 Q130,168 160,182 L152,256 Q130,268 108,256 Z"/>
+
+    <!-- الرقبة والرأس -->
+    <rect class="skin-a" x="122" y="166" width="16" height="12" rx="4"/>
+    <circle class="skin-a" cx="130" cy="150" r="22"/>
+    <path class="hair-a" d="M108,146 Q108,124 130,124 Q152,124 152,146 Q152,134 130,132 Q108,134 108,146 Z"/>
+
+    <!-- الذراع الأمامية (تتحرك نحو B) -->
+    <g class="arm-a">
+      <rect class="cloth-a" x="160" y="182" width="66" height="16" rx="8"/>
+      <circle class="skin-a" cx="234" cy="190" r="11"/>
+    </g>
+  </g>
+
+  <!-- ================= الشخص B ================= -->
+  <g>
+    <!-- الأرجل -->
+    <rect class="cloth-b-dark" x="1248" y="256" width="17" height="76" rx="8"/>
+    <rect class="cloth-b-dark" x="1273" y="256" width="17" height="76" rx="8"/>
+    <ellipse class="skin-b" cx="1256.5" cy="330" rx="11" ry="5"/>
+    <ellipse class="skin-b" cx="1281.5" cy="330" rx="11" ry="5"/>
+
+    <!-- الذراع الخلفية (ثابتة) -->
+    <rect class="cloth-b" x="1293" y="188" width="15" height="58" rx="7"/>
+    <circle class="skin-b" cx="1300.5" cy="250" r="8"/>
+
+    <!-- الجسم / القميص -->
+    <path class="cloth-b" d="M1240,182 Q1270,168 1300,182 L1292,256 Q1270,268 1248,256 Z"/>
+
+    <!-- الرقبة والرأس -->
+    <rect class="skin-b" x="1262" y="166" width="16" height="12" rx="4"/>
+    <circle class="skin-b" cx="1270" cy="150" r="22"/>
+    <path class="hair-b" d="M1248,146 Q1248,124 1270,124 Q1292,124 1292,146 Q1292,134 1270,132 Q1248,134 1248,146 Z"/>
+
+    <!-- الذراع الأمامية (تتحرك نحو A) -->
+    <g class="arm-b">
+      <rect class="cloth-b" x="1174" y="182" width="66" height="16" rx="8"/>
+      <circle class="skin-b" cx="1166" cy="190" r="11"/>
+    </g>
+  </g>
+
+  <!-- الغرض الأول: من A إلى B (صندوق) -->
+  <g class="item-1">
+    <rect class="item item-stroke" x="218" y="176" width="34" height="28" rx="4"/>
+    <line x1="218" y1="190" x2="252" y2="190" class="item-stroke"/>
+  </g>
+
+  <!-- الغرض الثاني: من B إلى A (كيس/دائرة) -->
+  <g class="item-2">
+    <circle class="item item-stroke" cx="1166" cy="192" r="16"/>
+  </g>
+
+</svg>
+</div>
+
+</body>
+</html>
