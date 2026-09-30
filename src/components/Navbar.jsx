@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 const NAV = [
   { label: 'الرئيسية', href: '/' },
   { label: 'كيف تعمل', href: '/#about' },
-  { label: 'السوق', href: '/market' },
-  { label: 'من نحن', href: '/about' },
+  { label: 'السوق', href: '/#market' },
+  { label: 'من نحن', href: '/#why-badelha' },
   { label: 'اتصل بنا', href: '/#contact' },
 ];
 
@@ -692,7 +692,7 @@ function Navbar() {
                     flex-col
                     gap-1
                   ">
-                  {NAV.map((item, index) => (
+                  {NAV.map((item) => (
                     <Link
                       key={item.label}
                       to={item.href}

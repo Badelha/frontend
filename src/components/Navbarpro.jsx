@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
 
 const NAV = [
   { label: 'الرئيسية', href: '/' },
   { label: 'كيف تعمل', href: '/#about' },
   { label: 'السوق', href: '/#market' },
-  { label: 'من نحن', href: '/about' },
+  { label: 'من نحن', href: '/#why-badelha' },
   { label: 'اتصل بنا', href: '/#contact' },
 ];
 
@@ -19,6 +20,7 @@ function Navbar() {
   const [city, setCity] = useState('');
 
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const profileRef = useRef(null);
   const cityRef = useRef(null);
@@ -488,7 +490,7 @@ function Navbar() {
                 </div>
 
                 <Link
-                  to="/profile"
+                  to="/profilePage"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -504,7 +506,7 @@ function Navbar() {
                 </Link>
 
                 <Link
-                  to="/my-products"
+                  to="/profilePage"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -539,9 +541,14 @@ function Navbar() {
 
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setProfileOpen(false);
-                    navigate('/home');
+                    try {
+                      await logout();
+                    } catch (error) {
+                      window.alert(error.message);
+                    }
+                    navigate('/login');
                   }}
                   className="
                     flex w-full

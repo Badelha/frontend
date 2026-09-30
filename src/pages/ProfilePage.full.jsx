@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbarpro from '../components/Navbarpro';
+import auth from '../services/auth';
+import marketplace from '../services/marketplace';
+import { getApiError } from '../services/api';
 
 /* =========================================================
    أدوات مساعدة
@@ -123,55 +127,67 @@ function FileButton({ onPick, label, className, children }) {
 ========================================================= */
 
 export default function ProfilePage() {
-  /* صورة الغلاف */
-  const [coverImage, setCoverImage] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [profile, setProfile] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
+  const [productsError, setProductsError] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ fullName: '', phoneNumber: '', address: '', city: '' });
+  const [editError, setEditError] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileCities, setProfileCities] = useState([]);
+  const [citiesError, setCitiesError] = useState('');
 
-  /* الصورة الشخصية */
-  const [profileImage, setProfileImage] = useState(null);
+  useEffect(() => {
+    let active = true;
+    auth.profile()
+      .then((data) => {
+        if (active) setProfile(data);
+      })
+      .catch((error) => {
+        if (active) setProfileError(getApiError(error) || 'تعذر تحميل الملف الشخصي');
+      })
+      .finally(() => {
+        if (active) setProfileLoading(false);
+      });
 
-  /* بيانات المستخدم */
-  const [profile] = useState({
-    name: 'منة الصوير',
-    city: 'غزة',
-    region: 'قطاع غزة، فلسطين',
-    memberSince: '2026-10-01',
-    verified: true,
-  });
+    marketplace.myProducts()
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data?.products;
+        if (!Array.isArray(items)) throw new Error('Unexpected listings response');
+        if (active) setProducts(items);
+      })
+      .catch((error) => {
+        if (active) setProductsError(getApiError(error) || 'تعذر تحميل المنتجات');
+      })
+      .finally(() => {
+        if (active) setProductsLoading(false);
+      });
 
-  /* =======================================================
-     رفع صورة الغلاف
-  ======================================================= */
+    marketplace.cities()
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data?.cities;
+        if (active && Array.isArray(items)) setProfileCities(items);
+      })
+      .catch((error) => {
+        if (active) setCitiesError(getApiError(error) || 'تعذر تحميل قائمة المدن');
+      });
 
-  const handleCoverChange = (file) => {
-    if (!file) return;
+    return () => {
+      active = false;
+    };
+  }, []);
 
-    const imageUrl = URL.createObjectURL(file);
-
-    setCoverImage((oldImage) => {
-      if (oldImage) {
-        URL.revokeObjectURL(oldImage);
-      }
-
-      return imageUrl;
-    });
-  };
-
-  /* =======================================================
-     رفع الصورة الشخصية
-  ======================================================= */
-
-  const handleProfileChange = (file) => {
-    if (!file) return;
-
-    const imageUrl = URL.createObjectURL(file);
-
-    setProfileImage((oldImage) => {
-      if (oldImage) {
-        URL.revokeObjectURL(oldImage);
-      }
-
-      return imageUrl;
-    });
+  const displayProfile = {
+    name: profile?.full_name,
+    city: profile?.city,
+    memberSince: profile?.created_at,
+    verified: profile?.is_verified,
+    averageRating: profile?.average_rating,
+    totalTransactions: profile?.total_transactions,
   };
 
   /* =======================================================
@@ -182,7 +198,7 @@ export default function ProfilePage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: profile.name,
+          title: profile?.full_name || 'Badelha',
           url: window.location.href,
         });
       } else {
@@ -199,7 +215,34 @@ export default function ProfilePage() {
   ======================================================= */
 
   const handleEdit = () => {
-    console.log('تعديل الملف الشخصي');
+    setEditForm({
+      fullName: profile?.full_name || '',
+      phoneNumber: profile?.phone_number || '',
+      address: profile?.address || '',
+      city: profile?.city || '',
+    });
+    setEditError('');
+    setEditOpen(true);
+  };
+
+  const handleProfileSubmit = async (event) => {
+    event.preventDefault();
+    setSavingProfile(true);
+    setEditError('');
+    try {
+      const updated = await auth.updateProfile(editForm);
+      setProfile((current) => ({
+        ...current,
+        ...updated,
+        average_rating: current?.average_rating,
+        total_transactions: current?.total_transactions,
+      }));
+      setEditOpen(false);
+    } catch (error) {
+      setEditError(getApiError(error) || 'تعذر تحديث الملف الشخصي');
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   return (
@@ -238,93 +281,6 @@ export default function ProfilePage() {
           ">
           {/* صورة الغلاف */}
 
-          {coverImage && (
-            <img
-              src={coverImage}
-              alt="صورة الغلاف"
-              className="
-                absolute
-                inset-0
-                h-full
-                w-full
-                object-cover
-              "
-            />
-          )}
-
-          {/* طبقة فوق الصورة */}
-
-          {coverImage && <div className="absolute inset-0 bg-black/10" />}
-
-          {/* زر إضافة صورة */}
-
-          {!coverImage && (
-            <FileButton
-              onPick={handleCoverChange}
-              label="إضافة صورة الغلاف"
-              className="
-                absolute
-                left-1/2
-                top-1/2
-                z-10
-                -translate-x-1/2
-                -translate-y-1/2
-                inline-flex
-                items-center
-                gap-2
-                rounded-full
-                bg-white/95
-                px-6
-                py-3
-                text-[15px]
-                font-semibold
-                text-[#2e7fa0]
-                shadow-[0_8px_25px_rgba(0,0,0,0.12)]
-                transition-all
-                duration-300
-                hover:-translate-x-1/2
-                hover:-translate-y-[calc(50%+3px)]
-                hover:bg-white
-                hover:shadow-[0_12px_30px_rgba(0,0,0,0.18)]
-                active:scale-95
-              ">
-              <Icon name="camera" size={17} />
-              إضافة صورة
-            </FileButton>
-          )}
-
-          {/* زر تغيير الغلاف */}
-
-          {coverImage && (
-            <FileButton
-              onPick={handleCoverChange}
-              label="تغيير صورة الغلاف"
-              className="
-                absolute
-                right-5
-                top-5
-                z-10
-                inline-flex
-                items-center
-                gap-2
-                rounded-full
-                bg-black/45
-                px-5
-                py-2.5
-                text-sm
-                font-medium
-                text-white
-                backdrop-blur-md
-                transition-all
-                duration-300
-                hover:bg-black/60
-                hover:scale-[1.03]
-                active:scale-95
-              ">
-              <Icon name="camera" size={16} />
-              تغيير الصورة
-            </FileButton>
-          )}
         </div>
       </section>
 
@@ -334,24 +290,76 @@ export default function ProfilePage() {
 
       <Identity
         p={{
-          ...profile,
-          avatarUrl: profileImage,
+          ...displayProfile,
         }}
-        loading={false}
+        loading={profileLoading}
         isOwner={true}
         uploading={false}
-        onAvatar={handleProfileChange}
         onShare={handleShare}
         onEdit={handleEdit}
       />
+      {editOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
+          <form onSubmit={handleProfileSubmit} className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold">تعديل الملف الشخصي</h2>
+            {[
+              ['fullName', 'الاسم الكامل'],
+              ['phoneNumber', 'رقم الهاتف'],
+              ['city', 'المدينة (من مدن غزة المعتمدة)'],
+              ['address', 'العنوان'],
+            ].map(([field, label]) => (
+              <label key={field} className="block text-sm">
+                {label}
+                {field === 'city' ? (
+                  <select
+                    required
+                    value={editForm.city}
+                    onChange={(event) => setEditForm({ ...editForm, city: event.target.value })}
+                    className="mt-1 w-full rounded-lg border border-[#d8d8d8] p-2">
+                    <option value="">اختر المدينة</option>
+                    {profileCities.map((city) => {
+                      const name = city.city || city.city_name || city.name;
+                      return <option key={city.city_id ?? city.id ?? name} value={name}>{name}</option>;
+                    })}
+                  </select>
+                ) : (
+                  <input
+                    required={field !== 'address'}
+                    value={editForm[field]}
+                    onChange={(event) => setEditForm({ ...editForm, [field]: event.target.value })}
+                    className="mt-1 w-full rounded-lg border border-[#d8d8d8] p-2"
+                  />
+                )}
+              </label>
+            ))}
+            {editError && <p role="alert" className="text-sm text-red-600">{editError}</p>}
+            {citiesError && <p role="alert" className="text-sm text-red-600">{citiesError}</p>}
+            <div className="flex gap-2">
+              <button disabled={savingProfile || !profileCities.length} className="rounded-lg bg-[#347f81] px-4 py-2 text-white disabled:opacity-60">
+                {savingProfile ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
+              </button>
+              <button type="button" onClick={() => setEditOpen(false)} className="rounded-lg border px-4 py-2">إلغاء</button>
+            </div>
+          </form>
+        </div>
+      )}
+      {profileError && <p role="alert" className="mx-auto mt-4 max-w-[1100px] px-5 text-red-600">{profileError}</p>}
 
       {/* =====================================================
           الإحصائيات
       ===================================================== */}
 
-      <ProfileStats />
+      <ProfileStats profile={displayProfile} productsCount={products.length} loading={productsLoading} />
       <ProfileAbout />
-      <ProfileTabs />
+      <ProfileTabs
+        initialTab={searchParams.get('tab')}
+        openAddProduct={searchParams.get('addProduct') === '1'}
+        profile={displayProfile}
+        products={products}
+        productsLoading={productsLoading}
+        productsError={productsError}
+        onProductsChange={setProducts}
+      />
     </div>
   );
 }
@@ -422,7 +430,7 @@ function Identity({
 
         {/* زر تغيير الصورة */}
 
-        {isOwner && !loading && (
+        {isOwner && !loading && p.avatarEditable && (
           <FileButton
             onPick={onAvatar}
             label="تغيير الصورة الشخصية"
@@ -651,26 +659,11 @@ function AnimatedNumber({ value, duration = 1400, decimals = 0 }) {
    إحصائيات الملف الشخصي
 ========================================================= */
 
-function ProfileStats() {
+function ProfileStats({ profile, productsCount, loading }) {
   const stats = [
-    {
-      value: 48,
-      label: 'منتجات',
-    },
-    {
-      value: 1204,
-      label: 'عمليات تبديل',
-    },
-    {
-      value: 392,
-      label: 'متابعون',
-    },
-    {
-      value: 4.8,
-      label: 'تقييم',
-      rating: true,
-      decimals: 1,
-    },
+    { value: productsCount, label: 'منتجات' },
+    { value: profile.totalTransactions || 0, label: 'عمليات مكتملة' },
+    { value: profile.averageRating || 0, label: 'تقييم', rating: true, decimals: 1 },
   ];
 
   return (
@@ -693,7 +686,7 @@ function ProfileStats() {
           border-[#e1ebec]
           bg-white
           shadow-[0_4px_18px_rgba(22,56,79,0.05)]
-          sm:grid-cols-4
+          sm:grid-cols-3
         ">
         {stats.map((stat, index) => (
           <div
@@ -767,7 +760,7 @@ function ProfileStats() {
                 </span>
               )}
 
-              <AnimatedNumber value={stat.value} decimals={stat.decimals || 0} />
+              {loading && index === 0 ? '…' : <AnimatedNumber value={stat.value} decimals={stat.decimals || 0} />}
             </span>
 
             {/* اسم الإحصائية */}
@@ -790,8 +783,6 @@ function ProfileStats() {
   );
 }
 function ProfileAbout() {
-  const categories = ['خزف يدوي', 'مواد غذائية', 'خرز', 'تمور'];
-
   return (
     <section
       className="
@@ -826,8 +817,6 @@ function ProfileAbout() {
           نبذة عن البائع
         </h2>
 
-        {/* الوصف */}
-
         <p
           className="
             max-w-[850px]
@@ -835,35 +824,8 @@ function ProfileAbout() {
             leading-[2]
             text-[#5b7482]
           ">
-          بائع معتمد في سوق غزة المحلي، متخصص في التمور الفاخرة والمنتجات الحرفية اليدوية. أكثر من
-          10 سنوات خبرة في التجارة المحلية، جميع المنتجات طازجة وعالية الجودة.
+          لا تتوفر نبذة تعريفية إضافية لهذا الحساب.
         </p>
-
-        {/* التصنيفات */}
-
-        <div className="mt-[20px] flex flex-wrap gap-[9px]">
-          {categories.map((category) => (
-            <span
-              key={category}
-              className="
-                cursor-default
-                rounded-full
-                bg-[#edf7f7]
-                px-[14px]
-                py-[7px]
-                text-[13px]
-                font-medium
-                text-[#347f81]
-                transition-all
-                duration-300
-                hover:-translate-y-[2px]
-                hover:bg-[#dff0ef]
-                hover:shadow-[0_4px_12px_rgba(63,154,153,0.12)]
-              ">
-              {category}
-            </span>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -872,8 +834,8 @@ function ProfileAbout() {
    تبويبات الملف الشخصي
 ========================================================= */
 
-function ProfileTabs() {
-  const [activeTab, setActiveTab] = useState('info');
+function ProfileTabs({ profile, products, productsLoading, productsError, onProductsChange, initialTab, openAddProduct }) {
+  const [activeTab, setActiveTab] = useState(initialTab === 'products' ? 'products' : 'info');
 
   const tabs = [
     { id: 'info', label: 'المعلومات' },
@@ -960,11 +922,19 @@ function ProfileTabs() {
             animate-[tabFade_0.35s_ease-out]
             sm:p-7
           ">
-          {activeTab === 'info' && <InfoTab />}
+          {activeTab === 'info' && <InfoTab profile={profile} />}
 
-          {activeTab === 'reviews' && <ReviewsTab />}
+          {activeTab === 'reviews' && <ReviewsTab averageRating={profile.averageRating} />}
 
-          {activeTab === 'products' && <ProductsTab />}
+          {activeTab === 'products' && (
+            <ProductsTab
+              products={products}
+              loading={productsLoading}
+              error={productsError}
+              onProductsChange={onProductsChange}
+              openAddProduct={openAddProduct}
+            />
+          )}
         </div>
       </div>
     </section>
@@ -975,12 +945,12 @@ function ProfileTabs() {
    تبويب المعلومات
 ========================================================= */
 
-function InfoTab() {
+function InfoTab({ profile }) {
   const information = [
-    { label: 'الاسم', value: 'منة الصوير' },
-    { label: 'الموقع', value: 'غزة، فلسطين' },
-    { label: 'تاريخ الانضمام', value: '2026' },
-    { label: 'حالة الحساب', value: 'بائع موثّق' },
+    { label: 'الاسم', value: profile.name || '—' },
+    { label: 'الموقع', value: profile.city || '—' },
+    { label: 'تاريخ الانضمام', value: profile.memberSince ? new Date(profile.memberSince).getFullYear() : '—' },
+    { label: 'حالة الحساب', value: profile.verified ? 'بائع موثّق' : 'غير موثّق' },
   ];
 
   return (
@@ -1017,41 +987,9 @@ function InfoTab() {
    تبويب التقييمات
 ========================================================= */
 
-function ReviewsTab() {
-  const reviews = [
-    {
-      id: 1,
-      name: 'سامر',
-      initial: 'س',
-      date: '30 أغسطس 2026',
-      rating: 5,
-      comment: 'التمر طازج ومغلّف بعناية، والتبديل كان سريعًا وبدون تعقيد.',
-    },
-    {
-      id: 2,
-      name: 'رنا',
-      initial: 'ر',
-      date: '12 أغسطس 2026',
-      rating: 5,
-      comment: 'الخزف أجمل من الصور، تعامل محترم والتزام بالمواعيد.',
-    },
-    {
-      id: 3,
-      name: 'خالد',
-      initial: 'خ',
-      date: '21 يوليو 2026',
-      rating: 4,
-      comment: 'جودة ممتازة، والتوصيل تأخر يومًا واحدًا فقط.',
-    },
-  ];
-
-  const ratingStats = [
-    { stars: 5, percentage: 67 },
-    { stars: 4, percentage: 33 },
-    { stars: 3, percentage: 0 },
-    { stars: 2, percentage: 0 },
-    { stars: 1, percentage: 0 },
-  ];
+function ReviewsTab({ averageRating }) {
+  const reviews = [];
+  const ratingStats = [];
 
   return (
     <section className="w-full" dir="rtl">
@@ -1065,6 +1003,11 @@ function ReviewsTab() {
         ========================= */}
 
         <div className="flex flex-col gap-4">
+          {reviews.length === 0 && (
+            <p className="rounded-xl bg-[#f7fafa] p-5 text-center text-[#718692]">
+              لا تتوفر مراجعات عامة من خلال واجهة الخادم الحالية.
+            </p>
+          )}
           {reviews.map((review, index) => (
             <article
               key={review.id}
@@ -1186,7 +1129,7 @@ function ReviewsTab() {
                 text-[#20557b]
                 animate-[ratingNumber_0.8s_ease-out]
               ">
-              4.8
+              {Number(averageRating || 0).toFixed(1)}
             </span>
 
             {/* النجوم */}
@@ -1199,7 +1142,7 @@ function ReviewsTab() {
               ))}
             </div>
 
-            <p className="mt-4 text-[15px] text-[#81939d]">من 3 تقييمات</p>
+            <p className="mt-4 text-[15px] text-[#81939d]">متوسط التقييم المسجّل</p>
           </div>
 
           {/* توزيع التقييمات */}
@@ -1259,48 +1202,101 @@ function ReviewsTab() {
    تبويب منتجاتي
 ========================================================= */
 
-function ProductsTab() {
-  const products = [
-    {
-      id: 1,
-      name: 'تمر مجدول فاخر (5 كغ)',
-      category: 'تمور',
-      exchange: 'زيت زيتون أو عسل',
-      emoji: '🌴',
-      available: true,
-    },
-    {
-      id: 2,
-      name: 'مزهرية خزف مطلية يدويًا',
-      category: 'خزف يدوي',
-      exchange: 'أقمشة أو خيوط تطريز',
-      emoji: '🏺',
-      available: true,
-    },
-    {
-      id: 3,
-      name: 'عقد خرز بألوان الأرض',
-      category: 'خرز',
-      exchange: 'مقابل مكسرات',
-      emoji: '📿',
-      available: true,
-    },
-    {
-      id: 4,
-      name: 'دبس التمر الطبيعي',
-      category: 'مواد غذائية',
-      exchange: 'طحين أو أرز',
-      emoji: '🍯',
-      available: true,
-    },
-  ];
+function ProductsTab({ products, loading, error, onProductsChange, openAddProduct }) {
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [formOpen, setFormOpen] = useState(openAddProduct);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    categoryId: '',
+    cityId: '',
+    condition: 'GOOD',
+    price: '',
+    exchangePreference: 'BOTH',
+  });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const handleAddProduct = () => {
-    console.log('إضافة منتج جديد');
+  useEffect(() => {
+    let active = true;
+    Promise.all([marketplace.categories(), marketplace.cities()])
+      .then(([categoryResult, cityResult]) => {
+        const categoryList = Array.isArray(categoryResult) ? categoryResult : categoryResult?.categories;
+        const cityList = Array.isArray(cityResult) ? cityResult : cityResult?.cities;
+        if (!Array.isArray(categoryList) || !Array.isArray(cityList)) {
+          throw new Error('Unexpected categories or cities response');
+        }
+        if (active) {
+          setCategories(categoryList);
+          setCities(cityList);
+        }
+      })
+      .catch((requestError) => {
+        if (active) setFormError(getApiError(requestError) || 'تعذر تحميل الفئات والمدن');
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const openForm = (product = null) => {
+    setFormOpen(true);
+    setEditing(product);
+    setForm({
+      title: product?.title || '',
+      description: product?.description || '',
+      categoryId: product?.category_id || '',
+      cityId: product?.city_id || '',
+      condition: product?.condition || 'GOOD',
+      price: product?.price ?? '',
+      exchangePreference: product?.exchange_preference || 'BOTH',
+    });
+    setFormError('');
   };
 
-  const handleProductClick = (product) => {
-    console.log('عرض المنتج:', product);
+  const refreshProducts = async () => {
+    const result = await marketplace.myProducts();
+    const items = Array.isArray(result) ? result : result?.products;
+    if (!Array.isArray(items)) throw new Error('Unexpected listings response');
+    onProductsChange(items);
+  };
+
+  const saveProduct = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setFormError('');
+    const payload = {
+      ...form,
+      categoryId: Number(form.categoryId),
+      cityId: Number(form.cityId),
+      price: form.price === '' ? null : Number(form.price),
+    };
+    try {
+      if (editing) {
+        await marketplace.updateProduct(editing.product_id, payload);
+      } else {
+        await marketplace.createProduct(payload);
+      }
+      await refreshProducts();
+      setFormOpen(false);
+      setEditing(null);
+    } catch (requestError) {
+      setFormError(getApiError(requestError) || 'تعذر حفظ المنتج');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeProduct = async (product) => {
+    if (!window.confirm('هل تريد حذف هذا المنتج؟')) return;
+    try {
+      await marketplace.deleteProduct(product.product_id);
+      await refreshProducts();
+    } catch (requestError) {
+      setFormError(getApiError(requestError) || 'تعذر حذف المنتج');
+    }
   };
 
   return (
@@ -1317,7 +1313,50 @@ function ProductsTab() {
         <span className="rounded-full bg-[#e3f2f1] px-4 py-2 text-[13px] font-semibold text-[#347f81]">
           {products.length} منتجات
         </span>
+        <button type="button" onClick={() => openForm()} className="rounded-full bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] px-4 py-2 text-sm font-semibold text-white">
+          إضافة منتج
+        </button>
       </div>
+      {(error || formError) && <p role="alert" className="mb-4 text-sm text-red-600">{formError || error}</p>}
+      {formOpen && (
+        <form onSubmit={saveProduct} className="mb-6 grid gap-3 rounded-xl border border-[#e1ebec] bg-[#f7fafa] p-4 sm:grid-cols-2">
+          <label className="text-sm">اسم المنتج
+            <input required minLength="5" maxLength="200" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="mt-1 w-full rounded-lg border p-2" />
+          </label>
+          <label className="text-sm">الفئة
+            <select required value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })} className="mt-1 w-full rounded-lg border p-2">
+              <option value="">اختر الفئة</option>
+              {categories.map((item) => <option key={item.category_id ?? item.id} value={item.category_id ?? item.id}>{item.category_name || item.name}</option>)}
+            </select>
+          </label>
+          <label className="text-sm">المدينة
+            <select required value={form.cityId} onChange={(event) => setForm({ ...form, cityId: event.target.value })} className="mt-1 w-full rounded-lg border p-2">
+              <option value="">اختر المدينة</option>
+              {cities.map((item) => <option key={item.city_id ?? item.id} value={item.city_id ?? item.id}>{item.city || item.city_name || item.name}</option>)}
+            </select>
+          </label>
+          <label className="text-sm">الحالة
+            <select value={form.condition} onChange={(event) => setForm({ ...form, condition: event.target.value })} className="mt-1 w-full rounded-lg border p-2">
+              <option value="NEW">جديد</option><option value="LIKE_NEW">كالجديد</option><option value="GOOD">جيد</option><option value="FAIR">مقبول</option><option value="POOR">مستهلك</option>
+            </select>
+          </label>
+          <label className="text-sm">السعر (اختياري)
+            <input type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="mt-1 w-full rounded-lg border p-2" />
+          </label>
+          <label className="text-sm">نوع العرض
+            <select value={form.exchangePreference} onChange={(event) => setForm({ ...form, exchangePreference: event.target.value })} className="mt-1 w-full rounded-lg border p-2">
+              <option value="BOTH">تبديل أو شراء</option><option value="EXCHANGE_ONLY">تبديل فقط</option><option value="PURCHASE_ONLY">شراء فقط</option>
+            </select>
+          </label>
+          <label className="text-sm sm:col-span-2">الوصف
+            <textarea required minLength="10" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="mt-1 w-full rounded-lg border p-2" rows="3" />
+          </label>
+          <div className="flex gap-2 sm:col-span-2">
+            <button disabled={saving || !categories.length || !cities.length} className="rounded-lg bg-[#347f81] px-4 py-2 text-white disabled:opacity-50">{saving ? 'جارٍ الحفظ...' : 'حفظ'}</button>
+            <button type="button" onClick={() => { setFormOpen(false); setEditing(null); }} className="rounded-lg border px-4 py-2">إلغاء</button>
+          </div>
+        </form>
+      )}
 
       {/* شبكة المنتجات */}
 
@@ -1332,11 +1371,9 @@ function ProductsTab() {
         ">
         {/* كروت المنتجات */}
 
-        {products.map((product) => (
-          <button
-            key={product.id}
-            type="button"
-            onClick={() => handleProductClick(product)}
+        {loading ? <p>جارٍ تحميل المنتجات...</p> : products.map((product) => (
+          <article
+            key={product.product_id}
             className="
               group
               overflow-hidden
@@ -1374,7 +1411,7 @@ function ProductsTab() {
                   group-hover:scale-110
                   group-hover:-rotate-3
                 ">
-                {product.emoji}
+                {product.images?.[0]?.image_url ? <img src={product.images[0].image_url} alt="" className="h-full w-full object-cover" /> : '📦'}
               </span>
 
               {/* حالة المنتج */}
@@ -1394,7 +1431,7 @@ function ProductsTab() {
                   shadow-sm
                   backdrop-blur-sm
                 ">
-                {product.available ? 'متاح للتبديل' : 'غير متاح'}
+                {product.availability_status === 'AVAILABLE' ? 'متاح' : 'غير متاح'}
               </span>
             </div>
 
@@ -1411,17 +1448,17 @@ function ProductsTab() {
                   duration-300
                   group-hover:text-[#347f81]
                 ">
-                {product.name}
+                {product.title}
               </h3>
 
-              <p className="mt-2 text-[13px] text-[#81939d]">{product.category}</p>
+              <p className="mt-2 text-[13px] text-[#81939d]">{product.category?.category_name || product.category?.name || ''}</p>
 
               {/* نوع التبديل */}
 
               <div className="mt-3 flex items-start gap-2 text-[13px] text-[#718692]">
                 <span className="mt-[1px] text-[#399d9a]">⇄</span>
 
-                <p className="line-clamp-2 leading-6">يبدّل مقابل: {product.exchange}</p>
+                <p className="line-clamp-2 leading-6">{product.description}</p>
               </div>
 
               {/* زر التفاصيل */}
@@ -1443,69 +1480,16 @@ function ProductsTab() {
                     group-hover:to-[#4F9D9E]
                     group-hover:text-white
                   ">
-                  عرض التفاصيل
+                  {product.price != null ? `السعر: ${product.price}` : 'تفاصيل المنتج'}
                 </span>
               </div>
+              <div className="mt-3 flex justify-end gap-2">
+                <button type="button" onClick={(event) => { event.stopPropagation(); openForm(product); }} className="rounded border px-3 py-1 text-xs">تعديل</button>
+                <button type="button" onClick={() => removeProduct(product)} className="rounded border border-red-200 px-3 py-1 text-xs text-red-600">حذف</button>
+              </div>
             </div>
-          </button>
+          </article>
         ))}
-
-        {/* بطاقة إضافة منتج */}
-
-        <button
-          type="button"
-          onClick={handleAddProduct}
-          className="
-            group
-            flex
-            min-h-[315px]
-            flex-col
-            items-center
-            justify-center
-            rounded-[25px]
-            border-2
-            border-dashed
-            border-[#d6e5e7]
-            bg-transparent
-            px-5
-            py-8
-            text-center
-            transition-all
-            duration-300
-            hover:border-[#4F9D9E]
-            hover:bg-[#e9f5f3]
-            hover:shadow-[0_8px_22px_rgba(63,154,153,0.08)]
-          ">
-          {/* علامة الإضافة */}
-
-          <span
-            className="
-              flex
-              h-[58px]
-              w-[58px]
-              items-center
-              justify-center
-              rounded-full
-              text-[38px]
-              font-light
-              text-[#5c7885]
-              transition-all
-              duration-300
-              group-hover:rotate-90
-              group-hover:bg-white
-              group-hover:text-[#399d9a]
-            ">
-            +
-          </span>
-
-          <h3 className="mt-5 text-[17px] font-bold text-[#526f7e] transition-colors group-hover:text-[#347f81]">
-            إضافة منتج جديد
-          </h3>
-
-          <p className="mt-3 max-w-[220px] text-[13px] leading-6 text-[#81939d]">
-            اذكري ما تعرضينه للتبديل واحصلي على فرص جديدة.
-          </p>
-        </button>
       </div>
     </section>
   );

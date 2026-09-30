@@ -1,24 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
+import { getApiError } from '../services/api';
+import marketplace from '../services/marketplace';
 function Sigin() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { register } = useAuth();
   // بيانات الفورم
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    birthDate: '',
-    gender: '',
+    city: '',
     address: '',
     password: '',
   });
 
   // الأخطاء
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [cities, setCities] = useState([]);
 
   // إظهار وإخفاء كلمة المرور
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    marketplace.cities()
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data?.cities;
+        if (!Array.isArray(items)) throw new Error('Unexpected cities response');
+        if (active) setCities(items);
+      })
+      .catch((error) => {
+        if (active) setErrors((current) => ({ ...current, general: getApiError(error) || 'تعذر تحميل المدن' }));
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // تغيير قيمة أي input
   const handleChange = (e) => {
@@ -37,7 +60,7 @@ function Sigin() {
   };
 
   // إرسال الفورم
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -55,18 +78,8 @@ function Sigin() {
     }
 
     // رقم الهاتف
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'يجب تعبئة رقم الهاتف';
-    }
-
-    // تاريخ الميلاد
-    if (!formData.birthDate) {
-      newErrors.birthDate = 'يجب تعبئة تاريخ الميلاد';
-    }
-
-    // الجنس
-    if (!formData.gender) {
-      newErrors.gender = 'يجب اختيار الجنس';
+    if (!/^05\d{8}$/.test(formData.phone.trim())) {
+      newErrors.phone = 'أدخل رقم هاتف فلسطينيًا مكوّنًا من 10 أرقام ويبدأ بـ 05';
     }
 
     // العنوان
@@ -79,11 +92,12 @@ function Sigin() {
       newErrors.password = 'يجب تعبئة كلمة المرور';
     } else {
       const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
       const hasNumber = /[0-9]/.test(formData.password);
       const hasSymbol = /[^A-Za-z0-9]/.test(formData.password);
 
-      if (!hasUpperCase || !hasNumber || !hasSymbol) {
-        newErrors.password = 'كلمة المرور يجب أن تحتوي على حرف كبير ورقم ورمز';
+      if (formData.password.length < 8 || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSymbol) {
+        newErrors.password = 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وصغير ورقم ورمز';
       }
     }
 
@@ -92,9 +106,22 @@ function Sigin() {
 
     // إذا لم يوجد أي خطأ
     if (Object.keys(newErrors).length === 0) {
-      console.log('تم إنشاء الحساب بنجاح');
-
-      // هنا لاحقاً ممكن تربطي التسجيل بالـ Backend
+      setLoading(true);
+      try {
+        await register({
+          fullName: formData.name.trim(),
+          email: formData.email.trim(),
+          phoneNumber: formData.phone.trim(),
+          city: formData.city,
+          address: formData.address.trim(),
+          password: formData.password,
+        });
+        navigate(location.state?.from || '/profilePage', { replace: true });
+      } catch (error) {
+        setErrors({ general: getApiError(error) || 'تعذر إنشاء الحساب، حاول مرة أخرى' });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -137,6 +164,11 @@ function Sigin() {
             ">
             أدخل بياناتك لإنشاء حساب جديد
           </p>
+          {errors.general && (
+            <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">
+              {errors.general}
+            </p>
+          )}
 
           {/* ================= FORM ================= */}
           <form onSubmit={handleSubmit} className="w-full">
@@ -192,7 +224,7 @@ function Sigin() {
               <input
                 id="phone"
                 type="tel"
-                placeholder="+972 59-------"
+                placeholder="0599123456"
                 value={formData.phone}
                 onChange={handleChange}
                 className={`
@@ -205,56 +237,21 @@ function Sigin() {
               {errors.phone && <p className="text-red-500 text-[12px] mt-[5px]">{errors.phone}</p>}
             </div>
 
-            {/* ================= BIRTH DATE ================= */}
             <div className="mb-[15px]">
-              <label htmlFor="birthDate" className="block text-[14px] sm:text-[15px] mb-[10px]">
-                تاريخ الميلاد
+              <label htmlFor="city" className="block text-[14px] sm:text-[15px] mb-[10px]">
+                المدينة
               </label>
-
-              <input
-                id="birthDate"
-                type="date"
-                value={formData.birthDate}
-                onChange={handleChange}
-                className={`
-                  w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
-                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.birthDate ? 'border-red-500' : 'border-[#D8D8D8]'}
-                `}
-              />
-
-              {errors.birthDate && (
-                <p className="text-red-500 text-[12px] mt-[5px]">{errors.birthDate}</p>
-              )}
-            </div>
-
-            {/* ================= GENDER ================= */}
-            <div className="mb-[15px]">
-              <label htmlFor="gender" className="block text-[14px] sm:text-[15px] mb-[10px]">
-                الجنس
-              </label>
-
               <select
-                id="gender"
-                value={formData.gender}
+                id="city"
+                value={formData.city}
                 onChange={handleChange}
-                className={`
-                   w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
-                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.gender ? 'border-red-500' : 'border-[#D8D8D8] '}
-                `}>
-                <option value="" disabled>
-                  اختر الجنس
-                </option>
-
-                <option value="male">ذكر</option>
-
-                <option value="female">أنثى</option>
+                className="w-full rounded-[10px] border border-[#D8D8D8] bg-[#f1f4f9] p-[8px] my-[10px]">
+                <option value="">اختر المدينة (اختياري)</option>
+                {cities.map((item) => {
+                  const cityName = item.city || item.city_name || item.name;
+                  return <option key={item.city_id ?? item.id ?? cityName} value={cityName}>{cityName}</option>;
+                })}
               </select>
-
-              {errors.gender && (
-                <p className="text-red-500 text-[12px] mt-[5px]">{errors.gender}</p>
-              )}
             </div>
 
             {/* ================= ADDRESS ================= */}
@@ -266,7 +263,7 @@ function Sigin() {
               <input
                 id="address"
                 type="text"
-                placeholder="غزة"
+                placeholder="الحي والشارع"
                 value={formData.address}
                 onChange={handleChange}
                 className={`
@@ -338,6 +335,7 @@ function Sigin() {
             {/* ================= REGISTER BUTTON ================= */}
             <button
               type="submit"
+              disabled={loading}
               className="
                 w-full
                 h-[45px]
@@ -349,7 +347,7 @@ function Sigin() {
                 bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)]
                 hover:opacity-90
               ">
-              إنشاء حساب
+              {loading ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
             </button>
           </form>
 
