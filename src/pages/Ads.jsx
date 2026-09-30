@@ -101,120 +101,9 @@ function Ads() {
       className="min-h-screen bg-[#F7FAFB]"
       style={{ fontFamily: "Cairo, sans-serif" }}
     >
-      {/* ================= الهيدر ================= */}
-
-      <header className="border-b border-[#DCE7EB] bg-gradient-to-l from-[#4C9FA0] to-[#3976AD] text-white">
-        <div className="mx-auto flex max-w-[1440px] flex-col">
-
-          {/* الصف الأول */}
-
-          <div className="flex h-[62px] items-center justify-between px-[98px]">
-
-            {/* اليمين */}
-
-            <div className="flex items-center gap-[40px]">
-
-              {/* الشعار */}
-
-              <div className="flex w-[90px] flex-col items-center justify-center">
-                <div className="text-[25px] leading-[20px]">
-                  〰
-                </div>
-
-                <div className="text-[18px] font-bold leading-[20px]">
-                  بدّلها
-                </div>
-              </div>
-
-              {/* الروابط */}
-
-              <nav className="flex items-center gap-[24px] text-[12px] font-semibold">
-
-                <a href="#" className="text-white/80">
-                  الرئيسية
-                </a>
-
-                <a href="#" className="text-white/80">
-                  من نحن
-                </a>
-
-                <a href="#" className="text-white/80">
-                  السوق
-                </a>
-
-                <a href="#" className="text-white/80">
-                  اتصل بنا
-                </a>
-
-                <a
-                  href="#"
-                  className="rounded-full border border-white/70 px-4 py-1 text-white"
-                >
-                  الوسوم
-                </a>
-
-                <a
-                  href="#"
-                  className="rounded-full border border-white/70 px-4 py-1 text-white"
-                >
-                  الفئات
-                </a>
-
-              </nav>
-            </div>
-
-            {/* المستخدم */}
-
-            <div className="flex items-center gap-[10px]">
-              <div className="flex h-[48px] w-[48px] items-center justify-center rounded-full border-[3px] border-white bg-[#285F88]">
-                <div className="text-[25px]">
-                  ♙
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* الصف الثاني */}
-
-          <div className="flex h-[35px] items-center justify-center gap-[34px]">
-
-            <a
-              href="#"
-              className="border-b-[2px] border-white pb-[6px] text-[11px] font-bold text-white"
-            >
-              الإعلانات
-            </a>
-
-            <a
-              href="#"
-              className="text-[11px] font-semibold text-white/75"
-            >
-              البلاغات
-            </a>
-
-            <a
-              href="#"
-              className="text-[11px] font-semibold text-white/75"
-            >
-              المستخدمون
-            </a>
-
-            <a
-              href="#"
-              className="text-[11px] font-semibold text-white/75"
-            >
-              لوحة التحكم
-            </a>
-
-          </div>
-
-        </div>
-      </header>
-
       {/* ================= المحتوى ================= */}
 
-      <main className="min-h-[calc(100vh-97px)] bg-[#F8FBFC] px-[40px] pt-[24px]">
+      <main className="min-h-screen bg-[#F8FBFC] px-[40px] pt-[24px]">
 
         {/* العنوان وزر الإضافة */}
 
@@ -309,9 +198,7 @@ function Ads() {
 
                 <div
                   className={`flex h-[40px] w-[40px] items-center justify-center text-[#64748B] ${
-                    index === 0
-                      ? "text-[#D1D5DB]"
-                      : ""
+                    index === 0 ? "text-[#D1D5DB]" : ""
                   }`}
                 >
                   📢

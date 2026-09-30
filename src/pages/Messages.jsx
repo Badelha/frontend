@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Messages() {
+    const navigate = useNavigate();
+
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
 
@@ -28,107 +31,11 @@ function Messages() {
         }
     };
 
-    const handleBack = () => {
-        window.history.back();
-    };
-
     return (
         <div dir="rtl" className="min-h-screen bg-[#F0F9FF] font-['Cairo']">
 
-            {/* الهيدر */}
-            <header className="relative h-[90px] w-full border-b-[0.67px] border-[#E8F0F3] bg-white px-[63px]">
-
-                <div className="relative mx-auto h-full w-full max-w-[1314px]">
-
-                    {/* العودة */}
-                    <button
-                        type="button"
-                        onClick={handleBack}
-                        className="absolute right-0 top-1/2 flex -translate-y-1/2 items-center gap-[10px] text-[18px] font-semibold text-[#547487]"
-                    >
-                        <span>العودة</span>
-
-                        <span
-                            className="h-[9px] w-[9px] rotate-45 border-r-[1.5px] border-t-[1.5px] border-current"
-                        ></span>
-                    </button>
-
-
-                    {/* العنوان */}
-                    <h1
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[24px] font-bold leading-[34px] text-[#0D3B57]"
-                    >
-                        ملفي الشخصي
-                    </h1>
-
-
-                    {/* معلومات المستخدم */}
-                    <div className="absolute left-0 top-1/2 flex -translate-y-1/2 items-start gap-3">
-
-                        {/* الصورة */}
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4384A5] text-sm font-bold text-white">
-                            أح
-                        </div>
-
-
-                        {/* البيانات */}
-                        <div className="flex flex-col items-start gap-[3px]">
-
-                            <span className="whitespace-nowrap text-sm font-bold text-[#0D3B57]">
-                                أحمد محمد البدلحي
-                            </span>
-
-                            <span className="whitespace-nowrap text-[11px] text-[#A1B6C2]">
-                                دير البلح
-                            </span>
-
-
-                            {/* تعديل الملف */}
-                            <span
-                                className="flex h-[28px] w-[148px] flex-row items-center justify-center gap-[6px] rounded-[9999999px] bg-white shadow-[0px_1px_2px_-1px_#0000001A,0px_1px_3px_0px_#0000001A]"
-                            >
-
-                                <span className="text-[10px] font-bold leading-[15px] text-[#438095]">
-                                    تعديل الملف الشخصي
-                                </span>
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 16 16"
-                                    fill="none"
-                                >
-                                    <path
-                                        d="M10.5 1.5H2.5C1.95 1.5 1.5 1.95 1.5 2.5V13.5C1.5 14.05 1.95 14.5 2.5 14.5H13.5C14.05 14.5 14.5 14.05 14.5 13.5V8.5"
-                                        stroke="#438095"
-                                        strokeWidth="1.4"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-
-                                    <path
-                                        d="M5.5 10.5L6.1 7.9L11.9 2.1C12.3 1.7 13 1.7 13.4 2.1L13.9 2.6C14.3 3 14.3 3.7 13.9 4.1L8.1 9.9L5.5 10.5Z"
-                                        stroke="#438095"
-                                        strokeWidth="1.4"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                </svg>
-
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </header>
-
-
             {/* MAIN */}
-            <main className="min-h-[calc(100vh-90px)] bg-[#F0F9FF] px-[24px] py-[16px]">
+            <main className="min-h-screen bg-[#F0F9FF] px-[24px] py-[16px]">
 
                 <div
                     dir="ltr"
@@ -141,7 +48,7 @@ function Messages() {
                         className="flex min-h-[517px] flex-col overflow-hidden rounded-[16px] border-[0.67px] border-[#E1E9ED] bg-white"
                     >
 
-                        {/* HEADER */}
+                        {/* HEADER داخل المحادثة */}
                         <div className="flex h-[56px] shrink-0 items-center border-b border-[#F0F4F6] bg-white">
 
                             {/* المحادثات */}
@@ -186,10 +93,8 @@ function Messages() {
                         {/* BODY */}
                         <div dir="ltr" className="flex min-h-0 flex-1">
 
-
                             {/* تفاصيل المحادثة */}
                             <div dir="ltr" className="flex min-w-0 flex-1 flex-col">
-
 
                                 {/* الرسائل */}
                                 <div
@@ -546,6 +451,7 @@ function Messages() {
                         {/* الإشعارات */}
                         <button
                             type="button"
+                            onClick={() => navigate("/notifications")}
                             className="flex h-[32px] w-full items-center justify-between rounded-xl bg-white px-[12px] py-[7px] text-right shadow-sm transition hover:bg-[#F5F9FA]"
                         >
 
@@ -564,6 +470,7 @@ function Messages() {
                         {/* الطلبات */}
                         <button
                             type="button"
+                            onClick={() => navigate("/orders")}
                             className="flex h-[32px] w-full items-center justify-between rounded-xl bg-white px-[12px] py-[7px] text-right shadow-sm transition hover:bg-[#F5F9FA]"
                         >
 
@@ -582,6 +489,7 @@ function Messages() {
                         {/* المحادثات */}
                         <button
                             type="button"
+                            onClick={() => navigate("/messages")}
                             className="flex h-[44px] w-full items-center justify-between rounded-xl bg-gradient-to-l from-[#3A73AA] via-[#4388A5] to-[#4F9D9E] px-[12px] py-[10px] text-right shadow-sm transition hover:brightness-95"
                         >
 
