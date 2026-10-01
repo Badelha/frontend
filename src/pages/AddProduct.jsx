@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { FaPlus, FaChevronDown, FaHome, FaImage, FaTimes } from 'react-icons/fa';
-
+import Navbarpro from '../components/Navbarpro';
 const AddProduct = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

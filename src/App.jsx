@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
 import './App.css';
 
 // Components
+import Navbarpro from './components/Navbarpro'; // ← بس هاد
 
 // Store
 import Store from './pages/Store';
@@ -28,36 +28,28 @@ import ProfilePage from './pages/ProfilePage.full';
 import Personalinfoform from './pages/Personalinfoform';
 
 function AppContent() {
-  // الصفحات التي تستخدم Navbarpro
-
   return (
-    <div className="">
-      {/* Navbar */}
+    <div>
+      <Navbarpro /> {/* ← استدعينا تبع الفريق */}
 
-      {/* Routes */}
       <Routes>
-        {/* Store */}
         <Route path="/" element={<Store />} />
         <Route path="/products" element={<Store />} />
         <Route path="/add-product" element={<AddProduct />} />
 
-        {/* Admin */}
         <Route path="/manage-tags" element={<ManageTags />} />
         <Route path="/categories" element={<CategoriesPage />} />
 
-        {/* Authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verification" element={<VerificationCode />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Main */}
         <Route path="/home" element={<Home />} />
         <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
         <Route path="/aboutUs" element={<AboutUs />} />
 
-        {/* Profile */}
         <Route path="/profilePage" element={<ProfilePage />} />
         <Route path="/personalinfoform" element={<Personalinfoform />} />
       </Routes>

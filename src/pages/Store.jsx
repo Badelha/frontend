@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import Navbarpro from '../components/Navbarpro';
 import SearchBar from '../components/SearchBar';
 import FilterTabs from '../components/FilterTabs';
 import Sidebar from '../components/Sidebar';
@@ -19,7 +20,8 @@ const Store = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/products');
-        setProducts(response.data.length ? response.data : mockProducts);
+        const data = Array.isArray(response.data) ? response.data : mockProducts;
+        setProducts(data);
       } catch (error) {
         console.error('خطأ:', error);
         setProducts(mockProducts);
@@ -30,7 +32,7 @@ const Store = () => {
     fetchProducts();
   }, []);
 
-  const filtered = products.filter((p) => {
+  const filtered = (products ?? []).filter((p) => {
     const matchSearch = p.name?.toLowerCase().includes(search.toLowerCase());
     const matchTab = activeTab === 'all' || p.type === activeTab;
     const matchCat = activeCategory === 'all' || p.category === activeCategory;
