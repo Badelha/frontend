@@ -12,6 +12,16 @@ parsedBaseUrl.hash = '';
 
 export const API_BASE_URL = parsedBaseUrl.toString().replace(/\/+$/, '');
 
+export const resolveApiUrl = (path) => {
+  const normalizedPath = String(path)
+    .replace(/\\/g, '/')
+    .replace(/\/{2,}/g, '/')
+    .replace(/^\/+/, '')
+    .replace(/^(?:api\/)+/i, '');
+
+  return new URL(normalizedPath, `${API_BASE_URL}/`).toString();
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -27,7 +37,7 @@ export const getApiError = (error) =>
 
 api.interceptors.request.use((config) => {
   if (config.url && !/^https?:\/\//i.test(config.url)) {
-    config.url = `/${config.url.replace(/^\/+/, '').replace(/^api\/+/i, '')}`;
+    config.url = resolveApiUrl(config.url);
   }
 
   const token = localStorage.getItem('accessToken');
