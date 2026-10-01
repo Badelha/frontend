@@ -7,6 +7,7 @@ const tabs = [
   { id: 'both', label: 'بيع / تبادل' },
 ];
 
+
 const FilterTabs = ({ active, onChange }) => {
   return (
     <div className="flex gap-2 justify-center mt-4 flex-wrap">
