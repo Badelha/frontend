@@ -15,7 +15,7 @@ export default function VerifyEmail() {
 
     let active = true;
     api
-      .get('/api/auth/verify-email', { params: { token } })
+      .get('/auth/verify-email', { params: { token } })
       .then(() => {
         if (active) {
           setStatus('success');

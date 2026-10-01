@@ -1,8 +1,16 @@
 import axios from 'axios';
 
-export const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 'https://backend-6fgq.onrender.com'
-).replace(/\/+$/, '');
+const configuredBaseUrl = (import.meta.env.VITE_API_URL || 'https://backend-6fgq.onrender.com').trim();
+const parsedBaseUrl = new URL(configuredBaseUrl);
+const basePath = parsedBaseUrl.pathname
+  .replace(/\/{2,}/g, '/')
+  .replace(/\/+$/, '')
+  .replace(/\/api$/i, '');
+parsedBaseUrl.pathname = `${basePath}/api`;
+parsedBaseUrl.search = '';
+parsedBaseUrl.hash = '';
+
+export const API_BASE_URL = parsedBaseUrl.toString().replace(/\/+$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -18,6 +26,10 @@ export const getApiError = (error) =>
   error.response?.data?.message || error.response?.data?.error || error.message;
 
 api.interceptors.request.use((config) => {
+  if (config.url && !/^https?:\/\//i.test(config.url)) {
+    config.url = `/${config.url.replace(/^\/+/, '').replace(/^api\/+/i, '')}`;
+  }
+
   const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -31,7 +43,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const request = error.config;
-    const isRefreshRequest = request?.url?.includes('/api/auth/refresh-token');
+    const isRefreshRequest = request?.url?.includes('/auth/refresh-token');
     const hasAccessToken = Boolean(request?.headers?.Authorization);
 
     if (error.response?.status !== 401 || !request || request._retry || isRefreshRequest || !hasAccessToken) {
@@ -41,8 +53,8 @@ api.interceptors.response.use(
     request._retry = true;
 
     try {
-      refreshRequest ??= axios
-        .post(`${API_BASE_URL}/api/auth/refresh-token`, {}, { withCredentials: true })
+      refreshRequest ??= api
+        .post('/auth/refresh-token')
         .then((response) => {
           const { accessToken } = getApiData(response);
           if (!accessToken) throw new Error('The refresh response did not include an access token');
