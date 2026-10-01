@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link, useLocation } from 'react-router-dom';
 const NAV = [
-  { label: 'الرئيسية', href: '/' },
-  { label: 'كيف تعمل', href: '/#about' },
-  { label: 'السوق', href: '/market' },
-  { label: 'من نحن', href: '/about' },
-  { label: 'اتصل بنا', href: '/#contact' },
+  { label: 'الرئيسية', href: '/home' },
+  { label: 'كيف تعمل', href: '/home#how-it-works' },
+  { label: 'السوق', href: '/home#market' },
+  { label: 'من نحن', href: '/home#about' },
+  { label: 'اتصل بنا', href: '/home#contact' },
 ];
 
 const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
@@ -19,9 +18,10 @@ function Navbar() {
 
   const cityRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const location = useLocation();
 
   // =========================
-  // Scroll
+  // Scroll Effect
   // =========================
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +36,30 @@ function Navbar() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // =========================
+  // التعامل مع روابط الأقسام
+  // =========================
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const sectionId = decodeURIComponent(location.hash.slice(1));
+
+    const scrollToSection = () => {
+      const section = document.getElementById(sectionId);
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    };
+
+    const timer = setTimeout(scrollToSection, 150);
+
+    return () => clearTimeout(timer);
+  }, [location.pathname, location.hash]);
 
   // =========================
   // إغلاق القوائم عند الضغط خارجها
@@ -68,10 +92,15 @@ function Navbar() {
   }, []);
 
   // =========================
-  // إغلاق القائمة عند اختيار رابط
+  // إغلاق القوائم
   // =========================
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
+  };
+
+  const closeAllMenus = () => {
+    setMobileMenuOpen(false);
+    setCityMenuOpen(false);
   };
 
   return (
@@ -106,13 +135,13 @@ function Navbar() {
           sm:min-h-[76px]
           lg:min-h-[80px]
         `}>
-        {/* ===================================== */}
+        {/* ========================= */}
         {/* LOGO */}
-        {/* ===================================== */}
+        {/* ========================= */}
 
         <Link
           to="/"
-          onClick={closeMobileMenu}
+          onClick={closeAllMenus}
           aria-label="بدّلها - الرئيسية"
           className="
             group flex shrink-0
@@ -132,7 +161,6 @@ function Navbar() {
               bg-white/15
               shadow-sm
               transition-all duration-500
-
               group-hover:rotate-6
               group-hover:scale-110
               group-hover:bg-white/25
@@ -174,9 +202,9 @@ function Navbar() {
           </span>
         </Link>
 
-        {/* ===================================== */}
+        {/* ========================= */}
         {/* DESKTOP NAVIGATION */}
-        {/* ===================================== */}
+        {/* ========================= */}
 
         <nav
           aria-label="التنقل الرئيسي"
@@ -188,23 +216,18 @@ function Navbar() {
             xl:gap-9
           ">
           {NAV.map((item, index) => (
-            <Link
+            <a
               key={item.label}
-              to={item.href}
+              href={item.href}
               className={`
                 group relative
                 whitespace-nowrap
                 py-2
-
                 text-[14px]
                 xl:text-[15px]
-
                 font-semibold
-
                 transition-colors duration-300
-
                 hover:text-white
-
                 ${index === 0 ? 'text-white' : 'text-white/75'}
               `}>
               {item.label}
@@ -222,26 +245,25 @@ function Navbar() {
                   group-hover:w-full
                 "
               />
-            </Link>
+            </a>
           ))}
         </nav>
 
-        {/* ===================================== */}
+        {/* ========================= */}
         {/* RIGHT ACTIONS */}
-        {/* ===================================== */}
+        {/* ========================= */}
 
         <div
           className="
-            flex
-            shrink-0
+            flex shrink-0
             items-center
             gap-1.5
             sm:gap-2
             lg:gap-3
           ">
-          {/* ================================= */}
-          {/* CITY */}
-          {/* ================================= */}
+          {/* ========================= */}
+          {/* CITY SELECTOR */}
+          {/* ========================= */}
 
           <div className="relative" ref={cityRef}>
             <button
@@ -254,42 +276,24 @@ function Navbar() {
                 items-center
                 justify-center
                 gap-1.5
-
                 rounded-full
-                border
-                border-white/40
-
+                border border-white/40
                 bg-white/10
-
-                px-2.5
-                py-2
-
-                sm:px-3
-                sm:py-2.5
-
+                px-2.5 py-2
+                sm:px-3 sm:py-2.5
                 lg:px-4
-
                 text-white
-
                 transition-all duration-300
-
                 hover:bg-white/20
                 hover:shadow-md
-
                 active:scale-95
-
                 focus-visible:outline-none
                 focus-visible:ring-2
                 focus-visible:ring-white
               ">
-              {/* Location Icon */}
-
               <svg
                 viewBox="0 0 24 24"
-                className="
-                  h-4 w-4
-                  sm:h-[18px] sm:w-[18px]
-                "
+                className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -299,21 +303,15 @@ function Navbar() {
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
 
-              {/* اسم المنطقة */}
-
               <span
                 className="
-                  hidden
-                  md:inline
-                  text-xs
-                  lg:text-sm
+                  hidden md:inline
+                  text-xs lg:text-sm
                   font-semibold
                   whitespace-nowrap
                 ">
                 {city || 'المنطقة'}
               </span>
-
-              {/* Arrow */}
 
               <svg
                 viewBox="0 0 24 24"
@@ -338,38 +336,24 @@ function Navbar() {
               <div
                 role="menu"
                 className="
-                  absolute
-                  left-0
-                  md:right-0
-                  md:left-auto
-
+                  absolute left-0
+                  md:right-0 md:left-auto
                   top-[calc(100%+10px)]
-
                   z-[70]
-
                   min-w-[175px]
                   sm:min-w-[190px]
-
                   overflow-hidden
                   rounded-2xl
-
-                  border
-                  border-[#dbe7e8]
-
+                  border border-[#dbe7e8]
                   bg-white
-
                   p-2
-
                   text-[#16384f]
-
                   shadow-[0_12px_35px_rgba(1,59,89,0.18)]
                 ">
                 <p
                   className="
-                    px-3
-                    py-2
-                    text-xs
-                    font-semibold
+                    px-3 py-2
+                    text-xs font-semibold
                     text-[#78909c]
                   ">
                   اختاري منطقتك
@@ -386,24 +370,14 @@ function Navbar() {
                       setCityMenuOpen(false);
                     }}
                     className={`
-                      flex
-                      w-full
-                      items-center
-                      justify-between
-
+                      flex w-full
+                      items-center justify-between
                       rounded-xl
-
-                      px-3
-                      py-2.5
-
-                      text-right
-                      text-sm
-
+                      px-3 py-2.5
+                      text-right text-sm
                       transition-all duration-200
-
                       hover:bg-[#e8f5f4]
                       hover:text-[#287d80]
-
                       ${city === item ? 'bg-[#e8f5f4] font-bold text-[#287d80]' : ''}
                     `}>
                     {item}
@@ -415,59 +389,34 @@ function Navbar() {
             )}
           </div>
 
-          {/* ================================= */}
+          {/* ========================= */}
           {/* ADD PRODUCT */}
-          {/* ================================= */}
+          {/* ========================= */}
 
           <Link
             to="/add-product"
             className="
-              hidden
-              sm:inline-flex
-
-              items-center
-              justify-center
-              gap-2
-
+              hidden sm:inline-flex
+              items-center justify-center gap-2
               rounded-full
-
-              border
-              border-white/70
-
+              border border-white/70
               bg-white
-
-              px-3
-              py-2
-
-              md:px-4
-              md:py-2.5
-
+              px-3 py-2
+              md:px-4 md:py-2.5
               lg:px-5
-
-              text-xs
-              md:text-sm
-
+              text-xs md:text-sm
               font-bold
-
               text-[#287d80]
-
               shadow-sm
-
               transition-all duration-300
-
               hover:-translate-y-0.5
               hover:bg-[#f0fbfa]
               hover:shadow-lg
-
               active:scale-95
             ">
             <svg
               viewBox="0 0 24 24"
-              className="
-                h-4 w-4
-                md:h-[18px]
-                md:w-[18px]
-              "
+              className="h-4 w-4 md:h-[18px] md:w-[18px]"
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
@@ -478,61 +427,37 @@ function Navbar() {
             <span>إضافة منتج</span>
           </Link>
 
-          {/* ================================= */}
+          {/* ========================= */}
           {/* LOGIN */}
-          {/* ================================= */}
+          {/* ========================= */}
 
           <Link
             to="/login"
             className="
               inline-flex
-              items-center
-              justify-center
-              gap-1.5
-              sm:gap-2
-
+              items-center justify-center
+              gap-1.5 sm:gap-2
               rounded-full
-
               bg-[#103f5b]
-
-              px-3
-              py-2
-
-              sm:px-4
-              sm:py-2.5
-
+              px-3 py-2
+              sm:px-4 sm:py-2.5
               lg:px-5
-
-              text-xs
-              sm:text-sm
-
-              font-bold
-              text-white
-
+              text-xs sm:text-sm
+              font-bold text-white
               shadow-[0_4px_15px_rgba(1,40,65,0.2)]
-
               transition-all duration-300
-
               hover:-translate-y-0.5
-
               hover:bg-white
               hover:text-[#164e70]
-
               hover:shadow-lg
-
               active:scale-95
-
               focus-visible:outline-none
               focus-visible:ring-2
               focus-visible:ring-white
             ">
             <svg
               viewBox="0 0 24 24"
-              className="
-                h-4 w-4
-                sm:h-[18px]
-                sm:w-[18px]
-              "
+              className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -548,16 +473,11 @@ function Navbar() {
             <span className="sm:hidden">دخول</span>
           </Link>
 
-          {/* ================================= */}
+          {/* ========================= */}
           {/* MOBILE MENU BUTTON */}
-          {/* ================================= */}
+          {/* ========================= */}
 
-          <div
-            ref={mobileMenuRef}
-            className="
-              relative
-              lg:hidden
-            ">
+          <div ref={mobileMenuRef} className="relative lg:hidden">
             <button
               type="button"
               aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
@@ -567,25 +487,14 @@ function Navbar() {
                 flex
                 h-10 w-10
                 sm:h-11 sm:w-11
-
-                items-center
-                justify-center
-
+                items-center justify-center
                 rounded-xl
-
-                border
-                border-white/30
-
+                border border-white/30
                 bg-white/10
-
                 text-white
-
                 transition-all duration-300
-
                 hover:bg-white/20
-
                 active:scale-95
-
                 focus-visible:outline-none
                 focus-visible:ring-2
                 focus-visible:ring-white
@@ -616,36 +525,24 @@ function Navbar() {
               )}
             </button>
 
-            {/* ================================= */}
+            {/* ========================= */}
             {/* MOBILE MENU */}
-            {/* ================================= */}
+            {/* ========================= */}
 
             {mobileMenuOpen && (
               <div
                 className="
-                  absolute
-                  left-0
-
+                  absolute left-0
                   top-[calc(100%+12px)]
-
                   z-[80]
-
                   w-[280px]
                   max-w-[calc(100vw-24px)]
-
                   overflow-hidden
-
                   rounded-2xl
-
-                  border
-                  border-[#dbe7e8]
-
+                  border border-[#dbe7e8]
                   bg-white
-
                   p-3
-
                   text-[#16384f]
-
                   shadow-[0_15px_40px_rgba(1,59,89,0.2)]
                 ">
                 {/* عنوان القائمة */}
@@ -653,29 +550,17 @@ function Navbar() {
                 <div
                   className="
                     mb-2
-                    flex
-                    items-center
-                    justify-between
-                    border-b
-                    border-[#edf2f3]
-                    px-2
-                    pb-3
+                    flex items-center justify-between
+                    border-b border-[#edf2f3]
+                    px-2 pb-3
                   ">
-                  <span
-                    className="
-                      text-sm
-                      font-bold
-                      text-[#3A73AA]
-                    ">
-                    القائمة الرئيسية
-                  </span>
+                  <span className="text-sm font-bold text-[#3A73AA]">القائمة الرئيسية</span>
 
                   <span
                     className="
                       rounded-full
                       bg-[#e8f5f4]
-                      px-2
-                      py-1
+                      px-2 py-1
                       text-[10px]
                       font-bold
                       text-[#4F9D9E]
@@ -686,92 +571,47 @@ function Navbar() {
 
                 {/* روابط القائمة */}
 
-                <nav
-                  className="
-                    flex
-                    flex-col
-                    gap-1
-                  ">
-                  {NAV.map((item, index) => (
-                    <Link
+                <nav className="flex flex-col gap-1">
+                  {NAV.map((item) => (
+                    <a
                       key={item.label}
-                      to={item.href}
+                      href={item.href}
                       onClick={closeMobileMenu}
                       className="
-                        flex
-                        items-center
-                        justify-between
-
+                        flex items-center justify-between
                         rounded-xl
-
-                        px-3
-                        py-3
-
-                        text-sm
-                        font-semibold
-
+                        px-3 py-3
+                        text-sm font-semibold
                         text-[#36566b]
-
                         transition-all duration-200
-
                         hover:bg-[#e8f5f4]
                         hover:text-[#287d80]
-
                         active:scale-[0.98]
                       ">
                       <span>{item.label}</span>
-
-                      <span
-                        className="
-                          text-[#4F9D9E]
-                          opacity-0
-                          transition-all
-                          group-hover:opacity-100
-                        ">
-                        ←
-                      </span>
-                    </Link>
+                      <span className="text-[#4F9D9E]">←</span>
+                    </a>
                   ))}
                 </nav>
 
-                {/* خط */}
+                {/* فاصل */}
 
-                <div
-                  className="
-                    my-2
-                    h-px
-                    bg-[#edf2f3]
-                  "
-                />
+                <div className="my-2 h-px bg-[#edf2f3]" />
 
-                {/* إضافة منتج للموبايل */}
+                {/* إضافة منتج */}
 
                 <Link
                   to="/add-product"
                   onClick={closeMobileMenu}
                   className="
-                    flex
-                    items-center
-                    justify-center
-                    gap-2
-
+                    flex items-center justify-center gap-2
                     rounded-xl
-
-                    border
-                    border-[#4F9D9E]
-
+                    border border-[#4F9D9E]
                     bg-[#e8f5f4]
-
-                    px-4
-                    py-3
-
-                    text-sm
-                    font-bold
-
+                    px-4 py-3
+                    text-sm font-bold
                     text-[#287d80]
-
                     transition-all duration-300
-
                     hover:bg-[#d9efed]
                   ">
                   <svg
@@ -786,35 +626,21 @@ function Navbar() {
                   إضافة منتج
                 </Link>
 
-                {/* تسجيل الدخول للموبايل */}
+                {/* تسجيل الدخول */}
 
                 <Link
                   to="/login"
                   onClick={closeMobileMenu}
                   className="
                     mt-2
-
-                    flex
-                    items-center
-                    justify-center
-                    gap-2
-
+                    flex items-center justify-center gap-2
                     rounded-xl
-
                     bg-[#103f5b]
-
-                    px-4
-                    py-3
-
-                    text-sm
-                    font-bold
-
+                    px-4 py-3
+                    text-sm font-bold
                     text-white
-
                     shadow-sm
-
                     transition-all duration-300
-
                     hover:bg-[#164e70]
                   ">
                   <svg

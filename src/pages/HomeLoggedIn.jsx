@@ -1,4 +1,4 @@
-import Navbar from '../components/Navbar';
+import Navbarpro from '../components/Navbarpro';
 import Footer from '../components/Footer';
 
 import { motion } from 'framer-motion';
@@ -103,7 +103,7 @@ function Home() {
   };
   return (
     <>
-      <Navbar />
+      <Navbarpro />
       <main>
         {/* HERO SECTION */}
 

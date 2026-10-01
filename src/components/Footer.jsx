@@ -9,9 +9,9 @@ const Footer = () => {
   ];
 
   const supportLinks = [
-    { title: 'مركز المساعدة', path: '/help' },
-    { title: 'قوانين المنصة', path: '/terms' },
-    { title: 'الإبلاغ عن مشكلة', path: '/report' },
+    { title: 'مركز المساعدة', path: '/helpCenter' },
+    { title: 'قوانين المنصة', path: '/PlatformRules' },
+    { title: 'الإبلاغ عن مشكلة', path: '/reportaproblem' },
     { title: 'سياسة الخصوصية', path: '/privacy' },
   ];
 

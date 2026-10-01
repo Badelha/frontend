@@ -7,6 +7,13 @@ import VerificationCode from './pages/VerificationCode';
 import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
 import ProfilePage from './pages/ProfilePage.full';
+import Personalinfoform from './pages/Personalinfoform';
+import HomeLoggedIn from './pages/HomeLoggedIn';
+import AboutUs from './pages/AboutUs';
+import HelpCenter from './pages/HelpCenter';
+import PlatformRules from './pages/PlatformRules';
+import Reportaproblem from './pages/Reportaproblem';
+import Privacy from './pages/Privacy';
 // import Navbarpro from './pages/Navbarpro.full'
 
 import api from './services/api';
@@ -21,7 +28,13 @@ function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/home" element={<Home />} />
       <Route path="/profilePage" element={<ProfilePage />} />
-      {/* <Route path="/navbarpro" element={<Navbarpro />} /> */}
+      <Route path="/personalinfoform" element={<Personalinfoform />} />
+      <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
+      <Route path="/aboutUs" element={<AboutUs />} />
+      <Route path="/helpCenter" element={<HelpCenter />} />
+      <Route path="/platformRules" element={<PlatformRules />} />
+      <Route path="/reportaproblem" element={<Reportaproblem />} />
+      <Route path="/privacy" element={<Privacy />} />
     </Routes>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Navbarpro from '../components/Navbarpro';
+import { useNavigate } from 'react-router-dom';
 
 /* =========================================================
    أدوات مساعدة
@@ -371,7 +372,7 @@ function Identity({
   onEdit = () => {},
 }) {
   const location = [p.city, p.region].filter(Boolean).join('، ');
-
+  const navigate = useNavigate();
   return (
     <section
       className="
@@ -537,7 +538,7 @@ function Identity({
         {isOwner && (
           <button
             type="button"
-            onClick={onEdit}
+            onClick={() => navigate('/Personalinfoform')}
             className="
               inline-flex
               items-center
@@ -561,7 +562,7 @@ function Identity({
               active:scale-[.97]
             ">
             <Icon name="edit" size={17} />
-            تعديل الملف
+            تعديل الملف الشخصي
           </button>
         )}
 

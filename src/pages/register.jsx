@@ -2,7 +2,9 @@ import { useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
 import { Link } from 'react-router-dom';
-function Sigin() {
+import { registerUser } from '../services/authService';
+
+function Register() {
   // بيانات الفورم
   const [formData, setFormData] = useState({
     name: '',
@@ -19,6 +21,7 @@ function Sigin() {
 
   // إظهار وإخفاء كلمة المرور
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // تغيير قيمة أي input
   const handleChange = (e) => {
@@ -37,7 +40,7 @@ function Sigin() {
   };
 
   // إرسال الفورم
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -86,15 +89,37 @@ function Sigin() {
         newErrors.password = 'كلمة المرور يجب أن تحتوي على حرف كبير ورقم ورمز';
       }
     }
-
+    if (!acceptedTerms) {
+      newErrors.terms = 'يجب الموافقة على الشروط والأحكام';
+    }
     // وضع الأخطاء
     setErrors(newErrors);
 
-    // إذا لم يوجد أي خطأ
     if (Object.keys(newErrors).length === 0) {
-      console.log('تم إنشاء الحساب بنجاح');
+      try {
+        const userData = {
+          fullName: formData.name,
+          phoneNumber: formData.phone,
+          address: formData.address,
+          email: formData.email,
+          password: formData.password,
 
-      // هنا لاحقاً ممكن تربطي التسجيل بالـ Backend
+          // temporary value until you connect cities
+          cityId: 1,
+        };
+
+        const result = await registerUser(userData);
+
+        console.log('Backend Response:', result);
+
+        localStorage.setItem('accessToken', result.data.accessToken);
+
+        alert('Registration successful');
+      } catch (error) {
+        console.error(error);
+
+        alert(error.message || 'Registration failed');
+      }
     }
   };
 
@@ -109,7 +134,9 @@ function Sigin() {
       <main className="flex-1 flex justify-center items-center px-[15px] py-[30px]">
         <div
           className="
-           w-full max-w-[500px] border rounded-[15px] p-[10px] sm:p-[15px]
+            w-full max-w-[500px]
+            border rounded-[15px]
+            p-[10px] sm:p-[15px]
             border-[#E5E5E5]
             bg-white
             shadow-[0_4px_20px_rgba(0,0,0,0.05)]
@@ -126,14 +153,19 @@ function Sigin() {
           {/* ================= TITLE ================= */}
           <h1
             className="
-            text-center m-[3px] font-bold text-[#013b59] text-[20px] sm:text-[25px]
+              text-center m-[3px]
+              font-bold
+              text-[#013b59]
+              text-[20px] sm:text-[25px]
             ">
             إنشاء حساب جديد
           </h1>
 
           <p
             className="
-             text-center mt-[5px] text-[#817f7f] text-[13px] sm:text-[15px]
+              text-center mt-[5px]
+              text-[#817f7f]
+              text-[13px] sm:text-[15px]
             ">
             أدخل بياناتك لإنشاء حساب جديد
           </p>
@@ -153,9 +185,12 @@ function Sigin() {
                 value={formData.name}
                 onChange={handleChange}
                 className={`
-                  w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.name ? 'border-red-500' : 'border-[#D8D8D8] '}
+                  ${errors.name ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
               />
 
@@ -175,7 +210,10 @@ function Sigin() {
                 value={formData.email}
                 onChange={handleChange}
                 className={`
-                w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
                   ${errors.email ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
               />
@@ -196,7 +234,10 @@ function Sigin() {
                 value={formData.phone}
                 onChange={handleChange}
                 className={`
-                   w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
                   ${errors.phone ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
@@ -217,7 +258,10 @@ function Sigin() {
                 value={formData.birthDate}
                 onChange={handleChange}
                 className={`
-                  w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
                   ${errors.birthDate ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
@@ -239,9 +283,12 @@ function Sigin() {
                 value={formData.gender}
                 onChange={handleChange}
                 className={`
-                   w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.gender ? 'border-red-500' : 'border-[#D8D8D8] '}
+                  ${errors.gender ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}>
                 <option value="" disabled>
                   اختر الجنس
@@ -270,9 +317,12 @@ function Sigin() {
                 value={formData.address}
                 onChange={handleChange}
                 className={`
-                   w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.address ? 'border-red-500' : 'border-[#D8D8D8] '}
+                  ${errors.address ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
               />
 
@@ -287,7 +337,6 @@ function Sigin() {
                 كلمة المرور
               </label>
 
-              {/* input + eye */}
               <div className="relative">
                 <input
                   id="password"
@@ -296,13 +345,15 @@ function Sigin() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`
-                    w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
-                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                    ${errors.password ? 'border-red-500' : 'border-[#D8D8D8] '}
+                    w-full p-[8px] my-[10px]
+                    bg-[#f1f4f9]
+                    border rounded-[10px]
+                    outline-none
+                    focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
+                    ${errors.password ? 'border-red-500' : 'border-[#D8D8D8]'}
                   `}
                 />
 
-                {/* Eye Icon */}
                 <i
                   onClick={() => setShowPassword(!showPassword)}
                   className={`
@@ -323,16 +374,55 @@ function Sigin() {
             </div>
 
             {/* ================= TERMS ================= */}
-            <div className="flex items-center gap-[8px] mb-[20px]">
-              <i
-                className="
-                  fa-regular
-                  fa-square
-                  text-[#777]
-                  cursor-pointer
-                "></i>
+            {/* ================= TERMS ================= */}
+            <div className="mb-[20px]">
+              <label className="flex items-center gap-[8px] cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
 
-              <p className="text-[12px] sm:text-[13px] text-[#777]">أوافق على الشروط والأحكام</p>
+                    if (e.target.checked) {
+                      setErrors({
+                        ...errors,
+                        terms: '',
+                      });
+                    }
+                  }}
+                  className="sr-only"
+                />
+
+                {/* Custom Checkbox */}
+                <span
+                  className={`
+        w-[20px]
+        h-[20px]
+        rounded-[5px]
+        border
+        flex
+        items-center
+        justify-center
+        transition-all
+        duration-200
+
+        ${
+          acceptedTerms
+            ? 'bg-[#4F9D9E] border-[#4F9D9E]'
+            : errors.terms
+              ? 'bg-white border-red-500'
+              : 'bg-white border-[#D8D8D8]'
+        }
+      `}>
+                  {acceptedTerms && <i className="fa-solid fa-check text-white text-[12px]"></i>}
+                </span>
+
+                <span className="text-[12px] sm:text-[13px] text-[#777]">
+                  أوافق على الشروط والأحكام
+                </span>
+              </label>
+
+              {errors.terms && <p className="text-red-500 text-[12px] mt-[6px]">{errors.terms}</p>}
             </div>
 
             {/* ================= REGISTER BUTTON ================= */}
@@ -354,14 +444,10 @@ function Sigin() {
           </form>
 
           {/* ================= LOGIN LINK ================= */}
-          <div className="text-center mt-[20px] flex text-center items-center justify-center mt-[20px] mb-[18px] gap-[5px]">
-            <p className=" text-[#777] "> لديك حساب بالفعل؟</p>
+          <div className="text-center mt-[20px] mb-[18px] flex items-center justify-center gap-[5px]">
+            <p className="text-[#777]">لديك حساب بالفعل؟</p>
 
-            <Link
-              to="/login"
-              className="
-                 line-clamp-1 text-[#041167] underline font-bold
-                ">
+            <Link to="/login" className="line-clamp-1 text-[#041167] underline font-bold">
               تسجيل الدخول
             </Link>
           </div>
@@ -377,20 +463,39 @@ function Sigin() {
               <div className="h-[1px] bg-[#E5E5E5] flex-1"></div>
             </div>
 
-            {/* Facebook */}
             {/* Social Login */}
             <div className="sm:flex sm:justify-center sm:items-center gap-[15px] m-[11px]">
               {/* Facebook */}
               <div
-                className="border border-[#e1e1e1] rounded-[11px] cursor-pointer px-[27px] py-[8px] gap-[5px] flex justify-center items-center hover:scale-[1.03] transition-all duration-300  sm:mb-[0]
-                  mb-[10px]">
+                className="
+                  border border-[#e1e1e1]
+                  rounded-[11px]
+                  cursor-pointer
+                  px-[27px] py-[8px]
+                  gap-[5px]
+                  flex justify-center items-center
+                  hover:scale-[1.03]
+                  transition-all duration-300
+                  sm:mb-[0]
+                  mb-[10px]
+                ">
                 <i className="fa-brands fa-facebook text-[24px] bg-gradient-to-b from-[#00B2FF] to-[#006AFF] bg-clip-text text-transparent"></i>
 
                 <p className="text-[12px] text-[#00B2FF]">الدخول باستخدام فيسبوك</p>
               </div>
 
               {/* Google */}
-              <div className="border border-[#e1e1e1] rounded-[11px] px-[27px] py-[10px] gap-[6px] cursor-pointer flex justify-center items-center hover:scale-[1.03] transition-all">
+              <div
+                className="
+                  border border-[#e1e1e1]
+                  rounded-[11px]
+                  px-[27px] py-[10px]
+                  gap-[6px]
+                  cursor-pointer
+                  flex justify-center items-center
+                  hover:scale-[1.03]
+                  transition-all
+                ">
                 <img src={googleIcon} className="w-[20px] h-[20px]" alt="Google" />
 
                 <p className="text-[12px] text-[#6f6d6d]">Google الدخول باستخدام</p>
@@ -403,4 +508,4 @@ function Sigin() {
   );
 }
 
-export default Sigin;
+export default Register;
