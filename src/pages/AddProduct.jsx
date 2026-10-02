@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { FaPlus, FaChevronDown, FaHome, FaImage, FaTimes } from 'react-icons/fa';
-import Navbarpro from '../components/Navbarpro';
+import Navbarpro from '../components/Navbarpro'; 
+
 const AddProduct = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -85,7 +86,12 @@ const AddProduct = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg pb-16">
-      <div className="container mx-auto px-4 py-10 max-w-3xl">
+      
+      {/* 1. إضافة شريط التنقل هنا */}
+      <Navbarpro />
+
+      {/* 2. إضافة pt-24 لتعويض ارتفاع الناف بار */}
+      <div className="container mx-auto px-4 pt-24 pb-10 max-w-3xl">
 
         <h1 className="text-4xl font-extrabold text-center text-brand-dark mb-8">
           اضف منتج جديد
