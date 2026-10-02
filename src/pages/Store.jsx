@@ -41,8 +41,12 @@ const Store = () => {
 
   return (
     <div className="min-h-screen bg-white pb-16">
+      
+      {/* 1. إضافة شريط التنقل هنا */}
+      <Navbarpro />
 
-      <div className="container mx-auto px-4 pt-8">
+      {/* 2. إضافة pt-24 (padding-top) لتعويض ارتفاع الناف بار إذا كان fixed */}
+      <div className="container mx-auto px-4 pt-24"> 
         <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} />
         <FilterTabs active={activeTab} onChange={setActiveTab} />
       </div>
