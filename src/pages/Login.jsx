@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
+import { getApiError } from '../services/api';
 
 function Login() {
   const [rememberPassword, setRememberPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,94 +41,10 @@ function Login() {
 
     try {
       setLoading(true);
-
-      // رابط الباك إند
-      const API_URL = import.meta.env.VITE_API_URL;
-
-      // Endpoint تسجيل الدخول
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password,
-        }),
-      });
-
-      // نحاول قراءة Response
-      const data = await response.json();
-
-      console.log('Login response:', data);
-
-      // =========================
-      // تسجيل الدخول ناجح
-      // =========================
-      if (response.ok) {
-        /*
-          نخزن بيانات المستخدم حتى نقدر
-          نعرف لاحقًا إنه عامل Login
-        */
-
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-        }
-
-        // إذا الباك إند يرجع token
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-        }
-
-        // الانتقال إلى صفحة Profile
-        navigate('/profile');
-
-        return;
-      }
-
-      // =========================
-      // البريد غير موجود
-      // =========================
-      if (
-        response.status === 404 ||
-        data.message === 'USER_NOT_FOUND' ||
-        data.error === 'USER_NOT_FOUND'
-      ) {
-        setErrors({
-          email: 'لا يوجد حساب بهذا البريد الإلكتروني',
-        });
-
-        return;
-      }
-
-      // =========================
-      // كلمة المرور خاطئة
-      // =========================
-      if (
-        response.status === 401 ||
-        data.message === 'INVALID_PASSWORD' ||
-        data.error === 'INVALID_PASSWORD'
-      ) {
-        setErrors({
-          password: 'كلمة المرور غير صحيحة',
-        });
-
-        return;
-      }
-
-      // =========================
-      // في حال الباك إند رجع
-      // رسالة مختلفة
-      // =========================
-      setErrors({
-        general: data.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
-      });
+      await login({ email: email.trim(), password });
+      navigate(location.state?.from || '/profilePage', { replace: true });
     } catch (error) {
-      console.error('Login Error:', error);
-
-      setErrors({
-        general: 'حدث خطأ أثناء الاتصال بالخادم، حاول مرة أخرى',
-      });
+      setErrors({ general: getApiError(error) || 'تعذر تسجيل الدخول، حاول مرة أخرى' });
     } finally {
       setLoading(false);
     }
@@ -184,6 +104,11 @@ function Login() {
             </div>
 
             {/* General Error */}
+            {location.state?.message && (
+              <p role="status" className="mt-[15px] rounded-[10px] bg-green-50 p-[10px] text-center text-[13px] text-green-700">
+                {location.state.message}
+              </p>
+            )}
             {errors.general && (
               <div
                 className="

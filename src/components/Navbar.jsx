@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+
 const NAV = [
   { label: 'الرئيسية', href: '/home' },
   { label: 'كيف تعمل', href: '/home#how-it-works' },
@@ -469,7 +470,6 @@ function Navbar() {
             </svg>
 
             <span className="hidden sm:inline">تسجيل دخول</span>
-
             <span className="sm:hidden">دخول</span>
           </Link>
 
@@ -571,11 +571,16 @@ function Navbar() {
 
                 {/* روابط القائمة */}
 
-                <nav className="flex flex-col gap-1">
+                <nav
+                  className="
+                    flex
+                    flex-col
+                    gap-1
+                  ">
                   {NAV.map((item) => (
-                    <a
+                    <Link
                       key={item.label}
-                      href={item.href}
+                      to={item.href}
                       onClick={closeMobileMenu}
                       className="
                         flex items-center justify-between
@@ -590,7 +595,7 @@ function Navbar() {
                       ">
                       <span>{item.label}</span>
                       <span className="text-[#4F9D9E]">←</span>
-                    </a>
+                    </Link>
                   ))}
                 </nav>
 

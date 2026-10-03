@@ -1,42 +1,80 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
-import { Link } from 'react-router-dom';
-import { registerUser } from '../services/authService';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
+import { getApiError } from '../services/api';
+import marketplace from '../services/marketplace';
 
 function Register() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { register } = useAuth();
+
   // بيانات الفورم
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    birthDate: '',
-    gender: '',
+    city: '',
     address: '',
     password: '',
   });
 
   // الأخطاء
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [cities, setCities] = useState([]);
 
   // إظهار وإخفاء كلمة المرور
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  // جلب المدن
+  useEffect(() => {
+    let active = true;
+
+    marketplace
+      .cities()
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data?.cities;
+
+        if (!Array.isArray(items)) {
+          throw new Error('Unexpected cities response');
+        }
+
+        if (active) {
+          setCities(items);
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setErrors((current) => ({
+            ...current,
+            general: getApiError(error) || 'تعذر تحميل المدن',
+          }));
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   // تغيير قيمة أي input
   const handleChange = (e) => {
     const { id, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((current) => ({
+      ...current,
       [id]: value,
-    });
+    }));
 
-    // إزالة الخطأ بمجرد أن يبدأ المستخدم بالكتابة
-    setErrors({
-      ...errors,
+    setErrors((current) => ({
+      ...current,
       [id]: '',
-    });
+      general: '',
+    }));
   };
 
   // إرسال الفورم
@@ -58,18 +96,8 @@ function Register() {
     }
 
     // رقم الهاتف
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'يجب تعبئة رقم الهاتف';
-    }
-
-    // تاريخ الميلاد
-    if (!formData.birthDate) {
-      newErrors.birthDate = 'يجب تعبئة تاريخ الميلاد';
-    }
-
-    // الجنس
-    if (!formData.gender) {
-      newErrors.gender = 'يجب اختيار الجنس';
+    if (!/^05\d{8}$/.test(formData.phone.trim())) {
+      newErrors.phone = 'أدخل رقم هاتف فلسطينيًا مكوّنًا من 10 أرقام ويبدأ بـ 05';
     }
 
     // العنوان
@@ -82,43 +110,50 @@ function Register() {
       newErrors.password = 'يجب تعبئة كلمة المرور';
     } else {
       const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
       const hasNumber = /[0-9]/.test(formData.password);
       const hasSymbol = /[^A-Za-z0-9]/.test(formData.password);
 
-      if (!hasUpperCase || !hasNumber || !hasSymbol) {
-        newErrors.password = 'كلمة المرور يجب أن تحتوي على حرف كبير ورقم ورمز';
+      if (
+        formData.password.length < 8 ||
+        !hasUpperCase ||
+        !hasLowerCase ||
+        !hasNumber ||
+        !hasSymbol
+      ) {
+        newErrors.password =
+          'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وصغير ورقم ورمز';
       }
     }
+
+    // الشروط والأحكام
     if (!acceptedTerms) {
       newErrors.terms = 'يجب الموافقة على الشروط والأحكام';
     }
-    // وضع الأخطاء
+
     setErrors(newErrors);
 
+    // إذا لم يوجد أخطاء
     if (Object.keys(newErrors).length === 0) {
+      setLoading(true);
+
       try {
-        const userData = {
-          fullName: formData.name,
-          phoneNumber: formData.phone,
-          address: formData.address,
-          email: formData.email,
+        await register({
+          fullName: formData.name.trim(),
+          email: formData.email.trim(),
+          phoneNumber: formData.phone.trim(),
+          city: formData.city,
+          address: formData.address.trim(),
           password: formData.password,
+        });
 
-          // temporary value until you connect cities
-          cityId: 1,
-        };
-
-        const result = await registerUser(userData);
-
-        console.log('Backend Response:', result);
-
-        localStorage.setItem('accessToken', result.data.accessToken);
-
-        alert('Registration successful');
+        navigate(location.state?.from || '/profilePage', { replace: true });
       } catch (error) {
-        console.error(error);
-
-        alert(error.message || 'Registration failed');
+        setErrors({
+          general: getApiError(error) || 'تعذر إنشاء الحساب، حاول مرة أخرى',
+        });
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -169,6 +204,20 @@ function Register() {
             ">
             أدخل بياناتك لإنشاء حساب جديد
           </p>
+
+          {/* General Error */}
+          {errors.general && (
+            <p
+              role="alert"
+              className="
+                mt-4 rounded-lg
+                bg-red-50 p-3
+                text-center text-sm
+                text-red-600
+              ">
+              {errors.general}
+            </p>
+          )}
 
           {/* ================= FORM ================= */}
           <form onSubmit={handleSubmit} className="w-full">
@@ -230,7 +279,7 @@ function Register() {
               <input
                 id="phone"
                 type="tel"
-                placeholder="+972 59-------"
+                placeholder="0599123456"
                 value={formData.phone}
                 onChange={handleChange}
                 className={`
@@ -246,62 +295,36 @@ function Register() {
               {errors.phone && <p className="text-red-500 text-[12px] mt-[5px]">{errors.phone}</p>}
             </div>
 
-            {/* ================= BIRTH DATE ================= */}
+            {/* ================= CITY ================= */}
             <div className="mb-[15px]">
-              <label htmlFor="birthDate" className="block text-[14px] sm:text-[15px] mb-[10px]">
-                تاريخ الميلاد
-              </label>
-
-              <input
-                id="birthDate"
-                type="date"
-                value={formData.birthDate}
-                onChange={handleChange}
-                className={`
-                  w-full p-[8px] my-[10px]
-                  bg-[#f1f4f9]
-                  border rounded-[10px]
-                  outline-none
-                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.birthDate ? 'border-red-500' : 'border-[#D8D8D8]'}
-                `}
-              />
-
-              {errors.birthDate && (
-                <p className="text-red-500 text-[12px] mt-[5px]">{errors.birthDate}</p>
-              )}
-            </div>
-
-            {/* ================= GENDER ================= */}
-            <div className="mb-[15px]">
-              <label htmlFor="gender" className="block text-[14px] sm:text-[15px] mb-[10px]">
-                الجنس
+              <label htmlFor="city" className="block text-[14px] sm:text-[15px] mb-[10px]">
+                المدينة
               </label>
 
               <select
-                id="gender"
-                value={formData.gender}
+                id="city"
+                value={formData.city}
                 onChange={handleChange}
-                className={`
+                className="
                   w-full p-[8px] my-[10px]
                   bg-[#f1f4f9]
-                  border rounded-[10px]
+                  border border-[#D8D8D8]
+                  rounded-[10px]
                   outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.gender ? 'border-red-500' : 'border-[#D8D8D8]'}
-                `}>
-                <option value="" disabled>
-                  اختر الجنس
-                </option>
+                ">
+                <option value="">اختر المدينة (اختياري)</option>
 
-                <option value="male">ذكر</option>
+                {cities.map((item) => {
+                  const cityName = item.city || item.city_name || item.name;
 
-                <option value="female">أنثى</option>
+                  return (
+                    <option key={item.city_id ?? item.id ?? cityName} value={cityName}>
+                      {cityName}
+                    </option>
+                  );
+                })}
               </select>
-
-              {errors.gender && (
-                <p className="text-red-500 text-[12px] mt-[5px]">{errors.gender}</p>
-              )}
             </div>
 
             {/* ================= ADDRESS ================= */}
@@ -313,7 +336,7 @@ function Register() {
               <input
                 id="address"
                 type="text"
-                placeholder="غزة"
+                placeholder="الحي والشارع"
                 value={formData.address}
                 onChange={handleChange}
                 className={`
@@ -374,7 +397,6 @@ function Register() {
             </div>
 
             {/* ================= TERMS ================= */}
-            {/* ================= TERMS ================= */}
             <div className="mb-[20px]">
               <label className="flex items-center gap-[8px] cursor-pointer select-none">
                 <input
@@ -384,10 +406,10 @@ function Register() {
                     setAcceptedTerms(e.target.checked);
 
                     if (e.target.checked) {
-                      setErrors({
-                        ...errors,
+                      setErrors((current) => ({
+                        ...current,
                         terms: '',
-                      });
+                      }));
                     }
                   }}
                   className="sr-only"
@@ -396,24 +418,24 @@ function Register() {
                 {/* Custom Checkbox */}
                 <span
                   className={`
-        w-[20px]
-        h-[20px]
-        rounded-[5px]
-        border
-        flex
-        items-center
-        justify-center
-        transition-all
-        duration-200
+                    w-[20px]
+                    h-[20px]
+                    rounded-[5px]
+                    border
+                    flex
+                    items-center
+                    justify-center
+                    transition-all
+                    duration-200
 
-        ${
-          acceptedTerms
-            ? 'bg-[#4F9D9E] border-[#4F9D9E]'
-            : errors.terms
-              ? 'bg-white border-red-500'
-              : 'bg-white border-[#D8D8D8]'
-        }
-      `}>
+                    ${
+                      acceptedTerms
+                        ? 'bg-[#4F9D9E] border-[#4F9D9E]'
+                        : errors.terms
+                          ? 'bg-white border-red-500'
+                          : 'bg-white border-[#D8D8D8]'
+                    }
+                  `}>
                   {acceptedTerms && <i className="fa-solid fa-check text-white text-[12px]"></i>}
                 </span>
 
@@ -428,6 +450,7 @@ function Register() {
             {/* ================= REGISTER BUTTON ================= */}
             <button
               type="submit"
+              disabled={loading}
               className="
                 w-full
                 h-[45px]
@@ -438,8 +461,10 @@ function Register() {
                 transition
                 bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)]
                 hover:opacity-90
+                disabled:opacity-60
+                disabled:cursor-not-allowed
               ">
-              إنشاء حساب
+              {loading ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
             </button>
           </form>
 

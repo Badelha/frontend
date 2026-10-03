@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
 
 const NAV = [
   { label: 'الرئيسية', href: '/homeLoggedIn' },
-  { label: 'كيف تعمل', href: '/homeLoggedIn#hoow-it-works' },
+  { label: 'كيف تعمل', href: '/homeLoggedIn#how-it-works' },
   { label: 'السوق', href: '/homeLoggedIn#market' },
   { label: 'من نحن', href: '/aboutUs' },
-  { label: 'اتصل بنا', href: '' },
+  { label: 'اتصل بنا', href: '/homeLoggedIn#contact' },
 ];
 
 const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
@@ -19,6 +20,7 @@ function Navbarpro() {
   const [city, setCity] = useState('');
 
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const profileRef = useRef(null);
   const cityRef = useRef(null);
@@ -134,7 +136,7 @@ function Navbarpro() {
         {/* ================= LOGO ================= */}
 
         <Link
-          to="/"
+          to="/homeLoggedIn"
           aria-label="بدّلها - الرئيسية"
           className="
             group flex shrink-0
@@ -488,7 +490,7 @@ function Navbarpro() {
                 </div>
 
                 <Link
-                  to="/ProfilePage"
+                  to="/profilePage"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -504,7 +506,7 @@ function Navbarpro() {
                 </Link>
 
                 <Link
-                  to="/listing"
+                  to="/my-products"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -520,7 +522,7 @@ function Navbarpro() {
                 </Link>
 
                 <Link
-                  to="/Personalinfoform"
+                  to="/personalinfoform"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -539,9 +541,16 @@ function Navbarpro() {
 
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setProfileOpen(false);
-                    navigate('/home');
+
+                    try {
+                      await logout();
+                    } catch (error) {
+                      window.alert(error.message);
+                    }
+
+                    navigate('/login');
                   }}
                   className="
                     flex w-full
