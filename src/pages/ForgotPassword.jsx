@@ -1,14 +1,14 @@
 import { useState } from 'react';
-
-import { useNavigate } from 'react-router-dom';
+import auth from '../services/auth';
+import { getApiError } from '../services/api';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
 
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email.trim()) {
@@ -22,10 +22,16 @@ function ForgotPassword() {
     }
 
     setError('');
-
-    console.log('تم إرسال رابط إعادة تعيين كلمة المرور');
-
-    navigate('/verification');
+    setSuccess('');
+    setLoading(true);
+    try {
+      await auth.forgotPassword(email.trim());
+      setSuccess('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.');
+    } catch (requestError) {
+      setError(getApiError(requestError) || 'تعذر إرسال رابط إعادة التعيين');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,12 +82,14 @@ function ForgotPassword() {
 
             {/* Error */}
             {error && <p className="text-red-500 text-[12px] mt-[-5px] mb-[10px]">{error}</p>}
+            {success && <p role="status" className="text-green-700 text-[12px] mb-[10px]">{success}</p>}
 
             {/* Button */}
             <button
               type="submit"
+              disabled={loading}
               className="block mx-auto w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white cursor-pointer transition-all text-center duration-300 bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] hover:from-[#4f8ac1] hover:to-[#6ccacc]">
-              التالي
+              {loading ? 'جارٍ الإرسال...' : 'إرسال رابط إعادة التعيين'}
             </button>
           </form>
         </div>

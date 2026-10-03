@@ -1,6 +1,3 @@
-// import Navbar from '../components/Navbar';
-// import Footer from '../components/Footer';
-
 import { motion } from 'framer-motion';
 // import heroImage from '../assets/image/badelha2.png';
 // import bater from '../assets/image/barter-animation-realistic.html';
@@ -21,8 +18,6 @@ import nine from '../assets/images/9.png';
 import ten from '../assets/images/10.png';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import marketplace from '../services/marketplace';
-import { getApiError } from '../services/api';
 
 // Counter
 function Counter({ end, duration = 2000 }) {
@@ -49,62 +44,8 @@ function Counter({ end, duration = 2000 }) {
   return <>{count.toLocaleString('ar-EG')}</>;
 }
 
-function Home() {
+function HomeLoggedin() {
   const [showAll, setShowAll] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState('');
-  const [search, setSearch] = useState('');
-  const [products, setProducts] = useState([]);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [searchError, setSearchError] = useState('');
-  const [searching, setSearching] = useState(false);
-  const categoryImages = [one, two, three, four, five, six, seven, eight, nine, ten];
-
-  useEffect(() => {
-    let active = true;
-    marketplace
-      .categories()
-      .then((result) => {
-        const items = Array.isArray(result) ? result : result?.categories;
-        if (active) {
-          if (!Array.isArray(items)) throw new Error('Unexpected categories response');
-          setCategories(items);
-        }
-      })
-      .catch((error) => {
-        if (active) setCategoriesError(getApiError(error) || 'تعذر تحميل الفئات');
-      })
-      .finally(() => {
-        if (active) setCategoriesLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const searchProducts = async (term = search, categoryId) => {
-    if (term.trim() && term.trim().length < 2) {
-      setSearchError('أدخل حرفين على الأقل للبحث.');
-      return;
-    }
-    setSearching(true);
-    setSearchError('');
-    try {
-      const result = await marketplace.searchProducts(term.trim(), categoryId);
-      const items = Array.isArray(result) ? result : result?.products;
-      if (!Array.isArray(items)) throw new Error('Unexpected products response');
-      setProducts(items);
-      setHasSearched(true);
-      document.getElementById('market')?.scrollIntoView({ behavior: 'smooth' });
-    } catch (error) {
-      setSearchError(getApiError(error) || 'تعذر تحميل المنتجات');
-      setProducts([]);
-    } finally {
-      setSearching(false);
-    }
-  };
-
   const sectionVariants = {
     hidden: { opacity: 0, y: 25 },
     visible: {
@@ -159,7 +100,6 @@ function Home() {
   };
   return (
     <>
-      {/* <Navbar /> */}
       <main>
         {/* HERO SECTION */}
 
@@ -203,33 +143,29 @@ function Home() {
             </p>{' '}
             {/* ============================= */} {/* SEARCH BOX */}{' '}
             {/* ============================= */}{' '}
-            <form onSubmit={(event) => { event.preventDefault(); searchProducts(); }} className=" relative mt-7 sm:mt-8 md:mt-9 w-full max-w-[550px] sm:max-w-[620px] md:max-w-[650px] ">
+            <div className=" relative mt-7 sm:mt-8 md:mt-9 w-full max-w-[550px] sm:max-w-[620px] md:max-w-[650px] ">
               {' '}
               <input
                 type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
                 placeholder="ابحث عن طعام، طاقة، مستلزمات..."
                 className=" h-[54px] sm:h-[58px] md:h-[62px] w-full rounded-[15px] sm:rounded-[17px] md:rounded-[18px] bg-white/90 backdrop-blur-md border border-white/60 px-[48px] sm:px-[55px] pr-[18px] sm:pr-[25px] text-[13px] sm:text-[15px] md:text-[16px] text-[#013B59] placeholder:text-[#8A949B] outline-none shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 focus:bg-white focus:border-[#4F9D9E] focus:shadow-[0_10px_35px_rgba(0,0,0,0.20)] "
               />{' '}
-              <button type="submit" aria-label="بحث" disabled={searching} className="absolute left-[17px] sm:left-[20px] md:left-[22px] top-1/2 -translate-y-1/2 text-[#4F9D9E] text-[17px] sm:text-[19px] md:text-[20px] disabled:opacity-50">
-                <i className="fa-solid fa-magnifying-glass" />
-              </button>{' '}
-            </form>{' '}
+              <i className=" fa-solid fa-magnifying-glass absolute left-[17px] sm:left-[20px] md:left-[22px] top-1/2 -translate-y-1/2 text-[#4F9D9E] text-[17px] sm:text-[19px] md:text-[20px] " />{' '}
+            </div>{' '}
             {/* ============================= */} {/* BUTTONS */}{' '}
             {/* ============================= */}{' '}
             <div className=" mt-6 sm:mt-7 flex w-full max-w-[550px] flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 ">
               {' '}
               {/* عرض سلعتك */}{' '}
-              <Link to="/add-product"
-                className="inline-flex items-center justify-center w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)] text-white text-[14px] sm:text-[15px] font-bold shadow-[0_8px_20px_rgba(58,115,170,0.25)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(58,115,170,0.35)] active:scale-[0.98] ">
+              <button
+                type="button"
+                className=" w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)] text-white text-[14px] sm:text-[15px] font-bold shadow-[0_8px_20px_rgba(58,115,170,0.25)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(58,115,170,0.35)] active:scale-[0.98] ">
                 {' '}
                 اعرض سلعتك{' '}
-              </Link>{' '}
+              </button>{' '}
               {/* تصفح العروض */}{' '}
               <button
                 type="button"
-                onClick={() => document.getElementById('market')?.scrollIntoView({ behavior: 'smooth' })}
                 className=" w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-white/90 backdrop-blur-md text-[#4181A6] text-[14px] sm:text-[15px] font-bold border border-white shadow-[0_8px_20px_rgba(0,0,0,0.10)] transition-all duration-300 hover:bg-white hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(0,0,0,0.15)] active:scale-[0.98] ">
                 {' '}
                 تصفح العروض{' '}
@@ -240,7 +176,7 @@ function Home() {
         {/*THE END HERO SECTION */}
         {/* section two */}
         <section
-          id="how-it-works"
+          id="hoow-it-works"
           className="bg-[#eff7fc] px-4 py-[50px] sm:px-6 md:px-10 lg:px-[60px] lg:py-[60px]">
           {/* Section Header */}
           <motion.div
@@ -368,7 +304,7 @@ function Home() {
               </h2>
 
               <p className="text-[14px] leading-7 text-[#aaa7a7] sm:text-[15px]">
-                تصفح الفئات المتاحة في السوق.
+                عشر فئات تغطي أغلب احتياجاتك اليومية.
               </p>
             </div>
 
@@ -400,20 +336,62 @@ function Home() {
       md:grid-cols-4
       lg:grid-cols-5 lg:gap-5
     ">
-            {categoriesLoading ? <p className="col-span-full text-center text-[#718692]">جارٍ تحميل الفئات...</p> : categories
-              .slice(0, showAll ? categories.length : 5)
+            {[
+              {
+                image: one,
+                title: 'عدة وأدوات عمل',
+                count: '١٥٨ عرض',
+              },
+              {
+                image: two,
+                title: 'سيارات',
+                count: '٢١٤ عرض',
+              },
+              {
+                image: three,
+                title: 'طاقة وبطاريات',
+                count: '٩٧ عرض',
+              },
+              {
+                image: four,
+                title: 'أدوات وخياطة',
+                count: '٧٤ عرض',
+              },
+              {
+                image: five,
+                title: 'هواتف ذكية',
+                count: '٣٤٦ عرض',
+              },
+              {
+                image: six,
+                title: 'أثاث',
+                count: '١٨٩ عرض',
+              },
+              {
+                image: seven,
+                title: 'ملابس',
+                count: '٤١٢ عرض',
+              },
+              {
+                image: eight,
+                title: 'مستلزمات أطفال',
+                count: '١٦٣ عرض',
+              },
+              {
+                image: nine,
+                title: 'مؤن وغذاء',
+                count: '٢٦٨ عرض',
+              },
+              {
+                image: ten,
+                title: 'الصحة والمرأة',
+                count: '١٢١ عرض',
+              },
+            ]
+              .slice(0, showAll ? 10 : 5)
               .map((product, index) => (
                 <motion.div
-                  key={product.category_id ?? product.id ?? product.name}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => searchProducts('', product.category_id ?? product.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      searchProducts('', product.category_id ?? product.id);
-                    }
-                  }}
+                  key={product.title}
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -450,8 +428,8 @@ function Home() {
           ">
                   {/* Product Image */}
                   <motion.img
-                    src={categoryImages[index % categoryImages.length]}
-                    alt={product.category_name || product.name}
+                    src={product.image}
+                    alt={product.title}
                     whileHover={{ scale: 1.08 }}
                     transition={{ duration: 0.3 }}
                     className={`
@@ -467,40 +445,18 @@ function Home() {
 
                   {/* Product Title */}
                   <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
-                    {product.category_name || product.name}
+                    {product.title}
                   </h4>
 
                   {/* Product Count */}
                   <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
-                    {product.description || 'تصفح المنتجات'}
+                    {product.count}
                   </p>
                 </motion.div>
               ))}
           </div>
-          {categoriesError && <p role="alert" className="mt-6 text-center text-red-600">{categoriesError}</p>}
-          {searchError && <p role="alert" className="mt-6 text-center text-red-600">{searchError}</p>}
-          {(searching || hasSearched) && (
-            <div className="mx-auto mt-8 max-w-[1200px]" aria-live="polite">
-              <h3 className="mb-4 text-xl font-bold text-[#306061]">
-                {searching ? 'جارٍ تحميل المنتجات...' : 'نتائج المنتجات'}
-              </h3>
-              {!searching && (
-                products.length ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {products.map((product) => (
-                      <article key={product.product_id ?? product.id} className="rounded-xl border border-[#ecebeb] bg-white p-4 shadow-sm">
-                        <h4 className="font-bold text-[#4181A6]">{product.title || product.name}</h4>
-                        {product.description && <p className="mt-2 line-clamp-3 text-sm text-[#718692]">{product.description}</p>}
-                        {product.price != null && <p className="mt-2 text-sm text-[#306061]">{product.price}</p>}
-                      </article>
-                    ))}
-                  </div>
-                ) : <p className="text-[#718692]">لا توجد منتجات مطابقة.</p>
-              )}
-            </div>
-          )}
         </section>
-        {/*the end section threee */}
+        {/*the end section three */}
 
         {/* section four */}
         <motion.section
@@ -756,45 +712,6 @@ function Home() {
           </div>
         </section>
         {/*the end section five */}
-        {/* section six */}
-        <motion.section
-          variants={ctaSectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.25 }}
-          className=" bg-[#eff7fc] px-4 py-[45px] sm:px-6 sm:py-[55px] md:px-10 lg:px-[60px] lg:py-[60px] ">
-          {' '}
-          <div className=" mx-auto flex max-w-[1100px] flex-col items-center justify-between gap-7 rounded-[25px] bg-[#4a9596] px-5 py-7 text-center shadow-[0_8px_30px_rgba(74,149,150,0.15)] sm:px-7 sm:py-8 md:px-10 md:py-9 lg:flex-row lg:gap-10 lg:rounded-[30px] lg:px-12 lg:py-9 lg:text-right ">
-            {' '}
-            {/* Text */}{' '}
-            <motion.div variants={ctaTextVariants} className="flex-1">
-              {' '}
-              <h2 className=" m-0 text-[23px] font-bold leading-[1.5] text-white sm:text-[27px] md:text-[30px] ">
-                {' '}
-                جاهز تبدأ أول صفقة إلك؟{' '}
-              </h2>{' '}
-              <p className=" mt-2 text-[13px] leading-7 text-[#e5eeee] sm:text-[14px] md:text-[15px] ">
-                {' '}
-                انضم لآلاف المستخدمين اللي وفروا وقتهم وفلوسهم عن طريق بدّلها.{' '}
-              </p>{' '}
-            </motion.div>{' '}
-            {/* Button */}{' '}
-            <motion.div variants={ctaButtonVariants}>
-              {' '}
-              <Link
-                to="/register"
-                className=" flex w-full items-center justify-center gap-2 rounded-[30px] bg-white px-6 py-3 text-center font-bold transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:w-auto sm:min-w-[190px] sm:px-7 ">
-                {' '}
-                <i className="fa-solid fa-plus text-[#4a9596]"></i>{' '}
-                <span className=" text-[14px] text-[#4a9596] sm:text-[15px] ">
-                  {' '}
-                  أنشئ حسابك الآن{' '}
-                </span>{' '}
-              </Link>{' '}
-            </motion.div>{' '}
-          </div>{' '}
-        </motion.section>
-        {/*the end section six */}
       </main>
 
       <link rel="stylesheet" href="menagehad" />
@@ -802,4 +719,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default HomeLoggedin;

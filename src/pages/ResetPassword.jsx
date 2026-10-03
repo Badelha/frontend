@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import auth from '../services/auth';
+import { getApiError } from '../services/api';
 
 function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -10,8 +12,11 @@ function ResetPassword() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [requestError, setRequestError] = useState('');
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // التحقق من قوة كلمة المرور
   const validatePassword = (value) => {
@@ -38,7 +43,7 @@ function ResetPassword() {
     return '';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let valid = true;
@@ -71,9 +76,21 @@ function ResetPassword() {
 
     // إذا كل شيء صحيح
     if (valid && password === confirmPassword) {
-      console.log('تم تغيير كلمة المرور بنجاح');
-
-      navigate('/login');
+      const token = searchParams.get('token');
+      if (!token) {
+        setRequestError('رابط إعادة التعيين غير صالح أو منتهي الصلاحية.');
+        return;
+      }
+      setLoading(true);
+      setRequestError('');
+      try {
+        await auth.resetPassword(token, password);
+        navigate('/login', { state: { message: 'تم تغيير كلمة المرور بنجاح. سجل الدخول الآن.' } });
+      } catch (error) {
+        setRequestError(getApiError(error) || 'تعذر تغيير كلمة المرور');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -102,6 +119,7 @@ function ResetPassword() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-[5px] sm:px-[10px] mt-[20px]">
+            {requestError && <p role="alert" className="mb-3 text-center text-[12px] text-red-600">{requestError}</p>}
             {/* Password */}
             <div className="relative">
               <label htmlFor="password" className="block text-[14px] sm:text-[15px]">
@@ -228,8 +246,9 @@ function ResetPassword() {
             {/* Button */}
             <button
               type="submit"
-              className="block mx-auto cursor-pointer transition-all duration-300 hover:from-[#4f8ac1] hover:to-[#6ccacc] bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white">
-              التالي
+              disabled={loading}
+              className="block mx-auto cursor-pointer transition-all duration-300 hover:from-[#4f8ac1] hover:to-[#6ccacc] bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white disabled:opacity-60">
+              {loading ? 'جارٍ الحفظ...' : 'تغيير كلمة المرور'}
             </button>
           </form>
         </div>

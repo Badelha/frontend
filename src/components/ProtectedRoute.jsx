@@ -1,0 +1,22 @@
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
+
+export default function ProtectedRoute() {
+  const { user, loading, restoreError } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <p className="p-8 text-center text-[#3b5869]">جارٍ التحقق من الجلسة...</p>;
+  }
+
+  if (restoreError && !user) {
+    return (
+      <div className="p-8 text-center text-red-600" role="alert">
+        <p>{restoreError}</p>
+        <Link className="mt-3 inline-block underline" to="/login">العودة إلى تسجيل الدخول</Link>
+      </div>
+    );
+  }
+
+  return user ? <Outlet /> : <Navigate to="/login" replace state={{ from: location }} />;
+}

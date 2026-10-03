@@ -1,1 +1,16 @@
 @import 'tailwindcss';
+
+html {
+  scroll-behavior: smooth;
+}
+@keyframes statsAppear {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
