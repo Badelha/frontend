@@ -1,14 +1,26 @@
 import { useState } from 'react';
+<<<<<<< HEAD
 
 import { useNavigate } from 'react-router-dom';
+=======
+import auth from '../services/auth';
+import { getApiError } from '../services/api';
+>>>>>>> origin/develop
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+<<<<<<< HEAD
 
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
+=======
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+
+  const handleSubmit = async (e) => {
+>>>>>>> origin/develop
     e.preventDefault();
 
     if (!email.trim()) {
@@ -22,10 +34,23 @@ function ForgotPassword() {
     }
 
     setError('');
+<<<<<<< HEAD
 
     console.log('تم إرسال رابط إعادة تعيين كلمة المرور');
 
     navigate('/verification');
+=======
+    setSuccess('');
+    setLoading(true);
+    try {
+      await auth.forgotPassword(email.trim());
+      setSuccess('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.');
+    } catch (requestError) {
+      setError(getApiError(requestError) || 'تعذر إرسال رابط إعادة التعيين');
+    } finally {
+      setLoading(false);
+    }
+>>>>>>> origin/develop
   };
 
   return (
@@ -76,12 +101,22 @@ function ForgotPassword() {
 
             {/* Error */}
             {error && <p className="text-red-500 text-[12px] mt-[-5px] mb-[10px]">{error}</p>}
+<<<<<<< HEAD
+=======
+            {success && <p role="status" className="text-green-700 text-[12px] mb-[10px]">{success}</p>}
+>>>>>>> origin/develop
 
             {/* Button */}
             <button
               type="submit"
+<<<<<<< HEAD
               className="block mx-auto w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white cursor-pointer transition-all text-center duration-300 bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] hover:from-[#4f8ac1] hover:to-[#6ccacc]">
               التالي
+=======
+              disabled={loading}
+              className="block mx-auto w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white cursor-pointer transition-all text-center duration-300 bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] hover:from-[#4f8ac1] hover:to-[#6ccacc]">
+              {loading ? 'جارٍ الإرسال...' : 'إرسال رابط إعادة التعيين'}
+>>>>>>> origin/develop
             </button>
           </form>
         </div>

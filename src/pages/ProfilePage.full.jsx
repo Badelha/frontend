@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+<<<<<<< HEAD
 import Navbarpro from '../components/Navbarpro';
 import { useNavigate } from 'react-router-dom';
+=======
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import Navbarpro from '../components/Navbarpro';
+
+import auth from '../services/auth';
+import marketplace from '../services/marketplace';
+import { getApiError } from '../services/api';
+>>>>>>> origin/develop
 
 /* =========================================================
    أدوات مساعدة
@@ -124,6 +133,7 @@ function FileButton({ onPick, label, className, children }) {
 ========================================================= */
 
 export default function ProfilePage() {
+<<<<<<< HEAD
   /* صورة الغلاف */
   const [coverImage, setCoverImage] = useState(null);
 
@@ -173,6 +183,91 @@ export default function ProfilePage() {
 
       return imageUrl;
     });
+=======
+  const [searchParams] = useSearchParams();
+  const [profile, setProfile] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
+  const [productsError, setProductsError] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+  });
+  const [editError, setEditError] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileCities, setProfileCities] = useState([]);
+  const [citiesError, setCitiesError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    auth
+      .profile()
+      .then((data) => {
+        if (active) setProfile(data);
+      })
+      .catch((error) => {
+        if (active) {
+          setProfileError(getApiError(error) || 'تعذر تحميل الملف الشخصي');
+        }
+      })
+      .finally(() => {
+        if (active) setProfileLoading(false);
+      });
+
+    marketplace
+      .myProducts()
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data?.products;
+
+        if (!Array.isArray(items)) {
+          throw new Error('Unexpected listings response');
+        }
+
+        if (active) setProducts(items);
+      })
+      .catch((error) => {
+        if (active) {
+          setProductsError(getApiError(error) || 'تعذر تحميل المنتجات');
+        }
+      })
+      .finally(() => {
+        if (active) setProductsLoading(false);
+      });
+
+    marketplace
+      .cities()
+      .then((data) => {
+        const items = Array.isArray(data) ? data : data?.cities;
+
+        if (active && Array.isArray(items)) {
+          setProfileCities(items);
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setCitiesError(getApiError(error) || 'تعذر تحميل قائمة المدن');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const displayProfile = {
+    name: profile?.full_name,
+    city: profile?.city,
+    memberSince: profile?.created_at,
+    verified: profile?.is_verified,
+    averageRating: profile?.average_rating,
+    totalTransactions: profile?.total_transactions,
+>>>>>>> origin/develop
   };
 
   /* =======================================================
@@ -183,7 +278,11 @@ export default function ProfilePage() {
     try {
       if (navigator.share) {
         await navigator.share({
+<<<<<<< HEAD
           title: profile.name,
+=======
+          title: profile?.full_name || 'Badelha',
+>>>>>>> origin/develop
           url: window.location.href,
         });
       } else {
@@ -200,7 +299,42 @@ export default function ProfilePage() {
   ======================================================= */
 
   const handleEdit = () => {
+<<<<<<< HEAD
     console.log('تعديل الملف الشخصي');
+=======
+    setEditForm({
+      fullName: profile?.full_name || '',
+      phoneNumber: profile?.phone_number || '',
+      address: profile?.address || '',
+      city: profile?.city || '',
+    });
+
+    setEditError('');
+    setEditOpen(true);
+  };
+
+  const handleProfileSubmit = async (event) => {
+    event.preventDefault();
+    setSavingProfile(true);
+    setEditError('');
+
+    try {
+      const updated = await auth.updateProfile(editForm);
+
+      setProfile((current) => ({
+        ...current,
+        ...updated,
+        average_rating: current?.average_rating,
+        total_transactions: current?.total_transactions,
+      }));
+
+      setEditOpen(false);
+    } catch (error) {
+      setEditError(getApiError(error) || 'تعذر تحديث الملف الشخصي');
+    } finally {
+      setSavingProfile(false);
+    }
+>>>>>>> origin/develop
   };
 
   return (
@@ -238,6 +372,7 @@ export default function ProfilePage() {
             lg:h-[300px]
           ">
           {/* صورة الغلاف */}
+<<<<<<< HEAD
 
           {coverImage && (
             <img
@@ -326,6 +461,8 @@ export default function ProfilePage() {
               تغيير الصورة
             </FileButton>
           )}
+=======
+>>>>>>> origin/develop
         </div>
       </section>
 
@@ -335,6 +472,7 @@ export default function ProfilePage() {
 
       <Identity
         p={{
+<<<<<<< HEAD
           ...profile,
           avatarUrl: profileImage,
         }}
@@ -342,17 +480,138 @@ export default function ProfilePage() {
         isOwner={true}
         uploading={false}
         onAvatar={handleProfileChange}
+=======
+          ...displayProfile,
+        }}
+        loading={profileLoading}
+        isOwner={true}
+        uploading={false}
+>>>>>>> origin/develop
         onShare={handleShare}
         onEdit={handleEdit}
       />
 
+<<<<<<< HEAD
+=======
+      {editOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
+          <form
+            onSubmit={handleProfileSubmit}
+            className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold">تعديل الملف الشخصي</h2>
+
+            {[
+              ['fullName', 'الاسم الكامل'],
+              ['phoneNumber', 'رقم الهاتف'],
+              ['city', 'المدينة (من مدن غزة المعتمدة)'],
+              ['address', 'العنوان'],
+            ].map(([field, label]) => (
+              <label key={field} className="block text-sm">
+                {label}
+
+                {field === 'city' ? (
+                  <select
+                    required
+                    value={editForm.city}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        city: event.target.value,
+                      })
+                    }
+                    className="mt-1 w-full rounded-lg border border-[#d8d8d8] p-2">
+                    <option value="">اختر المدينة</option>
+
+                    {profileCities.map((city) => {
+                      const name = city.city || city.city_name || city.name;
+
+                      return (
+                        <option key={city.city_id ?? city.id ?? name} value={name}>
+                          {name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                ) : (
+                  <input
+                    required={field !== 'address'}
+                    value={editForm[field]}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        [field]: event.target.value,
+                      })
+                    }
+                    className="mt-1 w-full rounded-lg border border-[#d8d8d8] p-2"
+                  />
+                )}
+              </label>
+            ))}
+
+            {editError && (
+              <p role="alert" className="text-sm text-red-600">
+                {editError}
+              </p>
+            )}
+
+            {citiesError && (
+              <p role="alert" className="text-sm text-red-600">
+                {citiesError}
+              </p>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                disabled={savingProfile || !profileCities.length}
+                className="rounded-lg bg-[#347f81] px-4 py-2 text-white disabled:opacity-60">
+                {savingProfile ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEditOpen(false)}
+                className="rounded-lg border px-4 py-2">
+                إلغاء
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {profileError && (
+        <p role="alert" className="mx-auto mt-4 max-w-[1100px] px-5 text-red-600">
+          {profileError}
+        </p>
+      )}
+
+>>>>>>> origin/develop
       {/* =====================================================
           الإحصائيات
       ===================================================== */}
 
+<<<<<<< HEAD
       <ProfileStats />
       <ProfileAbout />
       <ProfileTabs />
+=======
+      <ProfileStats
+        profile={displayProfile}
+        productsCount={products.length}
+        loading={productsLoading}
+      />
+
+      <ProfileAbout />
+
+      <ProfileTabs
+        initialTab={searchParams.get('tab')}
+        openAddProduct={searchParams.get('addProduct') === '1'}
+        profile={displayProfile}
+        products={products}
+        productsLoading={productsLoading}
+        productsError={productsError}
+        onProductsChange={setProducts}
+      />
+>>>>>>> origin/develop
     </div>
   );
 }
@@ -372,7 +631,13 @@ function Identity({
   onEdit = () => {},
 }) {
   const location = [p.city, p.region].filter(Boolean).join('، ');
+<<<<<<< HEAD
   const navigate = useNavigate();
+=======
+
+  const navigate = useNavigate();
+
+>>>>>>> origin/develop
   return (
     <section
       className="
@@ -423,11 +688,16 @@ function Identity({
 
         {/* زر تغيير الصورة */}
 
+<<<<<<< HEAD
         {isOwner && !loading && (
+=======
+        {isOwner && !loading && p.avatarEditable && (
+>>>>>>> origin/develop
           <FileButton
             onPick={onAvatar}
             label="تغيير الصورة الشخصية"
             className="
+<<<<<<< HEAD
               absolute
               bottom-0
               end-0
@@ -447,6 +717,27 @@ function Identity({
               hover:brightness-110
               active:scale-95
             ">
+=======
+                absolute
+                bottom-0
+                end-0
+                grid
+                h-[34px]
+                w-[34px]
+                place-items-center
+                rounded-full
+                border-[3px]
+                border-white
+                bg-[#b9771d]
+                text-white
+                shadow-[0_4px_12px_rgba(0,0,0,0.15)]
+                transition-all
+                duration-200
+                hover:scale-105
+                hover:brightness-110
+                active:scale-95
+              ">
+>>>>>>> origin/develop
             <Icon name="camera" size={16} />
           </FileButton>
         )}
@@ -619,7 +910,10 @@ function AnimatedNumber({ value, duration = 1400, decimals = 0 }) {
 
       const progress = Math.min((currentTime - startTime) / duration, 1);
 
+<<<<<<< HEAD
       // حركة ناعمة
+=======
+>>>>>>> origin/develop
       const easeOut = 1 - Math.pow(1 - progress, 3);
 
       const currentValue = target * easeOut;
@@ -652,6 +946,7 @@ function AnimatedNumber({ value, duration = 1400, decimals = 0 }) {
    إحصائيات الملف الشخصي
 ========================================================= */
 
+<<<<<<< HEAD
 function ProfileStats() {
   const stats = [
     {
@@ -668,6 +963,20 @@ function ProfileStats() {
     },
     {
       value: 4.8,
+=======
+function ProfileStats({ profile, productsCount, loading }) {
+  const stats = [
+    {
+      value: productsCount,
+      label: 'منتجات',
+    },
+    {
+      value: profile.totalTransactions || 0,
+      label: 'عمليات مكتملة',
+    },
+    {
+      value: profile.averageRating || 0,
+>>>>>>> origin/develop
       label: 'تقييم',
       rating: true,
       decimals: 1,
@@ -694,7 +1003,11 @@ function ProfileStats() {
           border-[#e1ebec]
           bg-white
           shadow-[0_4px_18px_rgba(22,56,79,0.05)]
+<<<<<<< HEAD
           sm:grid-cols-4
+=======
+          sm:grid-cols-3
+>>>>>>> origin/develop
         ">
         {stats.map((stat, index) => (
           <div
@@ -721,8 +1034,11 @@ function ProfileStats() {
                   : ''
               }
             `}>
+<<<<<<< HEAD
             {/* خط متحرك */}
 
+=======
+>>>>>>> origin/develop
             <span
               className="
                 absolute
@@ -741,8 +1057,11 @@ function ProfileStats() {
               "
             />
 
+<<<<<<< HEAD
             {/* الرقم */}
 
+=======
+>>>>>>> origin/develop
             <span
               className="
                 flex
@@ -768,11 +1087,21 @@ function ProfileStats() {
                 </span>
               )}
 
+<<<<<<< HEAD
               <AnimatedNumber value={stat.value} decimals={stat.decimals || 0} />
             </span>
 
             {/* اسم الإحصائية */}
 
+=======
+              {loading && index === 0 ? (
+                '…'
+              ) : (
+                <AnimatedNumber value={stat.value} decimals={stat.decimals || 0} />
+              )}
+            </span>
+
+>>>>>>> origin/develop
             <span
               className="
                 text-[14px]
@@ -790,9 +1119,14 @@ function ProfileStats() {
     </section>
   );
 }
+<<<<<<< HEAD
 function ProfileAbout() {
   const categories = ['خزف يدوي', 'مواد غذائية', 'خرز', 'تمور'];
 
+=======
+
+function ProfileAbout() {
+>>>>>>> origin/develop
   return (
     <section
       className="
@@ -815,8 +1149,11 @@ function ProfileAbout() {
           duration-300
           hover:shadow-[0_8px_25px_rgba(22,56,79,0.08)]
         ">
+<<<<<<< HEAD
         {/* العنوان */}
 
+=======
+>>>>>>> origin/develop
         <h2
           className="
             mb-[12px]
@@ -827,8 +1164,11 @@ function ProfileAbout() {
           نبذة عن البائع
         </h2>
 
+<<<<<<< HEAD
         {/* الوصف */}
 
+=======
+>>>>>>> origin/develop
         <p
           className="
             max-w-[850px]
@@ -836,6 +1176,7 @@ function ProfileAbout() {
             leading-[2]
             text-[#5b7482]
           ">
+<<<<<<< HEAD
           بائع معتمد في سوق غزة المحلي، متخصص في التمور الفاخرة والمنتجات الحرفية اليدوية. أكثر من
           10 سنوات خبرة في التجارة المحلية، جميع المنتجات طازجة وعالية الجودة.
         </p>
@@ -865,16 +1206,37 @@ function ProfileAbout() {
             </span>
           ))}
         </div>
+=======
+          لا تتوفر نبذة تعريفية إضافية لهذا الحساب.
+        </p>
+>>>>>>> origin/develop
       </div>
     </section>
   );
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/develop
 /* =========================================================
    تبويبات الملف الشخصي
 ========================================================= */
 
+<<<<<<< HEAD
 function ProfileTabs() {
   const [activeTab, setActiveTab] = useState('info');
+=======
+function ProfileTabs({
+  profile,
+  products,
+  productsLoading,
+  productsError,
+  onProductsChange,
+  initialTab,
+  openAddProduct,
+}) {
+  const [activeTab, setActiveTab] = useState(initialTab === 'products' ? 'products' : 'info');
+>>>>>>> origin/develop
 
   const tabs = [
     { id: 'info', label: 'المعلومات' },
@@ -892,8 +1254,11 @@ function ProfileTabs() {
           bg-white
           shadow-[0_4px_18px_rgba(22,56,79,0.05)]
         ">
+<<<<<<< HEAD
         {/* أزرار التبويبات */}
 
+=======
+>>>>>>> origin/develop
         <div
           className="
             flex
@@ -928,8 +1293,11 @@ function ProfileTabs() {
               `}>
               {tab.label}
 
+<<<<<<< HEAD
               {/* الخط المتحرك أسفل التبويب */}
 
+=======
+>>>>>>> origin/develop
               <span
                 className={`
                   absolute
@@ -950,8 +1318,11 @@ function ProfileTabs() {
           ))}
         </div>
 
+<<<<<<< HEAD
         {/* محتوى التبويب */}
 
+=======
+>>>>>>> origin/develop
         <div
           key={activeTab}
           role="tabpanel"
@@ -961,11 +1332,27 @@ function ProfileTabs() {
             animate-[tabFade_0.35s_ease-out]
             sm:p-7
           ">
+<<<<<<< HEAD
           {activeTab === 'info' && <InfoTab />}
 
           {activeTab === 'reviews' && <ReviewsTab />}
 
           {activeTab === 'products' && <ProductsTab />}
+=======
+          {activeTab === 'info' && <InfoTab profile={profile} />}
+
+          {activeTab === 'reviews' && <ReviewsTab averageRating={profile.averageRating} />}
+
+          {activeTab === 'products' && (
+            <ProductsTab
+              products={products}
+              loading={productsLoading}
+              error={productsError}
+              onProductsChange={onProductsChange}
+              openAddProduct={openAddProduct}
+            />
+          )}
+>>>>>>> origin/develop
         </div>
       </div>
     </section>
@@ -976,12 +1363,33 @@ function ProfileTabs() {
    تبويب المعلومات
 ========================================================= */
 
+<<<<<<< HEAD
 function InfoTab() {
   const information = [
     { label: 'الاسم', value: 'منة الصوير' },
     { label: 'الموقع', value: 'غزة، فلسطين' },
     { label: 'تاريخ الانضمام', value: '2026' },
     { label: 'حالة الحساب', value: 'بائع موثّق' },
+=======
+function InfoTab({ profile }) {
+  const information = [
+    {
+      label: 'الاسم',
+      value: profile.name || '—',
+    },
+    {
+      label: 'الموقع',
+      value: profile.city || '—',
+    },
+    {
+      label: 'تاريخ الانضمام',
+      value: profile.memberSince ? new Date(profile.memberSince).getFullYear() : '—',
+    },
+    {
+      label: 'حالة الحساب',
+      value: profile.verified ? 'بائع موثّق' : 'غير موثّق',
+    },
+>>>>>>> origin/develop
   ];
 
   return (
@@ -1014,6 +1422,7 @@ function InfoTab() {
    تبويب التقييمات
 ========================================================= */
 
+<<<<<<< HEAD
 /* =========================================================
    تبويب التقييمات
 ========================================================= */
@@ -1066,6 +1475,22 @@ function ReviewsTab() {
         ========================= */}
 
         <div className="flex flex-col gap-4">
+=======
+function ReviewsTab({ averageRating }) {
+  const reviews = [];
+  const ratingStats = [];
+
+  return (
+    <section className="w-full" dir="rtl">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="flex flex-col gap-4">
+          {reviews.length === 0 && (
+            <p className="rounded-xl bg-[#f7fafa] p-5 text-center text-[#718692]">
+              لا تتوفر مراجعات عامة من خلال واجهة الخادم الحالية.
+            </p>
+          )}
+
+>>>>>>> origin/develop
           {reviews.map((review, index) => (
             <article
               key={review.id}
@@ -1087,12 +1512,17 @@ function ReviewsTab() {
                 hover:shadow-[0_10px_25px_rgba(22,56,79,0.07)]
                 sm:p-6
               ">
+<<<<<<< HEAD
               {/* معلومات صاحب التقييم */}
 
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                   {/* صورة رمزية */}
 
+=======
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-3">
+>>>>>>> origin/develop
                   <div
                     className="
                       grid
@@ -1112,8 +1542,11 @@ function ReviewsTab() {
                     {review.initial}
                   </div>
 
+<<<<<<< HEAD
                   {/* الاسم والتاريخ */}
 
+=======
+>>>>>>> origin/develop
                   <div className="min-w-0">
                     <h3 className="text-[16px] font-bold text-[#16384f]">{review.name}</h3>
 
@@ -1121,8 +1554,11 @@ function ReviewsTab() {
                   </div>
                 </div>
 
+<<<<<<< HEAD
                 {/* النجوم */}
 
+=======
+>>>>>>> origin/develop
                 <div
                   className="
                     flex
@@ -1143,8 +1579,11 @@ function ReviewsTab() {
                 </div>
               </div>
 
+<<<<<<< HEAD
               {/* نص التقييم */}
 
+=======
+>>>>>>> origin/develop
               <p
                 className="
                   mt-5
@@ -1158,10 +1597,13 @@ function ReviewsTab() {
           ))}
         </div>
 
+<<<<<<< HEAD
         {/* =========================
             ملخص التقييم
         ========================= */}
 
+=======
+>>>>>>> origin/develop
         <aside
           className="
             rounded-[25px]
@@ -1176,8 +1618,11 @@ function ReviewsTab() {
             lg:sticky
             lg:top-5
           ">
+<<<<<<< HEAD
           {/* المعدل العام */}
 
+=======
+>>>>>>> origin/develop
           <div className="flex flex-col items-center text-center">
             <span
               className="
@@ -1187,11 +1632,17 @@ function ReviewsTab() {
                 text-[#20557b]
                 animate-[ratingNumber_0.8s_ease-out]
               ">
+<<<<<<< HEAD
               4.8
             </span>
 
             {/* النجوم */}
 
+=======
+              {Number(averageRating || 0).toFixed(1)}
+            </span>
+
+>>>>>>> origin/develop
             <div className="mt-4 flex flex-row-reverse gap-1 text-[24px] text-[#b9771d]">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span key={star} className="transition-transform duration-300 hover:scale-125">
@@ -1200,16 +1651,23 @@ function ReviewsTab() {
               ))}
             </div>
 
+<<<<<<< HEAD
             <p className="mt-4 text-[15px] text-[#81939d]">من 3 تقييمات</p>
           </div>
 
           {/* توزيع التقييمات */}
 
+=======
+            <p className="mt-4 text-[15px] text-[#81939d]">متوسط التقييم المسجّل</p>
+          </div>
+
+>>>>>>> origin/develop
           <div className="mt-8 flex flex-col gap-5">
             {ratingStats.map((item, index) => (
               <div
                 key={item.stars}
                 className="
+<<<<<<< HEAD
                   grid
                   grid-cols-[25px_minmax(0,1fr)_40px]
                   items-center
@@ -1238,6 +1696,32 @@ function ReviewsTab() {
                       ease-out
                       animate-[ratingBar_1s_ease-out_both]
                     "
+=======
+                    grid
+                    grid-cols-[25px_minmax(0,1fr)_40px]
+                    items-center
+                    gap-3
+                  ">
+                <span className="text-[14px] text-[#5b7482]">{item.stars}</span>
+
+                <div
+                  className="
+                      h-[12px]
+                      overflow-hidden
+                      rounded-full
+                      bg-[#dce7e8]
+                    ">
+                  <div
+                    className="
+                        h-full
+                        rounded-full
+                        bg-[#b9771d]
+                        transition-all
+                        duration-1000
+                        ease-out
+                        animate-[ratingBar_1s_ease-out_both]
+                      "
+>>>>>>> origin/develop
                     style={{
                       width: `${item.percentage}%`,
                       animationDelay: `${index * 150}ms`,
@@ -1245,8 +1729,11 @@ function ReviewsTab() {
                   />
                 </div>
 
+<<<<<<< HEAD
                 {/* النسبة المئوية */}
 
+=======
+>>>>>>> origin/develop
                 <span className="text-left text-[14px] text-[#5b7482]">{item.percentage}%</span>
               </div>
             ))}
@@ -1256,10 +1743,15 @@ function ReviewsTab() {
     </section>
   );
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/develop
 /* =========================================================
    تبويب منتجاتي
 ========================================================= */
 
+<<<<<<< HEAD
 function ProductsTab() {
   const products = [
     {
@@ -1302,6 +1794,133 @@ function ProductsTab() {
 
   const handleProductClick = (product) => {
     console.log('عرض المنتج:', product);
+=======
+function ProductsTab({ products, loading, error, onProductsChange, openAddProduct }) {
+  const [categories, setCategories] = useState([]);
+
+  const [cities, setCities] = useState([]);
+
+  const [formOpen, setFormOpen] = useState(openAddProduct);
+
+  const [editing, setEditing] = useState(null);
+
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    categoryId: '',
+    cityId: '',
+    condition: 'GOOD',
+    price: '',
+    exchangePreference: 'BOTH',
+  });
+
+  const [saving, setSaving] = useState(false);
+
+  const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([marketplace.categories(), marketplace.cities()])
+      .then(([categoryResult, cityResult]) => {
+        const categoryList = Array.isArray(categoryResult)
+          ? categoryResult
+          : categoryResult?.categories;
+
+        const cityList = Array.isArray(cityResult) ? cityResult : cityResult?.cities;
+
+        if (!Array.isArray(categoryList) || !Array.isArray(cityList)) {
+          throw new Error('Unexpected categories or cities response');
+        }
+
+        if (active) {
+          setCategories(categoryList);
+          setCities(cityList);
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setFormError(getApiError(requestError) || 'تعذر تحميل الفئات والمدن');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const openForm = (product = null) => {
+    setFormOpen(true);
+    setEditing(product);
+
+    setForm({
+      title: product?.title || '',
+      description: product?.description || '',
+      categoryId: product?.category_id || '',
+      cityId: product?.city_id || '',
+      condition: product?.condition || 'GOOD',
+      price: product?.price ?? '',
+      exchangePreference: product?.exchange_preference || 'BOTH',
+    });
+
+    setFormError('');
+  };
+
+  const refreshProducts = async () => {
+    const result = await marketplace.myProducts();
+
+    const items = Array.isArray(result) ? result : result?.products;
+
+    if (!Array.isArray(items)) {
+      throw new Error('Unexpected listings response');
+    }
+
+    onProductsChange(items);
+  };
+
+  const saveProduct = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setFormError('');
+
+    const payload = {
+      ...form,
+      categoryId: Number(form.categoryId),
+      cityId: Number(form.cityId),
+      price: form.price === '' ? null : Number(form.price),
+    };
+
+    try {
+      if (editing) {
+        await marketplace.updateProduct(editing.product_id, payload);
+      } else {
+        await marketplace.createProduct(payload);
+      }
+
+      await refreshProducts();
+
+      setFormOpen(false);
+      setEditing(null);
+    } catch (requestError) {
+      setFormError(getApiError(requestError) || 'تعذر حفظ المنتج');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeProduct = async (product) => {
+    if (!window.confirm('هل تريد حذف هذا المنتج؟')) {
+      return;
+    }
+
+    try {
+      await marketplace.deleteProduct(product.product_id);
+
+      await refreshProducts();
+    } catch (requestError) {
+      setFormError(getApiError(requestError) || 'تعذر حذف المنتج');
+    }
+>>>>>>> origin/develop
   };
 
   return (
@@ -1318,8 +1937,183 @@ function ProductsTab() {
         <span className="rounded-full bg-[#e3f2f1] px-4 py-2 text-[13px] font-semibold text-[#347f81]">
           {products.length} منتجات
         </span>
+<<<<<<< HEAD
       </div>
 
+=======
+
+        <button
+          type="button"
+          onClick={() => openForm()}
+          className="rounded-full bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] px-4 py-2 text-sm font-semibold text-white">
+          إضافة منتج
+        </button>
+      </div>
+
+      {(error || formError) && (
+        <p role="alert" className="mb-4 text-sm text-red-600">
+          {formError || error}
+        </p>
+      )}
+
+      {formOpen && (
+        <form
+          onSubmit={saveProduct}
+          className="mb-6 grid gap-3 rounded-xl border border-[#e1ebec] bg-[#f7fafa] p-4 sm:grid-cols-2">
+          <label className="text-sm">
+            اسم المنتج
+            <input
+              required
+              minLength="5"
+              maxLength="200"
+              value={form.title}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  title: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2"
+            />
+          </label>
+
+          <label className="text-sm">
+            الفئة
+            <select
+              required
+              value={form.categoryId}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  categoryId: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2">
+              <option value="">اختر الفئة</option>
+
+              {categories.map((item) => (
+                <option key={item.category_id ?? item.id} value={item.category_id ?? item.id}>
+                  {item.category_name || item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-sm">
+            المدينة
+            <select
+              required
+              value={form.cityId}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  cityId: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2">
+              <option value="">اختر المدينة</option>
+
+              {cities.map((item) => (
+                <option key={item.city_id ?? item.id} value={item.city_id ?? item.id}>
+                  {item.city || item.city_name || item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-sm">
+            الحالة
+            <select
+              value={form.condition}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  condition: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2">
+              <option value="NEW">جديد</option>
+              <option value="LIKE_NEW">كالجديد</option>
+              <option value="GOOD">جيد</option>
+              <option value="FAIR">مقبول</option>
+              <option value="POOR">مستهلك</option>
+            </select>
+          </label>
+
+          <label className="text-sm">
+            السعر (اختياري)
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.price}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  price: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2"
+            />
+          </label>
+
+          <label className="text-sm">
+            نوع العرض
+            <select
+              value={form.exchangePreference}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  exchangePreference: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2">
+              <option value="BOTH">تبديل أو شراء</option>
+
+              <option value="EXCHANGE_ONLY">تبديل فقط</option>
+
+              <option value="PURCHASE_ONLY">شراء فقط</option>
+            </select>
+          </label>
+
+          <label className="text-sm sm:col-span-2">
+            الوصف
+            <textarea
+              required
+              minLength="10"
+              value={form.description}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  description: event.target.value,
+                })
+              }
+              className="mt-1 w-full rounded-lg border p-2"
+              rows="3"
+            />
+          </label>
+
+          <div className="flex gap-2 sm:col-span-2">
+            <button
+              disabled={saving || !categories.length || !cities.length}
+              className="rounded-lg bg-[#347f81] px-4 py-2 text-white disabled:opacity-50">
+              {saving ? 'جارٍ الحفظ...' : 'حفظ'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormOpen(false);
+                setEditing(null);
+              }}
+              className="rounded-lg border px-4 py-2">
+              إلغاء
+            </button>
+          </div>
+        </form>
+      )}
+
+>>>>>>> origin/develop
       {/* شبكة المنتجات */}
 
       <div
@@ -1333,6 +2127,7 @@ function ProductsTab() {
         ">
         {/* كروت المنتجات */}
 
+<<<<<<< HEAD
         {products.map((product) => (
           <button
             key={product.id}
@@ -1507,6 +2302,152 @@ function ProductsTab() {
             اذكري ما تعرضينه للتبديل واحصلي على فرص جديدة.
           </p>
         </button>
+=======
+        {loading ? (
+          <p>جارٍ تحميل المنتجات...</p>
+        ) : (
+          products.map((product) => (
+            <article
+              key={product.product_id}
+              className="
+                group
+                overflow-hidden
+                rounded-[25px]
+                border
+                border-[#e2ebeb]
+                bg-white
+                text-right
+                shadow-[0_4px_14px_rgba(22,56,79,0.04)]
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:border-[#cce5e3]
+                hover:shadow-[0_12px_28px_rgba(22,56,79,0.09)]
+              ">
+              {/* صورة المنتج */}
+
+              <div
+                className="
+                  relative
+                  flex
+                  h-[175px]
+                  items-center
+                  justify-center
+                  overflow-hidden
+                  bg-gradient-to-br
+                  from-[#e2f2ef]
+                  to-[#f5f0df]
+                ">
+                <span
+                  className="
+                    text-[58px]
+                    transition-transform
+                    duration-500
+                    group-hover:scale-110
+                    group-hover:-rotate-3
+                  ">
+                  {product.images?.[0]?.image_url ? (
+                    <img
+                      src={product.images[0].image_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    '📦'
+                  )}
+                </span>
+
+                {/* حالة المنتج */}
+
+                <span
+                  className="
+                    absolute
+                    right-3
+                    top-3
+                    rounded-full
+                    bg-white/90
+                    px-3
+                    py-1
+                    text-[11px]
+                    font-semibold
+                    text-[#347f81]
+                    shadow-sm
+                    backdrop-blur-sm
+                  ">
+                  {product.availability_status === 'AVAILABLE' ? 'متاح' : 'غير متاح'}
+                </span>
+              </div>
+
+              {/* تفاصيل المنتج */}
+
+              <div className="p-4">
+                <h3
+                  className="
+                    truncate
+                    text-[16px]
+                    font-bold
+                    text-[#16384f]
+                    transition-colors
+                    duration-300
+                    group-hover:text-[#347f81]
+                  ">
+                  {product.title}
+                </h3>
+
+                <p className="mt-2 text-[13px] text-[#81939d]">
+                  {product.category?.category_name || product.category?.name || ''}
+                </p>
+
+                <div className="mt-3 flex items-start gap-2 text-[13px] text-[#718692]">
+                  <span className="mt-[1px] text-[#399d9a]">⇄</span>
+
+                  <p className="line-clamp-2 leading-6">{product.description}</p>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <span
+                    className="
+                      rounded-full
+                      bg-[#e3f2f1]
+                      px-3
+                      py-1.5
+                      text-[12px]
+                      font-semibold
+                      text-[#347f81]
+                      transition-all
+                      duration-300
+                      group-hover:bg-gradient-to-r
+                      group-hover:from-[#3A73AA]
+                      group-hover:to-[#4F9D9E]
+                      group-hover:text-white
+                    ">
+                    {product.price != null ? `السعر: ${product.price}` : 'تفاصيل المنتج'}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openForm(product);
+                    }}
+                    className="rounded border px-3 py-1 text-xs">
+                    تعديل
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => removeProduct(product)}
+                    className="rounded border border-red-200 px-3 py-1 text-xs text-red-600">
+                    حذف
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))
+        )}
+>>>>>>> origin/develop
       </div>
     </section>
   );
