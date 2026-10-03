@@ -1,17 +1,31 @@
 import { useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
+<<<<<<< HEAD
 import { Link, useNavigate } from 'react-router-dom';
+=======
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
+import { getApiError } from '../services/api';
+>>>>>>> origin/develop
 
 function Login() {
   const [rememberPassword, setRememberPassword] = useState(false);
   const navigate = useNavigate();
+<<<<<<< HEAD
+=======
+  const location = useLocation();
+>>>>>>> origin/develop
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
+=======
+  const { login } = useAuth();
+>>>>>>> origin/develop
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,6 +51,7 @@ function Login() {
 
     try {
       setLoading(true);
+<<<<<<< HEAD
 
       // رابط الباك إند
       const API_URL = import.meta.env.VITE_API_URL;
@@ -125,6 +140,12 @@ function Login() {
       setErrors({
         general: 'حدث خطأ أثناء الاتصال بالخادم، حاول مرة أخرى',
       });
+=======
+      await login({ email: email.trim(), password });
+      navigate(location.state?.from || '/profilePage', { replace: true });
+    } catch (error) {
+      setErrors({ general: getApiError(error) || 'تعذر تسجيل الدخول، حاول مرة أخرى' });
+>>>>>>> origin/develop
     } finally {
       setLoading(false);
     }
@@ -184,6 +205,14 @@ function Login() {
             </div>
 
             {/* General Error */}
+<<<<<<< HEAD
+=======
+            {location.state?.message && (
+              <p role="status" className="mt-[15px] rounded-[10px] bg-green-50 p-[10px] text-center text-[13px] text-green-700">
+                {location.state.message}
+              </p>
+            )}
+>>>>>>> origin/develop
             {errors.general && (
               <div
                 className="

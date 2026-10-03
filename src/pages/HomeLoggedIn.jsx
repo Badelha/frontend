@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 import Navbarpro from '../components/Navbarpro';
 import Footer from '../components/Footer';
 
+=======
+>>>>>>> origin/develop
 import { motion } from 'framer-motion';
 // import heroImage from '../assets/image/badelha2.png';
 // import bater from '../assets/image/barter-animation-realistic.html';
@@ -47,7 +50,11 @@ function Counter({ end, duration = 2000 }) {
   return <>{count.toLocaleString('ar-EG')}</>;
 }
 
+<<<<<<< HEAD
 function Home() {
+=======
+function HomeLoggedin() {
+>>>>>>> origin/develop
   const [showAll, setShowAll] = useState(false);
   const sectionVariants = {
     hidden: { opacity: 0, y: 25 },
@@ -103,7 +110,10 @@ function Home() {
   };
   return (
     <>
+<<<<<<< HEAD
       <Navbarpro />
+=======
+>>>>>>> origin/develop
       <main>
         {/* HERO SECTION */}
 
@@ -180,7 +190,11 @@ function Home() {
         {/*THE END HERO SECTION */}
         {/* section two */}
         <section
+<<<<<<< HEAD
           id="how-it-works"
+=======
+          id="hoow-it-works"
+>>>>>>> origin/develop
           className="bg-[#eff7fc] px-4 py-[50px] sm:px-6 md:px-10 lg:px-[60px] lg:py-[60px]">
           {/* Section Header */}
           <motion.div
@@ -460,7 +474,11 @@ function Home() {
               ))}
           </div>
         </section>
+<<<<<<< HEAD
         {/*the end section threee */}
+=======
+        {/*the end section three */}
+>>>>>>> origin/develop
 
         {/* section four */}
         <motion.section
@@ -716,6 +734,7 @@ function Home() {
           </div>
         </section>
         {/*the end section five */}
+<<<<<<< HEAD
         {/* section six */}
         <motion.section
           variants={ctaSectionVariants}
@@ -758,9 +777,17 @@ function Home() {
       </main>
 
       <Footer />
+=======
+      </main>
+
+>>>>>>> origin/develop
       <link rel="stylesheet" href="menagehad" />
     </>
   );
 }
 
+<<<<<<< HEAD
 export default Home;
+=======
+export default HomeLoggedin;
+>>>>>>> origin/develop
