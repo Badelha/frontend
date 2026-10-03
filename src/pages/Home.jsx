@@ -1,5 +1,5 @@
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+// import Navbar from '../components/Navbar';
+// import Footer from '../components/Footer';
 
 import { motion } from 'framer-motion';
 // import heroImage from '../assets/image/badelha2.png';
@@ -103,7 +103,7 @@ function Home() {
   };
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <main>
         {/* HERO SECTION */}
 
@@ -757,7 +757,6 @@ function Home() {
         {/*the end section six */}
       </main>
 
-      <Footer />
       <link rel="stylesheet" href="menagehad" />
     </>
   );

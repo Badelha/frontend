@@ -4,7 +4,7 @@ const NAV = [
   { label: 'الرئيسية', href: '/home' },
   { label: 'كيف تعمل', href: '/home#how-it-works' },
   { label: 'السوق', href: '/home#market' },
-  { label: 'من نحن', href: '/home#about' },
+  { label: 'من نحن', href: '/aboutUs' },
   { label: 'اتصل بنا', href: '/home#contact' },
 ];
 

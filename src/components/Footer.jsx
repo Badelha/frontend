@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const quickLinks = [
-    { title: 'من نحن', path: '/about' },
-    { title: 'السوق', path: '/#market' },
+    { title: 'من نحن', path: '/aboutUs' },
+    { title: 'السوق', path: '#market' },
     { title: 'كيف تعمل المنصة', path: '/how-it-works' },
-    { title: 'الأسئلة الشائعة', path: '/faq' },
+    { title: 'الأسئلة الشائعة', path: '/helpCenter' },
   ];
 
   const supportLinks = [

@@ -2,16 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const NAV = [
-  { label: 'الرئيسية', href: '/' },
-  { label: 'كيف تعمل', href: '/#about' },
-  { label: 'السوق', href: '/#market' },
-  { label: 'من نحن', href: '/about' },
-  { label: 'اتصل بنا', href: '/#contact' },
+  { label: 'الرئيسية', href: '/homeLoggedIn' },
+  { label: 'كيف تعمل', href: '/homeLoggedIn#hoow-it-works' },
+  { label: 'السوق', href: '/homeLoggedIn#market' },
+  { label: 'من نحن', href: '/aboutUs' },
+  { label: 'اتصل بنا', href: '' },
 ];
 
 const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
 
-function Navbar() {
+function Navbarpro() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -484,11 +484,11 @@ function Navbar() {
                 <div className="border-b border-[#e8eeee] px-3 py-3">
                   <p className="text-sm font-bold">أهلًا بكِ 👋</p>
 
-                  <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بدّلها</p>
+                  <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بادل</p>
                 </div>
 
                 <Link
-                  to="/profile"
+                  to="/ProfilePage"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -504,7 +504,7 @@ function Navbar() {
                 </Link>
 
                 <Link
-                  to="/my-products"
+                  to="/listing"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -516,11 +516,11 @@ function Navbar() {
                     hover:text-[#287d80]
                   ">
                   <span>📦</span>
-                  إعلاناتي
+                  منتجاتي
                 </Link>
 
                 <Link
-                  to="/"
+                  to="/Personalinfoform"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -697,4 +697,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Navbarpro;

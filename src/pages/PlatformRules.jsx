@@ -37,7 +37,6 @@ const steps = [
 export default function Rules() {
   return (
     <>
-      <Navbar />
       <div dir="rtl" className="mx-auto max-w-4xl px-5 pb-12  py-[100px] text-[#16324a]">
         {/* الجزء الأزرق الكبير */}
         <div className="my-7 flex flex-col items-center gap-6 rounded-3xl bg-[#2f6f8f] p-8 text-center text-white sm:flex-row sm:text-right">
@@ -108,14 +107,12 @@ export default function Rules() {
         {/* رابط الإبلاغ */}
         <div className="mt-6 rounded-2xl bg-[#ffc93c] p-5 font-semibold text-[#3a2b00]">
           شفت شي مخالف؟{' '}
-          
           <a href="/report" className="underline">
             بلّغ عنه
           </a>
           ، بلاغك بيحمي غيرك.
         </div>
       </div>
-      <Footer />
     </>
   );
 }

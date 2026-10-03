@@ -47,7 +47,6 @@ const sections = [
 export default function Privacy() {
   return (
     <>
-      <Navbar />
       <div
         dir="rtl"
         className="mx-auto max-w-5xl scroll-smooth px-5 pb-12 p-[100px] text-[#16324a]">
@@ -114,7 +113,6 @@ export default function Privacy() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }
