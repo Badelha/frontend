@@ -21,6 +21,8 @@ import MainLayout from './pages/MainLayout';
 
 import Listing from './pages/Listing';
 import AddListing from './pages/AddListing';
+import AddProduct from './pages/AddProduct';
+import Market from './pages/Market';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -28,7 +30,7 @@ function App() {
   return (
     <Routes>
       {/* Auth */}
-      <Route path="/" element={<Home />} />
+
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -47,13 +49,14 @@ function App() {
           path="/add-product"
           element={<Navigate to="/profilePage?tab=products&addProduct=1" replace />}
         />
-        <Route path="/my-products" element={<Navigate to="/profilePage?tab=products" replace />} />
-
-        <Route path="/personalinfoform" element={<Personalinfoform />} />
       </Route>
+      <Route path="/my-products" element={<Navigate to="/profilePage?tab=products" replace />} />
 
+      <Route path="/personalinfoform" element={<Personalinfoform />} />
+      <Route path="/addproduct" element={<AddProduct />} />
       {/* Shared Pages */}
       <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
         <Route path="/aboutUs" element={<AboutUs />} />
@@ -61,6 +64,7 @@ function App() {
         <Route path="/helpCenter" element={<HelpCenter />} />
         <Route path="/platformRules" element={<PlatformRules />} />
         <Route path="/reportaproblem" element={<Reportaproblem />} />
+        <Route path="/market" element={<Market />} />
       </Route>
 
       {/* Any unknown route */}

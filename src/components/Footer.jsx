@@ -121,7 +121,7 @@ const Footer = () => {
                 </svg>
               </span>
 
-              <span className="text-[28px] font-bold sm:text-[30px]">بدّلها</span>
+              <span className="text-[28px] font-bold sm:text-[30px]">بادل</span>
             </Link>
 
             <p className="max-w-[390px] text-[13px] leading-7 text-white/85 sm:text-[14px]">

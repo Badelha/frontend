@@ -196,7 +196,7 @@ function Navbarpro() {
               sm:text-[25px]
               lg:text-[28px]
             ">
-            بدّلها
+            بادل{' '}
           </span>
         </Link>
 
@@ -339,7 +339,7 @@ function Navbarpro() {
           {/* ================= ADD PRODUCT ================= */}
 
           <Link
-            to="/add-product"
+            to="/addproduct"
             className="
               hidden
               items-center

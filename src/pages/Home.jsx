@@ -188,7 +188,7 @@ function Home() {
             {/* ============================= */}{' '}
             <h1 className=" w-full text-white text-[29px] leading-[1.35] sm:text-[38px] sm:leading-[1.3] md:text-[48px] md:leading-[1.25] lg:text-[56px] lg:leading-[1.25] xl:text-[60px] font-extrabold tracking-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.12)] ">
               {' '}
-              بدّلها.. بادل، بيع، أو اشترِ <br />{' '}
+              بادل.. بدّلها، بيع، أو اشترِ <br />{' '}
               <span className=" bg-[linear-gradient(90deg,#6FA6CC_0%,#79C2BE_100%)] bg-clip-text text-transparent ">
                 {' '}
                 كل احتياجاتك بمنصة واحدة.{' '}
@@ -203,7 +203,12 @@ function Home() {
             </p>{' '}
             {/* ============================= */} {/* SEARCH BOX */}{' '}
             {/* ============================= */}{' '}
-            <form onSubmit={(event) => { event.preventDefault(); searchProducts(); }} className=" relative mt-7 sm:mt-8 md:mt-9 w-full max-w-[550px] sm:max-w-[620px] md:max-w-[650px] ">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                searchProducts();
+              }}
+              className=" relative mt-7 sm:mt-8 md:mt-9 w-full max-w-[550px] sm:max-w-[620px] md:max-w-[650px] ">
               {' '}
               <input
                 type="text"
@@ -212,7 +217,11 @@ function Home() {
                 placeholder="ابحث عن طعام، طاقة، مستلزمات..."
                 className=" h-[54px] sm:h-[58px] md:h-[62px] w-full rounded-[15px] sm:rounded-[17px] md:rounded-[18px] bg-white/90 backdrop-blur-md border border-white/60 px-[48px] sm:px-[55px] pr-[18px] sm:pr-[25px] text-[13px] sm:text-[15px] md:text-[16px] text-[#013B59] placeholder:text-[#8A949B] outline-none shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 focus:bg-white focus:border-[#4F9D9E] focus:shadow-[0_10px_35px_rgba(0,0,0,0.20)] "
               />{' '}
-              <button type="submit" aria-label="بحث" disabled={searching} className="absolute left-[17px] sm:left-[20px] md:left-[22px] top-1/2 -translate-y-1/2 text-[#4F9D9E] text-[17px] sm:text-[19px] md:text-[20px] disabled:opacity-50">
+              <button
+                type="submit"
+                aria-label="بحث"
+                disabled={searching}
+                className="absolute left-[17px] sm:left-[20px] md:left-[22px] top-1/2 -translate-y-1/2 text-[#4F9D9E] text-[17px] sm:text-[19px] md:text-[20px] disabled:opacity-50">
                 <i className="fa-solid fa-magnifying-glass" />
               </button>{' '}
             </form>{' '}
@@ -221,7 +230,8 @@ function Home() {
             <div className=" mt-6 sm:mt-7 flex w-full max-w-[550px] flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 ">
               {' '}
               {/* عرض سلعتك */}{' '}
-              <Link to="/add-product"
+              <Link
+                to="/add-product"
                 className="inline-flex items-center justify-center w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)] text-white text-[14px] sm:text-[15px] font-bold shadow-[0_8px_20px_rgba(58,115,170,0.25)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(58,115,170,0.35)] active:scale-[0.98] ">
                 {' '}
                 اعرض سلعتك{' '}
@@ -229,7 +239,9 @@ function Home() {
               {/* تصفح العروض */}{' '}
               <button
                 type="button"
-                onClick={() => document.getElementById('market')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() =>
+                  document.getElementById('market')?.scrollIntoView({ behavior: 'smooth' })
+                }
                 className=" w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-white/90 backdrop-blur-md text-[#4181A6] text-[14px] sm:text-[15px] font-bold border border-white shadow-[0_8px_20px_rgba(0,0,0,0.10)] transition-all duration-300 hover:bg-white hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(0,0,0,0.15)] active:scale-[0.98] ">
                 {' '}
                 تصفح العروض{' '}
@@ -252,7 +264,7 @@ function Home() {
             <motion.h3
               variants={itemVariants}
               className="my-2 text-[26px] font-bold text-[#306061] sm:text-[30px] md:text-[33px]">
-              كيف تشتغل بدّلها؟
+              كيف تشتغل بادل؟{' '}
             </motion.h3>
 
             <motion.p
@@ -368,7 +380,7 @@ function Home() {
               </h2>
 
               <p className="text-[14px] leading-7 text-[#aaa7a7] sm:text-[15px]">
-                تصفح الفئات المتاحة في السوق.
+                عشر فئات تغطي أغلب احتياجاتك اليومية.
               </p>
             </div>
 
@@ -400,105 +412,126 @@ function Home() {
       md:grid-cols-4
       lg:grid-cols-5 lg:gap-5
     ">
-            {categoriesLoading ? <p className="col-span-full text-center text-[#718692]">جارٍ تحميل الفئات...</p> : categories
-              .slice(0, showAll ? categories.length : 5)
+            {[
+              {
+                image: one,
+                title: 'عدة وأدوات عمل',
+                count: '١٥٨ عرض',
+              },
+              {
+                image: two,
+                title: 'سيارات',
+                count: '٢١٤ عرض',
+              },
+              {
+                image: three,
+                title: 'طاقة وبطاريات',
+                count: '٩٧ عرض',
+              },
+              {
+                image: four,
+                title: 'أدوات وخياطة',
+                count: '٧٤ عرض',
+              },
+              {
+                image: five,
+                title: 'هواتف ذكية',
+                count: '٣٤٦ عرض',
+              },
+              {
+                image: six,
+                title: 'أثاث',
+                count: '١٨٩ عرض',
+              },
+              {
+                image: seven,
+                title: 'ملابس',
+                count: '٤١٢ عرض',
+              },
+              {
+                image: eight,
+                title: 'مستلزمات أطفال',
+                count: '١٦٣ عرض',
+              },
+              {
+                image: nine,
+                title: 'مؤن وغذاء',
+                count: '٢٦٨ عرض',
+              },
+              {
+                image: ten,
+                title: 'الصحة والمرأة',
+                count: '١٢١ عرض',
+              },
+            ]
+              .slice(0, showAll ? 10 : 5)
               .map((product, index) => (
-                <motion.div
-                  key={product.category_id ?? product.id ?? product.name}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => searchProducts('', product.category_id ?? product.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      searchProducts('', product.category_id ?? product.id);
-                    }
-                  }}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.9,
-                    y: 12,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    scale: 1,
-                    y: 0,
-                  }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: (index % 5) * 0.08,
-                    ease: 'easeOut',
-                  }}
-                  whileHover={{
-                    y: -5,
-                    scale: 1.02,
-                    transition: { duration: 0.25 },
-                  }}
-                  className="
-            group flex h-[165px] w-full cursor-pointer
-            flex-col items-center justify-center
-            rounded-2xl border border-[#ecebeb]
-            bg-white px-2
-            shadow-[0_0_15px_#80808033]
-            transition-colors duration-300 ease-in-out
-            hover:bg-gradient-to-r
-            hover:from-[#4F9D9E]
-            hover:to-[#3A73AA]
-            hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)]
-            sm:h-[175px]
-          ">
-                  {/* Product Image */}
-                  <motion.img
-                    src={categoryImages[index % categoryImages.length]}
-                    alt={product.category_name || product.name}
-                    whileHover={{ scale: 1.08 }}
-                    transition={{ duration: 0.3 }}
-                    className={`
-              ${
-                index < 3
-                  ? 'h-[68px] w-[68px] sm:h-[75px] sm:w-[75px]'
-                  : 'h-[65px] w-[65px] sm:h-[72px] sm:w-[72px]'
-              }
-              ${index < 3 ? 'rounded-full' : ''}
-              object-cover
-            `}
-                  />
+                <Link key={product.title} to="/market" className="block">
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      scale: 0.9,
+                      y: 12,
+                    }}
+                    whileInView={{
+                      opacity: 1,
+                      scale: 1,
+                      y: 0,
+                    }}
+                    viewport={{ once: true, amount: 0.15 }}
+                    transition={{
+                      duration: 0.45,
+                      delay: (index % 5) * 0.08,
+                      ease: 'easeOut',
+                    }}
+                    whileHover={{
+                      y: -5,
+                      scale: 1.02,
+                      transition: { duration: 0.25 },
+                    }}
+                    className="
+              group flex h-[165px] w-full cursor-pointer
+              flex-col items-center justify-center
+              rounded-2xl border border-[#ecebeb]
+              bg-white px-2
+              shadow-[0_0_15px_#80808033]
+              transition-colors duration-300 ease-in-out
+              hover:bg-gradient-to-r
+              hover:from-[#4F9D9E]
+              hover:to-[#3A73AA]
+              hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)]
+              sm:h-[175px]
+            ">
+                    {/* Product Image */}
+                    <motion.img
+                      src={product.image}
+                      alt={product.title}
+                      whileHover={{ scale: 1.08 }}
+                      transition={{ duration: 0.3 }}
+                      className={`
+                ${
+                  index < 3
+                    ? 'h-[68px] w-[68px] sm:h-[75px] sm:w-[75px]'
+                    : 'h-[65px] w-[65px] sm:h-[72px] sm:w-[72px]'
+                }
+                ${index < 3 ? 'rounded-full' : ''}
+                object-cover
+              `}
+                    />
 
-                  {/* Product Title */}
-                  <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
-                    {product.category_name || product.name}
-                  </h4>
+                    {/* Product Title */}
+                    <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
+                      {product.title}
+                    </h4>
 
-                  {/* Product Count */}
-                  <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
-                    {product.description || 'تصفح المنتجات'}
-                  </p>
-                </motion.div>
+                    {/* Product Count */}
+                    <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
+                      {product.count}
+                    </p>
+                  </motion.div>
+                </Link>
               ))}
           </div>
-          {categoriesError && <p role="alert" className="mt-6 text-center text-red-600">{categoriesError}</p>}
-          {searchError && <p role="alert" className="mt-6 text-center text-red-600">{searchError}</p>}
-          {(searching || hasSearched) && (
-            <div className="mx-auto mt-8 max-w-[1200px]" aria-live="polite">
-              <h3 className="mb-4 text-xl font-bold text-[#306061]">
-                {searching ? 'جارٍ تحميل المنتجات...' : 'نتائج المنتجات'}
-              </h3>
-              {!searching && (
-                products.length ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {products.map((product) => (
-                      <article key={product.product_id ?? product.id} className="rounded-xl border border-[#ecebeb] bg-white p-4 shadow-sm">
-                        <h4 className="font-bold text-[#4181A6]">{product.title || product.name}</h4>
-                        {product.description && <p className="mt-2 line-clamp-3 text-sm text-[#718692]">{product.description}</p>}
-                        {product.price != null && <p className="mt-2 text-sm text-[#306061]">{product.price}</p>}
-                      </article>
-                    ))}
-                  </div>
-                ) : <p className="text-[#718692]">لا توجد منتجات مطابقة.</p>
-              )}
-            </div>
-          )}
         </section>
         {/*the end section threee */}
 
@@ -516,7 +549,7 @@ function Home() {
             {' '}
             <h3 className=" my-2 text-[26px] font-bold text-[#306061] sm:text-[30px] md:text-[33px] ">
               {' '}
-              لماذا بدّلها؟{' '}
+              لماذا بادل؟{' '}
             </h3>{' '}
             <p className=" max-w-[850px] text-[14px] leading-7 text-[#989797] sm:text-[15px] ">
               {' '}
@@ -775,7 +808,7 @@ function Home() {
               </h2>{' '}
               <p className=" mt-2 text-[13px] leading-7 text-[#e5eeee] sm:text-[14px] md:text-[15px] ">
                 {' '}
-                انضم لآلاف المستخدمين اللي وفروا وقتهم وفلوسهم عن طريق بدّلها.{' '}
+                انضم لآلاف المستخدمين اللي وفروا وقتهم وفلوسهم عن طريق بادل.{' '}
               </p>{' '}
             </motion.div>{' '}
             {/* Button */}{' '}

@@ -199,7 +199,7 @@ function Navbar() {
               group-hover:tracking-wider
               group-hover:drop-shadow-md
             ">
-            بدّلها
+            بادل{' '}
           </span>
         </Link>
 
@@ -395,7 +395,7 @@ function Navbar() {
           {/* ========================= */}
 
           <Link
-            to="/add-product"
+            to="/login"
             className="
               hidden sm:inline-flex
               items-center justify-center gap-2
@@ -565,7 +565,7 @@ function Navbar() {
                       font-bold
                       text-[#4F9D9E]
                     ">
-                    بدّلها
+                    بادل{' '}
                   </span>
                 </div>
 
@@ -606,7 +606,7 @@ function Navbar() {
                 {/* إضافة منتج */}
 
                 <Link
-                  to="/add-product"
+                  to="/login"
                   onClick={closeMobileMenu}
                   className="
                     flex items-center justify-center gap-2
