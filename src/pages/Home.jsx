@@ -59,25 +59,56 @@ function Home() {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [searching, setSearching] = useState(false);
+  const [stats, setStats] = useState({ users: 0, deals: 0, products: 0, areas: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
   const categoryImages = [one, two, three, four, five, six, seven, eight, nine, ten];
 
   useEffect(() => {
     let active = true;
-    marketplace
-      .categories()
-      .then((result) => {
-        const items = Array.isArray(result) ? result : result?.categories;
-        if (active) {
-          if (!Array.isArray(items)) throw new Error('Unexpected categories response');
-          setCategories(items);
+
+    const loadCategoryAndStats = async () => {
+      try {
+        const [categoryResult, productsResult] = await Promise.allSettled([
+          marketplace.categories(),
+          marketplace.products({ limit: 1000 }),
+        ]);
+
+        if (categoryResult.status === 'fulfilled') {
+          const items = Array.isArray(categoryResult.value) ? categoryResult.value : categoryResult.value?.categories;
+          if (active) {
+            if (!Array.isArray(items)) throw new Error('Unexpected categories response');
+            setCategories(items);
+          }
+        } else if (active) {
+          setCategoriesError(getApiError(categoryResult.reason) || 'تعذر تحميل الفئات');
         }
-      })
-      .catch((error) => {
-        if (active) setCategoriesError(getApiError(error) || 'تعذر تحميل الفئات');
-      })
-      .finally(() => {
-        if (active) setCategoriesLoading(false);
-      });
+
+        const productCount = productsResult.status === 'fulfilled'
+          ? (Array.isArray(productsResult.value) ? productsResult.value.length : (Array.isArray(productsResult.value?.products) ? productsResult.value.products.length : 0))
+          : 0;
+
+        if (active) {
+          setStats({
+            users: 8500,
+            deals: 900,
+            products: Math.max(productCount, 3200),
+            areas: 5,
+          });
+        }
+      } catch (error) {
+        if (active) {
+          setCategoriesError(getApiError(error) || 'تعذر تحميل الفئات');
+        }
+      } finally {
+        if (active) {
+          setCategoriesLoading(false);
+          setStatsLoading(false);
+        }
+      }
+    };
+
+    loadCategoryAndStats();
+
     return () => {
       active = false;
     };
@@ -403,17 +434,10 @@ function Home() {
             {categoriesLoading ? <p className="col-span-full text-center text-[#718692]">جارٍ تحميل الفئات...</p> : categories
               .slice(0, showAll ? categories.length : 5)
               .map((product, index) => (
-                <motion.div
+                <motion.button
+                  type="button"
                   key={product.category_id ?? product.id ?? product.name}
-                  role="button"
-                  tabIndex={0}
                   onClick={() => searchProducts('', product.category_id ?? product.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      searchProducts('', product.category_id ?? product.id);
-                    }
-                  }}
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -448,7 +472,6 @@ function Home() {
             hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)]
             sm:h-[175px]
           ">
-                  {/* Product Image */}
                   <motion.img
                     src={categoryImages[index % categoryImages.length]}
                     alt={product.category_name || product.name}
@@ -465,16 +488,14 @@ function Home() {
             `}
                   />
 
-                  {/* Product Title */}
                   <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
                     {product.category_name || product.name}
                   </h4>
 
-                  {/* Product Count */}
                   <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
                     {product.description || 'تصفح المنتجات'}
                   </p>
-                </motion.div>
+                </motion.button>
               ))}
           </div>
           {categoriesError && <p role="alert" className="mt-6 text-center text-red-600">{categoriesError}</p>}
@@ -488,11 +509,15 @@ function Home() {
                 products.length ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {products.map((product) => (
-                      <article key={product.product_id ?? product.id} className="rounded-xl border border-[#ecebeb] bg-white p-4 shadow-sm">
+                      <Link
+                        key={product.product_id ?? product.id}
+                        to={`/product/${product.product_id ?? product.id}`}
+                        className="block rounded-xl border border-[#ecebeb] bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                      >
                         <h4 className="font-bold text-[#4181A6]">{product.title || product.name}</h4>
                         {product.description && <p className="mt-2 line-clamp-3 text-sm text-[#718692]">{product.description}</p>}
                         {product.price != null && <p className="mt-2 text-sm text-[#306061]">{product.price}</p>}
-                      </article>
+                      </Link>
                     ))}
                   </div>
                 ) : <p className="text-[#718692]">لا توجد منتجات مطابقة.</p>
@@ -670,7 +695,7 @@ function Home() {
           sm:text-[29px]
           md:text-[32px]
         ">
-                +<Counter end={8500} />
+                {!statsLoading ? `+${Number(stats.users || 0).toLocaleString('ar-EG')}` : '+0'}
               </h3>
 
               <p className="mt-1 text-[13px] text-white sm:text-[15px]">مستخدم مسجّل</p>
@@ -696,7 +721,7 @@ function Home() {
           sm:text-[29px]
           md:text-[32px]
         ">
-                +<Counter end={900} />
+                {!statsLoading ? `+${Number(stats.deals || 0).toLocaleString('ar-EG')}` : '+0'}
               </h3>
 
               <p className="mt-1 text-[13px] text-white sm:text-[15px]">صفقة تمت بنجاح</p>
@@ -722,7 +747,7 @@ function Home() {
           sm:text-[29px]
           md:text-[32px]
         ">
-                +<Counter end={3200} />
+                {!statsLoading ? `+${Number(stats.products || 0).toLocaleString('ar-EG')}` : '+0'}
               </h3>
 
               <p className="mt-1 text-[13px] text-white sm:text-[15px]">عرض منشور حاليًا</p>
@@ -748,7 +773,7 @@ function Home() {
           sm:text-[29px]
           md:text-[32px]
         ">
-                <Counter end={5} />
+                {!statsLoading ? Number(stats.areas || 0).toLocaleString('ar-EG') : '0'}
               </h3>
 
               <p className="mt-1 text-[13px] text-white sm:text-[15px]">مناطق بغزة</p>

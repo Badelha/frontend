@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
+import marketplace from '../services/marketplace';
 
 const NAV = [
   { label: 'الرئيسية', href: '/' },
@@ -10,7 +11,7 @@ const NAV = [
   { label: 'اتصل بنا', href: '/#contact' },
 ];
 
-const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
+const DEFAULT_CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
 
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,6 +19,8 @@ function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [city, setCity] = useState('');
+  const [cities, setCities] = useState(DEFAULT_CITIES);
+  const [loadingCities, setLoadingCities] = useState(true);
 
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -25,6 +28,27 @@ function Navbar() {
   const profileRef = useRef(null);
   const cityRef = useRef(null);
   const mobileRef = useRef(null);
+
+  /* ================= FETCH CITIES ================= */
+
+  useEffect(() => {
+    marketplace
+      .cities()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCities(data);
+        } else if (Array.isArray(data?.data)) {
+          setCities(data.data);
+        }
+      })
+      .catch(() => {
+        // Use default cities on error
+        setCities(DEFAULT_CITIES);
+      })
+      .finally(() => {
+        setLoadingCities(false);
+      });
+  }, []);
 
   /* ================= SCROLL ================= */
 
@@ -306,7 +330,7 @@ function Navbar() {
                 ">
                 <p className="px-3 py-2 text-xs font-semibold text-[#78909c]">اختاري منطقتك</p>
 
-                {CITIES.map((item) => (
+                {cities.map((item) => (
                   <button
                     key={item}
                     type="button"

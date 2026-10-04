@@ -16,6 +16,9 @@ const marketplace = {
   async products(params = {}) {
     return getApiData(await api.get('/products', { params }));
   },
+  async getProduct(id) {
+    return getApiData(await api.get(`/products/${id}`));
+  },
   async myProducts() {
     return getApiData(await api.get('/products/my/listings'));
   },

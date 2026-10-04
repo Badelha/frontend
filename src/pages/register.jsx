@@ -116,7 +116,7 @@ function Sigin() {
           address: formData.address.trim(),
           password: formData.password,
         });
-        navigate(location.state?.from || '/profilePage', { replace: true });
+        navigate('/verify-email?sent=1', { replace: true });
       } catch (error) {
         setErrors({ general: getApiError(error) || 'تعذر إنشاء الحساب، حاول مرة أخرى' });
       } finally {

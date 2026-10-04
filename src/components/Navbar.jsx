@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import marketplace from '../services/marketplace';
 
 const NAV = [
   { label: 'الرئيسية', href: '/' },
@@ -9,16 +10,40 @@ const NAV = [
   { label: 'اتصل بنا', href: '/#contact' },
 ];
 
-const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
+const DEFAULT_CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
 
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cityMenuOpen, setCityMenuOpen] = useState(false);
   const [city, setCity] = useState('');
+  const [cities, setCities] = useState(DEFAULT_CITIES);
+  const [loadingCities, setLoadingCities] = useState(true);
 
   const cityRef = useRef(null);
   const mobileMenuRef = useRef(null);
+
+  // =========================
+  // Fetch Cities
+  // =========================
+  useEffect(() => {
+    marketplace
+      .cities()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCities(data);
+        } else if (Array.isArray(data?.data)) {
+          setCities(data.data);
+        }
+      })
+      .catch(() => {
+        // Use default cities on error
+        setCities(DEFAULT_CITIES);
+      })
+      .finally(() => {
+        setLoadingCities(false);
+      });
+  }, []);
 
   // =========================
   // Scroll
@@ -375,7 +400,7 @@ function Navbar() {
                   اختاري منطقتك
                 </p>
 
-                {CITIES.map((item) => (
+                {cities.map((item) => (
                   <button
                     key={item}
                     type="button"
