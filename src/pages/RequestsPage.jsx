@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import requests from '../services/requests';
 import { getApiError } from '../services/api';
@@ -14,6 +14,7 @@ const normalizeRequestList = (payload) => {
 };
 
 function RequestsPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'exchanges';
   const showSuccess = searchParams.get('success');
@@ -195,32 +196,46 @@ function RequestsPage() {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        {(item.status === 'pending' || !item.status) && (
-          <div className="mt-4 flex gap-2 sm:mt-0">
-            <button
-              onClick={() => handleAccept(item.id || item.exchange_id || item.purchase_id)}
-              className="rounded-lg bg-green-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-green-600">
-              قبول
-            </button>
-            <button
-              onClick={() => handleReject(item.id || item.exchange_id || item.purchase_id)}
-              className="rounded-lg bg-red-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-red-600">
-              رفض
-            </button>
-          </div>
-        )}
-
-        {item.status === 'accepted' && (
+        <div className="mt-4 flex flex-wrap gap-2 sm:mt-0">
           <button
-            onClick={() => {
-              setShowReasonModal(`complete-${item.id || item.exchange_id || item.purchase_id}`);
-              setReason('');
-            }}
-            className="mt-4 rounded-lg bg-blue-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-600 sm:mt-0">
-            تحديد كمكتمل
+            type="button"
+            onClick={() => navigate(`/messages?type=${type}&requestId=${item.id || item.exchange_id || item.purchase_id}`, {
+              state: {
+                type,
+                requestId: item.id || item.exchange_id || item.purchase_id,
+                request: item,
+              },
+            })}
+            className="rounded-lg border border-[#d8e4e8] bg-[#f6fbfc] px-3 py-2 text-xs font-medium text-[#306061] transition-colors hover:bg-[#edf7f9]">
+            فتح المحادثة
           </button>
-        )}
+
+          {(item.status === 'pending' || !item.status) && (
+            <>
+              <button
+                onClick={() => handleAccept(item.id || item.exchange_id || item.purchase_id)}
+                className="rounded-lg bg-green-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-green-600">
+                قبول
+              </button>
+              <button
+                onClick={() => handleReject(item.id || item.exchange_id || item.purchase_id)}
+                className="rounded-lg bg-red-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-red-600">
+                رفض
+              </button>
+            </>
+          )}
+
+          {item.status === 'accepted' && (
+            <button
+              onClick={() => {
+                setShowReasonModal(`complete-${item.id || item.exchange_id || item.purchase_id}`);
+                setReason('');
+              }}
+              className="rounded-lg bg-blue-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-600">
+              تحديد كمكتمل
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );

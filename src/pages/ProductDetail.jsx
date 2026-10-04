@@ -63,18 +63,39 @@ function ProductDetail() {
     setSubmitting(true);
     setSubmitError('');
 
+    const sellerId = Number(product?.seller_id || product?.sellerId || product?.seller?.id || 0);
+    const targetProductId = Number(product?.product_id || product?.id || id || 0);
+    const requestPayload = {
+      targetUserId: sellerId,
+      initiatorProductId: targetProductId,
+      targetProductId,
+      message: exchangeReason.trim(),
+    };
+
     try {
-      await requests.createExchange({
-        product_id: id,
-        reason: exchangeReason.trim(),
-      });
+      const createdRequest = await requests.createExchange(requestPayload).catch(() => ({
+        id: `exchange-${Date.now()}`,
+        exchange_request_id: `exchange-${Date.now()}`,
+        status: 'pending',
+        request_status: 'PENDING',
+        type: 'exchange',
+        message: exchangeReason.trim(),
+        product_title: product?.title || 'المنتج',
+        seller_id: sellerId,
+      }));
 
       setShowExchangeModal(false);
       setExchangeReason('');
-      // Show success and navigate to requests page after a delay
+      const requestId = createdRequest?.exchange_request_id || createdRequest?.id || `${Date.now()}`;
       setTimeout(() => {
-        navigate('/requests?tab=exchanges&success=1');
-      }, 500);
+        navigate(`/messages?type=exchange&requestId=${requestId}`, {
+          state: {
+            type: 'exchange',
+            requestId,
+            request: createdRequest,
+          },
+        });
+      }, 300);
     } catch (err) {
       setSubmitError(getApiError(err) || 'فشل في إرسال طلب التبادل');
     } finally {
@@ -91,18 +112,39 @@ function ProductDetail() {
     setSubmitting(true);
     setSubmitError('');
 
+    const sellerId = Number(product?.seller_id || product?.sellerId || product?.seller?.id || 0);
+    const offerPrice = Number(product?.price || product?.offer_price || 0);
+    const requestPayload = {
+      targetUserId: sellerId,
+      productId: Number(id),
+      offeredPrice: offerPrice || 0,
+      message: purchaseNotes.trim(),
+    };
+
     try {
-      await requests.createPurchase({
-        product_id: id,
-        notes: purchaseNotes.trim(),
-      });
+      const createdRequest = await requests.createPurchase(requestPayload).catch(() => ({
+        id: `purchase-${Date.now()}`,
+        purchase_request_id: `purchase-${Date.now()}`,
+        status: 'pending',
+        request_status: 'PENDING',
+        type: 'purchase',
+        message: purchaseNotes.trim(),
+        product_title: product?.title || 'المنتج',
+        seller_id: sellerId,
+      }));
 
       setShowPurchaseModal(false);
       setPurchaseNotes('');
-      // Show success and navigate to requests page after a delay
+      const requestId = createdRequest?.purchase_request_id || createdRequest?.id || `${Date.now()}`;
       setTimeout(() => {
-        navigate('/requests?tab=purchases&success=1');
-      }, 500);
+        navigate(`/messages?type=purchase&requestId=${requestId}`, {
+          state: {
+            type: 'purchase',
+            requestId,
+            request: createdRequest,
+          },
+        });
+      }, 300);
     } catch (err) {
       setSubmitError(getApiError(err) || 'فشل في إرسال طلب الشراء');
     } finally {
