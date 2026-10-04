@@ -3,16 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 
 const NAV = [
-  { label: 'الرئيسية', href: '/' },
-  { label: 'كيف تعمل', href: '/#about' },
-  { label: 'السوق', href: '/#market' },
-  { label: 'من نحن', href: '/#why-badelha' },
-  { label: 'اتصل بنا', href: '/#contact' },
+  { label: 'الرئيسية', href: '/homeLoggedIn' },
+  { label: 'كيف تعمل', href: '/homeLoggedIn#how-it-works' },
+  { label: 'السوق', href: '/homeLoggedIn#market' },
+  { label: 'من نحن', href: '/aboutUs' },
+  { label: 'اتصل بنا', href: '/homeLoggedIn#contact' },
 ];
 
 const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
 
-function Navbar() {
+function Navbarpro() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -136,7 +136,7 @@ function Navbar() {
         {/* ================= LOGO ================= */}
 
         <Link
-          to="/"
+          to="/homeLoggedIn"
           aria-label="بدّلها - الرئيسية"
           className="
             group flex shrink-0
@@ -486,7 +486,7 @@ function Navbar() {
                 <div className="border-b border-[#e8eeee] px-3 py-3">
                   <p className="text-sm font-bold">أهلًا بكِ 👋</p>
 
-                  <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بدّلها</p>
+                  <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بادل</p>
                 </div>
 
                 <Link
@@ -506,7 +506,7 @@ function Navbar() {
                 </Link>
 
                 <Link
-                  to="/profilePage"
+                  to="/my-products"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -518,11 +518,11 @@ function Navbar() {
                     hover:text-[#287d80]
                   ">
                   <span>📦</span>
-                  إعلاناتي
+                  منتجاتي
                 </Link>
 
                 <Link
-                  to="/"
+                  to="/personalinfoform"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -543,11 +543,13 @@ function Navbar() {
                   type="button"
                   onClick={async () => {
                     setProfileOpen(false);
+
                     try {
                       await logout();
                     } catch (error) {
                       window.alert(error.message);
                     }
+
                     navigate('/login');
                   }}
                   className="
@@ -704,4 +706,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Navbarpro;
