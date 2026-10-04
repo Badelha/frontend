@@ -4,12 +4,23 @@ const marketplace = {
   async categories() {
     return getApiData(await api.get('/categories'));
   },
+  async createCategory(category) {
+    return getApiData(await api.post('/categories', category));
+  },
+  async updateCategory(id, category) {
+    return getApiData(await api.put(`/categories/${id}`, category));
+  },
+  async deleteCategory(id) {
+    return getApiData(await api.delete(`/categories/${id}`));
+  },
   async cities() {
     return getApiData(await api.get('/users/cities'));
   },
   async searchProducts(search, categoryId) {
     if (search) {
-      return getApiData(await api.get('/products/search', { params: { q: search } }));
+      return getApiData(await api.get('/products/search', {
+        params: { q: search, ...(categoryId ? { categoryId } : {}) },
+      }));
     }
     return getApiData(await api.get('/products', { params: { categoryId } }));
   },

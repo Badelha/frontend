@@ -1,83 +1,136 @@
-import { useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import CategoryCard from "../components/categories/CategoryCard";
-import CategoryModal from "../components/categories/CategoryModal";
-import DeleteCategoryModal from "../components/categories/DeleteCategoryModal";
-import Navbarpro from "../components/Navbarpro"; 
+import { useCallback, useEffect, useState } from 'react';
+import { FaPlus } from 'react-icons/fa';
+import CategoryCard from '../components/categories/CategoryCard';
+import CategoryModal from '../components/categories/CategoryModal';
+import DeleteCategoryModal from '../components/categories/DeleteCategoryModal';
+import Navbarpro from '../components/Navbarpro';
+import marketplace from '../services/marketplace';
+import { getApiError } from '../services/api';
+
+const normalizeCategory = (category) => ({
+  ...category,
+  id: category.category_id ?? category.id,
+  name: category.category_name ?? category.name ?? '',
+  description: category.description ?? '',
+  icon: category.icon ?? '',
+});
+
+const normalizeList = (result) => {
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.categories)) return result.categories;
+  if (Array.isArray(result?.items)) return result.items;
+  return [];
+};
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState([
-    { id: 1, name: "فواكه", description: "فواكه موسمية وطازجة", icon: "🍎" },
-    { id: 2, name: "خضروات", description: "جميع أنواع الخضروات الطازجة", icon: "🥦" },
-    { id: 3, name: "منتجات الألبان", description: "حليب وجبن وزبادي", icon: "🥛" },
-  ]);
-
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
 
-  const openAddModal = () => {
-    setEditData(null);
-    setShowModal(true);
-  };
+  const loadCategories = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      setCategories(normalizeList(await marketplace.categories()).map(normalizeCategory));
+    } catch (requestError) {
+      setError(getApiError(requestError) || 'تعذر تحميل الفئات');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const openEditModal = (cat) => {
-    setEditData(cat);
-    setShowModal(true);
-  };
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
   const closeModal = () => {
     setShowModal(false);
     setEditData(null);
   };
 
-  const handleSubmit = (form) => {
-    if (editData) {
-      setCategories((prev) =>
-        prev.map((c) => (c.id === editData.id ? { ...c, ...form } : c))
-      );
-    } else {
-      setCategories((prev) => [...prev, { id: Date.now(), ...form }]);
+  const handleSubmit = async (form) => {
+    setSubmitting(true);
+    setError('');
+    try {
+      const payload = {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        icon: form.icon.trim(),
+      };
+      if (editData) {
+        await marketplace.updateCategory(editData.id, payload);
+      } else {
+        await marketplace.createCategory(payload);
+      }
+      closeModal();
+      await loadCategories();
+    } catch (requestError) {
+      setError(getApiError(requestError) || 'تعذر حفظ الفئة');
+    } finally {
+      setSubmitting(false);
     }
-    closeModal();
   };
 
-  const handleDelete = () => {
-    setCategories((prev) => prev.filter((c) => c.id !== deleteData.id));
-    setDeleteData(null);
+  const handleDelete = async () => {
+    if (!deleteData) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      await marketplace.deleteCategory(deleteData.id);
+      setDeleteData(null);
+      await loadCategories();
+    } catch (requestError) {
+      setError(getApiError(requestError) || 'تعذر حذف الفئة');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-brand-bg pb-16" dir="rtl">
-      
-      {/* 1. إضافة شريط التنقل هنا */}
       <Navbarpro />
-
-      {/* 2. إضافة pt-24 لتعويض ارتفاع الناف بار */}
-      <div className="p-8 pt-24 max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+      <main className="mx-auto max-w-6xl px-4 pb-10 pt-28">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-2xl font-bold text-[#2c5f7c]">إدارة الفئات</h1>
           <button
-            onClick={openAddModal}
-            className="bg-gradient-to-l from-[#2c5f7c] to-[#5ba3b8] text-white px-6 py-3 rounded-full flex items-center gap-2 hover:opacity-90 transition font-semibold"
+            type="button"
+            onClick={() => {
+              setEditData(null);
+              setShowModal(true);
+            }}
+            className="flex items-center gap-2 rounded-full bg-gradient-to-l from-[#2c5f7c] to-[#5ba3b8] px-6 py-3 font-semibold text-white transition hover:opacity-90"
           >
             <FaPlus size={14} />
             <span>إضافة فئة</span>
           </button>
         </div>
 
-        {categories.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            لا توجد فئات بعد. اضغط "إضافة فئة" للبدء.
+        {error && (
+          <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <span>{error}</span>
+            <button type="button" onClick={loadCategories} className="font-bold underline">إعادة المحاولة</button>
           </div>
+        )}
+
+        {loading ? (
+          <div className="py-16 text-center text-[#4F9D9E]" role="status">جارٍ تحميل الفئات...</div>
+        ) : categories.length === 0 ? (
+          <div className="py-16 text-center text-gray-500">لا توجد فئات في الخادم بعد.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {categories.map((cat) => (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {categories.map((category) => (
               <CategoryCard
-                key={cat.id}
-                category={cat}
-                onEdit={() => openEditModal(cat)}
-                onDelete={() => setDeleteData(cat)}
+                key={category.id}
+                category={category}
+                onEdit={() => {
+                  setEditData(category);
+                  setShowModal(true);
+                }}
+                onDelete={() => setDeleteData(category)}
               />
             ))}
           </div>
@@ -88,15 +141,16 @@ export default function CategoriesPage() {
           onClose={closeModal}
           onSubmit={handleSubmit}
           initialData={editData}
+          submitting={submitting}
         />
-
         <DeleteCategoryModal
-          isOpen={!!deleteData}
+          isOpen={Boolean(deleteData)}
           onClose={() => setDeleteData(null)}
           onConfirm={handleDelete}
           categoryName={deleteData?.name}
+          submitting={submitting}
         />
-      </div>
+      </main>
     </div>
   );
 }
