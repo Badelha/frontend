@@ -2,6 +2,18 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const quickLinks = [
+<<<<<<< HEAD
+    { title: 'من نحن', path: '/about' },
+    { title: 'السوق', path: '/#market' },
+    { title: 'كيف تعمل المنصة', path: '/how-it-works' },
+    { title: 'الأسئلة الشائعة', path: '/faq' },
+  ];
+
+  const supportLinks = [
+    { title: 'مركز المساعدة', path: '/help' },
+    { title: 'قوانين المنصة', path: '/terms' },
+    { title: 'الإبلاغ عن مشكلة', path: '/report' },
+=======
     { title: 'من نحن', path: '/aboutUs' },
     { title: 'السوق', path: '#market' },
     { title: 'كيف تعمل المنصة', path: '/how-it-works' },
@@ -12,6 +24,7 @@ const Footer = () => {
     { title: 'مركز المساعدة', path: '/helpCenter' },
     { title: 'قوانين المنصة', path: '/PlatformRules' },
     { title: 'الإبلاغ عن مشكلة', path: '/reportaproblem' },
+>>>>>>> origin/develop
     { title: 'سياسة الخصوصية', path: '/privacy' },
   ];
 

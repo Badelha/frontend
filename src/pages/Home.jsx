@@ -1,5 +1,10 @@
+<<<<<<< HEAD
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+=======
 // import Navbar from '../components/Navbar';
 // import Footer from '../components/Footer';
+>>>>>>> origin/develop
 
 import { motion } from 'framer-motion';
 // import heroImage from '../assets/image/badelha2.png';
@@ -21,8 +26,11 @@ import nine from '../assets/images/9.png';
 import ten from '../assets/images/10.png';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+<<<<<<< HEAD
+=======
 import marketplace from '../services/marketplace';
 import { getApiError } from '../services/api';
+>>>>>>> origin/develop
 
 // Counter
 function Counter({ end, duration = 2000 }) {
@@ -51,6 +59,8 @@ function Counter({ end, duration = 2000 }) {
 
 function Home() {
   const [showAll, setShowAll] = useState(false);
+<<<<<<< HEAD
+=======
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState('');
@@ -105,6 +115,7 @@ function Home() {
     }
   };
 
+>>>>>>> origin/develop
   const sectionVariants = {
     hidden: { opacity: 0, y: 25 },
     visible: {
@@ -159,7 +170,11 @@ function Home() {
   };
   return (
     <>
+<<<<<<< HEAD
+      <Navbar />
+=======
       {/* <Navbar /> */}
+>>>>>>> origin/develop
       <main>
         {/* HERO SECTION */}
 
@@ -170,7 +185,11 @@ function Home() {
           {/* ============================= */} {/* Background Animation */}{' '}
           {/* ============================= */}{' '}
           <iframe
+<<<<<<< HEAD
+            src="../assets/images/barter-animation-realistic.html"
+=======
             src="/image/barter-animation-realistic.html"
+>>>>>>> origin/develop
             className=" pointer-events-none absolute inset-0 h-full w-full border-0 "
             title="Animation"
           />{' '}
@@ -203,6 +222,17 @@ function Home() {
             </p>{' '}
             {/* ============================= */} {/* SEARCH BOX */}{' '}
             {/* ============================= */}{' '}
+<<<<<<< HEAD
+            <div className=" relative mt-7 sm:mt-8 md:mt-9 w-full max-w-[550px] sm:max-w-[620px] md:max-w-[650px] ">
+              {' '}
+              <input
+                type="text"
+                placeholder="ابحث عن طعام، طاقة، مستلزمات..."
+                className=" h-[54px] sm:h-[58px] md:h-[62px] w-full rounded-[15px] sm:rounded-[17px] md:rounded-[18px] bg-white/90 backdrop-blur-md border border-white/60 px-[48px] sm:px-[55px] pr-[18px] sm:pr-[25px] text-[13px] sm:text-[15px] md:text-[16px] text-[#013B59] placeholder:text-[#8A949B] outline-none shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 focus:bg-white focus:border-[#4F9D9E] focus:shadow-[0_10px_35px_rgba(0,0,0,0.20)] "
+              />{' '}
+              <i className=" fa-solid fa-magnifying-glass absolute left-[17px] sm:left-[20px] md:left-[22px] top-1/2 -translate-y-1/2 text-[#4F9D9E] text-[17px] sm:text-[19px] md:text-[20px] " />{' '}
+            </div>{' '}
+=======
             <form onSubmit={(event) => { event.preventDefault(); searchProducts(); }} className=" relative mt-7 sm:mt-8 md:mt-9 w-full max-w-[550px] sm:max-w-[620px] md:max-w-[650px] ">
               {' '}
               <input
@@ -216,11 +246,23 @@ function Home() {
                 <i className="fa-solid fa-magnifying-glass" />
               </button>{' '}
             </form>{' '}
+>>>>>>> origin/develop
             {/* ============================= */} {/* BUTTONS */}{' '}
             {/* ============================= */}{' '}
             <div className=" mt-6 sm:mt-7 flex w-full max-w-[550px] flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 ">
               {' '}
               {/* عرض سلعتك */}{' '}
+<<<<<<< HEAD
+              <button
+                type="button"
+                className=" w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)] text-white text-[14px] sm:text-[15px] font-bold shadow-[0_8px_20px_rgba(58,115,170,0.25)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(58,115,170,0.35)] active:scale-[0.98] ">
+                {' '}
+                اعرض سلعتك{' '}
+              </button>{' '}
+              {/* تصفح العروض */}{' '}
+              <button
+                type="button"
+=======
               <Link to="/add-product"
                 className="inline-flex items-center justify-center w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)] text-white text-[14px] sm:text-[15px] font-bold shadow-[0_8px_20px_rgba(58,115,170,0.25)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(58,115,170,0.35)] active:scale-[0.98] ">
                 {' '}
@@ -230,6 +272,7 @@ function Home() {
               <button
                 type="button"
                 onClick={() => document.getElementById('market')?.scrollIntoView({ behavior: 'smooth' })}
+>>>>>>> origin/develop
                 className=" w-full sm:w-auto min-w-0 sm:min-w-[180px] h-[50px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] sm:rounded-[15px] bg-white/90 backdrop-blur-md text-[#4181A6] text-[14px] sm:text-[15px] font-bold border border-white shadow-[0_8px_20px_rgba(0,0,0,0.10)] transition-all duration-300 hover:bg-white hover:scale-[1.03] hover:shadow-[0_12px_25px_rgba(0,0,0,0.15)] active:scale-[0.98] ">
                 {' '}
                 تصفح العروض{' '}
@@ -368,7 +411,11 @@ function Home() {
               </h2>
 
               <p className="text-[14px] leading-7 text-[#aaa7a7] sm:text-[15px]">
+<<<<<<< HEAD
+                عشر فئات تغطي أغلب احتياجاتك اليومية.
+=======
                 تصفح الفئات المتاحة في السوق.
+>>>>>>> origin/develop
               </p>
             </div>
 
@@ -400,6 +447,64 @@ function Home() {
       md:grid-cols-4
       lg:grid-cols-5 lg:gap-5
     ">
+<<<<<<< HEAD
+            {[
+              {
+                image: one,
+                title: 'عدة وأدوات عمل',
+                count: '١٥٨ عرض',
+              },
+              {
+                image: two,
+                title: 'سيارات',
+                count: '٢١٤ عرض',
+              },
+              {
+                image: three,
+                title: 'طاقة وبطاريات',
+                count: '٩٧ عرض',
+              },
+              {
+                image: four,
+                title: 'أدوات وخياطة',
+                count: '٧٤ عرض',
+              },
+              {
+                image: five,
+                title: 'هواتف ذكية',
+                count: '٣٤٦ عرض',
+              },
+              {
+                image: six,
+                title: 'أثاث',
+                count: '١٨٩ عرض',
+              },
+              {
+                image: seven,
+                title: 'ملابس',
+                count: '٤١٢ عرض',
+              },
+              {
+                image: eight,
+                title: 'مستلزمات أطفال',
+                count: '١٦٣ عرض',
+              },
+              {
+                image: nine,
+                title: 'مؤن وغذاء',
+                count: '٢٦٨ عرض',
+              },
+              {
+                image: ten,
+                title: 'الصحة والمرأة',
+                count: '١٢١ عرض',
+              },
+            ]
+              .slice(0, showAll ? 10 : 5)
+              .map((product, index) => (
+                <motion.div
+                  key={product.title}
+=======
             {categoriesLoading ? <p className="col-span-full text-center text-[#718692]">جارٍ تحميل الفئات...</p> : categories
               .slice(0, showAll ? categories.length : 5)
               .map((product, index) => (
@@ -414,6 +519,7 @@ function Home() {
                       searchProducts('', product.category_id ?? product.id);
                     }
                   }}
+>>>>>>> origin/develop
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -450,8 +556,13 @@ function Home() {
           ">
                   {/* Product Image */}
                   <motion.img
+<<<<<<< HEAD
+                    src={product.image}
+                    alt={product.title}
+=======
                     src={categoryImages[index % categoryImages.length]}
                     alt={product.category_name || product.name}
+>>>>>>> origin/develop
                     whileHover={{ scale: 1.08 }}
                     transition={{ duration: 0.3 }}
                     className={`
@@ -467,16 +578,26 @@ function Home() {
 
                   {/* Product Title */}
                   <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
+<<<<<<< HEAD
+                    {product.title}
+=======
                     {product.category_name || product.name}
+>>>>>>> origin/develop
                   </h4>
 
                   {/* Product Count */}
                   <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
+<<<<<<< HEAD
+                    {product.count}
+=======
                     {product.description || 'تصفح المنتجات'}
+>>>>>>> origin/develop
                   </p>
                 </motion.div>
               ))}
           </div>
+<<<<<<< HEAD
+=======
           {categoriesError && <p role="alert" className="mt-6 text-center text-red-600">{categoriesError}</p>}
           {searchError && <p role="alert" className="mt-6 text-center text-red-600">{searchError}</p>}
           {(searching || hasSearched) && (
@@ -499,6 +620,7 @@ function Home() {
               )}
             </div>
           )}
+>>>>>>> origin/develop
         </section>
         {/*the end section threee */}
 
@@ -797,6 +919,10 @@ function Home() {
         {/*the end section six */}
       </main>
 
+<<<<<<< HEAD
+      <Footer />
+=======
+>>>>>>> origin/develop
       <link rel="stylesheet" href="menagehad" />
     </>
   );

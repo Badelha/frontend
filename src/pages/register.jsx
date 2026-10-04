@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+import { useState } from 'react';
+import badelhaLogo from '../assets/images/badelha.png';
+import googleIcon from '../assets/images/search 1.png';
+import { Link } from 'react-router-dom';
+import { registerUser } from '../services/authService';
+
+function Register() {
+=======
 import { useEffect, useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
@@ -11,25 +20,36 @@ function Register() {
   const location = useLocation();
   const { register } = useAuth();
 
+>>>>>>> origin/develop
   // بيانات الفورم
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+<<<<<<< HEAD
+    birthDate: '',
+    gender: '',
+=======
     city: '',
+>>>>>>> origin/develop
     address: '',
     password: '',
   });
 
   // الأخطاء
   const [errors, setErrors] = useState({});
+<<<<<<< HEAD
+=======
   const [loading, setLoading] = useState(false);
   const [cities, setCities] = useState([]);
+>>>>>>> origin/develop
 
   // إظهار وإخفاء كلمة المرور
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+<<<<<<< HEAD
+=======
   // جلب المدن
   useEffect(() => {
     let active = true;
@@ -61,10 +81,23 @@ function Register() {
     };
   }, []);
 
+>>>>>>> origin/develop
   // تغيير قيمة أي input
   const handleChange = (e) => {
     const { id, value } = e.target;
 
+<<<<<<< HEAD
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
+
+    // إزالة الخطأ بمجرد أن يبدأ المستخدم بالكتابة
+    setErrors({
+      ...errors,
+      [id]: '',
+    });
+=======
     setFormData((current) => ({
       ...current,
       [id]: value,
@@ -75,6 +108,7 @@ function Register() {
       [id]: '',
       general: '',
     }));
+>>>>>>> origin/develop
   };
 
   // إرسال الفورم
@@ -96,8 +130,23 @@ function Register() {
     }
 
     // رقم الهاتف
+<<<<<<< HEAD
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'يجب تعبئة رقم الهاتف';
+    }
+
+    // تاريخ الميلاد
+    if (!formData.birthDate) {
+      newErrors.birthDate = 'يجب تعبئة تاريخ الميلاد';
+    }
+
+    // الجنس
+    if (!formData.gender) {
+      newErrors.gender = 'يجب اختيار الجنس';
+=======
     if (!/^05\d{8}$/.test(formData.phone.trim())) {
       newErrors.phone = 'أدخل رقم هاتف فلسطينيًا مكوّنًا من 10 أرقام ويبدأ بـ 05';
+>>>>>>> origin/develop
     }
 
     // العنوان
@@ -110,6 +159,45 @@ function Register() {
       newErrors.password = 'يجب تعبئة كلمة المرور';
     } else {
       const hasUpperCase = /[A-Z]/.test(formData.password);
+<<<<<<< HEAD
+      const hasNumber = /[0-9]/.test(formData.password);
+      const hasSymbol = /[^A-Za-z0-9]/.test(formData.password);
+
+      if (!hasUpperCase || !hasNumber || !hasSymbol) {
+        newErrors.password = 'كلمة المرور يجب أن تحتوي على حرف كبير ورقم ورمز';
+      }
+    }
+    if (!acceptedTerms) {
+      newErrors.terms = 'يجب الموافقة على الشروط والأحكام';
+    }
+    // وضع الأخطاء
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      try {
+        const userData = {
+          fullName: formData.name,
+          phoneNumber: formData.phone,
+          address: formData.address,
+          email: formData.email,
+          password: formData.password,
+
+          // temporary value until you connect cities
+          cityId: 1,
+        };
+
+        const result = await registerUser(userData);
+
+        console.log('Backend Response:', result);
+
+        localStorage.setItem('accessToken', result.data.accessToken);
+
+        alert('Registration successful');
+      } catch (error) {
+        console.error(error);
+
+        alert(error.message || 'Registration failed');
+=======
       const hasLowerCase = /[a-z]/.test(formData.password);
       const hasNumber = /[0-9]/.test(formData.password);
       const hasSymbol = /[^A-Za-z0-9]/.test(formData.password);
@@ -154,6 +242,7 @@ function Register() {
         });
       } finally {
         setLoading(false);
+>>>>>>> origin/develop
       }
     }
   };
@@ -205,6 +294,8 @@ function Register() {
             أدخل بياناتك لإنشاء حساب جديد
           </p>
 
+<<<<<<< HEAD
+=======
           {/* General Error */}
           {errors.general && (
             <p
@@ -219,6 +310,7 @@ function Register() {
             </p>
           )}
 
+>>>>>>> origin/develop
           {/* ================= FORM ================= */}
           <form onSubmit={handleSubmit} className="w-full">
             {/* ================= NAME ================= */}
@@ -279,7 +371,11 @@ function Register() {
               <input
                 id="phone"
                 type="tel"
+<<<<<<< HEAD
+                placeholder="+972 59-------"
+=======
                 placeholder="0599123456"
+>>>>>>> origin/develop
                 value={formData.phone}
                 onChange={handleChange}
                 className={`
@@ -295,6 +391,64 @@ function Register() {
               {errors.phone && <p className="text-red-500 text-[12px] mt-[5px]">{errors.phone}</p>}
             </div>
 
+<<<<<<< HEAD
+            {/* ================= BIRTH DATE ================= */}
+            <div className="mb-[15px]">
+              <label htmlFor="birthDate" className="block text-[14px] sm:text-[15px] mb-[10px]">
+                تاريخ الميلاد
+              </label>
+
+              <input
+                id="birthDate"
+                type="date"
+                value={formData.birthDate}
+                onChange={handleChange}
+                className={`
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
+                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
+                  ${errors.birthDate ? 'border-red-500' : 'border-[#D8D8D8]'}
+                `}
+              />
+
+              {errors.birthDate && (
+                <p className="text-red-500 text-[12px] mt-[5px]">{errors.birthDate}</p>
+              )}
+            </div>
+
+            {/* ================= GENDER ================= */}
+            <div className="mb-[15px]">
+              <label htmlFor="gender" className="block text-[14px] sm:text-[15px] mb-[10px]">
+                الجنس
+              </label>
+
+              <select
+                id="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className={`
+                  w-full p-[8px] my-[10px]
+                  bg-[#f1f4f9]
+                  border rounded-[10px]
+                  outline-none
+                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
+                  ${errors.gender ? 'border-red-500' : 'border-[#D8D8D8]'}
+                `}>
+                <option value="" disabled>
+                  اختر الجنس
+                </option>
+
+                <option value="male">ذكر</option>
+
+                <option value="female">أنثى</option>
+              </select>
+
+              {errors.gender && (
+                <p className="text-red-500 text-[12px] mt-[5px]">{errors.gender}</p>
+              )}
+=======
             {/* ================= CITY ================= */}
             <div className="mb-[15px]">
               <label htmlFor="city" className="block text-[14px] sm:text-[15px] mb-[10px]">
@@ -325,6 +479,7 @@ function Register() {
                   );
                 })}
               </select>
+>>>>>>> origin/develop
             </div>
 
             {/* ================= ADDRESS ================= */}
@@ -336,7 +491,11 @@ function Register() {
               <input
                 id="address"
                 type="text"
+<<<<<<< HEAD
+                placeholder="غزة"
+=======
                 placeholder="الحي والشارع"
+>>>>>>> origin/develop
                 value={formData.address}
                 onChange={handleChange}
                 className={`
@@ -397,6 +556,10 @@ function Register() {
             </div>
 
             {/* ================= TERMS ================= */}
+<<<<<<< HEAD
+            {/* ================= TERMS ================= */}
+=======
+>>>>>>> origin/develop
             <div className="mb-[20px]">
               <label className="flex items-center gap-[8px] cursor-pointer select-none">
                 <input
@@ -406,10 +569,17 @@ function Register() {
                     setAcceptedTerms(e.target.checked);
 
                     if (e.target.checked) {
+<<<<<<< HEAD
+                      setErrors({
+                        ...errors,
+                        terms: '',
+                      });
+=======
                       setErrors((current) => ({
                         ...current,
                         terms: '',
                       }));
+>>>>>>> origin/develop
                     }
                   }}
                   className="sr-only"
@@ -418,6 +588,26 @@ function Register() {
                 {/* Custom Checkbox */}
                 <span
                   className={`
+<<<<<<< HEAD
+        w-[20px]
+        h-[20px]
+        rounded-[5px]
+        border
+        flex
+        items-center
+        justify-center
+        transition-all
+        duration-200
+
+        ${
+          acceptedTerms
+            ? 'bg-[#4F9D9E] border-[#4F9D9E]'
+            : errors.terms
+              ? 'bg-white border-red-500'
+              : 'bg-white border-[#D8D8D8]'
+        }
+      `}>
+=======
                     w-[20px]
                     h-[20px]
                     rounded-[5px]
@@ -436,6 +626,7 @@ function Register() {
                           : 'bg-white border-[#D8D8D8]'
                     }
                   `}>
+>>>>>>> origin/develop
                   {acceptedTerms && <i className="fa-solid fa-check text-white text-[12px]"></i>}
                 </span>
 
@@ -450,7 +641,10 @@ function Register() {
             {/* ================= REGISTER BUTTON ================= */}
             <button
               type="submit"
+<<<<<<< HEAD
+=======
               disabled={loading}
+>>>>>>> origin/develop
               className="
                 w-full
                 h-[45px]
@@ -461,10 +655,15 @@ function Register() {
                 transition
                 bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)]
                 hover:opacity-90
+<<<<<<< HEAD
+              ">
+              إنشاء حساب
+=======
                 disabled:opacity-60
                 disabled:cursor-not-allowed
               ">
               {loading ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
+>>>>>>> origin/develop
             </button>
           </form>
 

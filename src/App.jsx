@@ -1,17 +1,23 @@
-import Login from './pages/Login';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import Register from './pages/register';
-import { Navigate, Route, Routes } from 'react-router-dom';
 
+// ===== Components =====
+import Navbarpro from './components/Navbarpro';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// ===== Authentication =====
+import Login from './pages/Login';
+import Register from './pages/register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 
+// ===== Main Pages =====
 import Home from './pages/Home';
-import ProfilePage from './pages/ProfilePage.full';
-
-import Personalinfoform from './pages/Personalinfoform';
 import HomeLoggedIn from './pages/HomeLoggedIn';
+import ProfilePage from './pages/ProfilePage.full';
+import Personalinfoform from './pages/Personalinfoform';
 import AboutUs from './pages/AboutUs';
 import HelpCenter from './pages/HelpCenter';
 import PlatformRules from './pages/PlatformRules';
@@ -19,11 +25,17 @@ import Reportaproblem from './pages/Reportaproblem';
 import Privacy from './pages/Privacy';
 import MainLayout from './pages/MainLayout';
 
+// ===== Listing Pages =====
 import Listing from './pages/Listing';
 import AddListing from './pages/AddListing';
 
-import ProtectedRoute from './components/ProtectedRoute';
+// ===== صفحاتك - Store =====
+import Store from './pages/Store';
+import AddProduct from './pages/AddProduct';
+import ManageTags from './pages/ManageTags';
+import CategoriesPage from './pages/CategoriesPage';
 
+// ===== Dashboard Pages =====
 import Layout from './pages/components/Layout';
 import Dashboard from './pages/Dashboard';
 import Ads from './pages/Ads';
@@ -36,144 +48,63 @@ import Users from './pages/Users';
 
 function App() {
   return (
-    <Routes>
-      {/* Auth */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+    <div>
+      <Navbarpro />
 
-      {/* Protected Profile */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/profilePage" element={<ProfilePage />} />
+      <Routes>
+        {/* ========== شغلك - Store ========== */}
+        <Route path="/" element={<Store />} />
+        <Route path="/store" element={<Store />} />
+        <Route path="/products" element={<Store />} />
+        <Route path="/add-product" element={<AddProduct />} />
+        <Route path="/manage-tags" element={<ManageTags />} />
+        <Route path="/categories" element={<CategoriesPage />} />
 
-        <Route
-          path="/profile"
-          element={<Navigate to="/profilePage" replace />}
-        />
+        {/* ========== Auth ========== */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route
-          path="/add-product"
-          element={
-            <Navigate
-              to="/profilePage?tab=products&addProduct=1"
-              replace
-            />
-          }
-        />
+        {/* ========== Listing ========== */}
+        <Route path="/listing" element={<Listing />} />
+        <Route path="/addListing" element={<AddListing />} />
 
-        <Route
-          path="/my-products"
-          element={
-            <Navigate
-              to="/profilePage?tab=products"
-              replace
-            />
-          }
-        />
+        {/* ========== Protected (Profile) ========== */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/profilePage" element={<ProfilePage />} />
+          <Route path="/profile" element={<Navigate to="/profilePage" replace />} />
+          <Route path="/my-products" element={<Navigate to="/profilePage?tab=products" replace />} />
+          <Route path="/personalinfoform" element={<Personalinfoform />} />
+        </Route>
 
-        <Route
-          path="/personalinfoform"
-          element={<Personalinfoform />}
-        />
-      </Route>
+        {/* ========== Dashboard Pages ========== */}
+        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/ads" element={<Layout><Ads /></Layout>} />
+        <Route path="/messages" element={<Layout><Messages /></Layout>} />
+        <Route path="/messages-empty" element={<Layout><MessagesEmpty /></Layout>} />
+        <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
+        <Route path="/orders" element={<Layout><Orders /></Layout>} />
+        <Route path="/purchase-orders" element={<Layout><PurchaseOrders /></Layout>} />
+        <Route path="/users" element={<Layout><Users /></Layout>} />
 
-      {/* Shared Pages */}
-      <Route element={<MainLayout />}>
-        <Route path="/home" element={<Home />} />
-        <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
-        <Route path="/aboutUs" element={<AboutUs />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/helpCenter" element={<HelpCenter />} />
-        <Route path="/platformRules" element={<PlatformRules />} />
-        <Route path="/reportaproblem" element={<Reportaproblem />} />
-      </Route>
+        {/* ========== Shared Pages ========== */}
+        <Route element={<MainLayout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
+          <Route path="/aboutUs" element={<AboutUs />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/helpCenter" element={<HelpCenter />} />
+          <Route path="/platformRules" element={<PlatformRules />} />
+          <Route path="/reportaproblem" element={<Reportaproblem />} />
+        </Route>
 
-      {/* Listing */}
-      <Route path="/listing" element={<Listing />} />
-      <Route path="/addListing" element={<AddListing />} />
-
-      {/* Dashboard Pages */}
-      <Route
-        path="/dashboard"
-        element={
-          <Layout>
-            <Dashboard />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/ads"
-        element={
-          <Layout>
-            <Ads />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/messages"
-        element={
-          <Layout>
-            <Messages />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/messages-empty"
-        element={
-          <Layout>
-            <MessagesEmpty />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/notifications"
-        element={
-          <Layout>
-            <Notifications />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/orders"
-        element={
-          <Layout>
-            <Orders />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/purchase-orders"
-        element={
-          <Layout>
-            <PurchaseOrders />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/users"
-        element={
-          <Layout>
-            <Users />
-          </Layout>
-        }
-      />
-
-      {/* Any unknown route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* ========== Fallback ========== */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
   );
 }
 
 export default App;
-
-

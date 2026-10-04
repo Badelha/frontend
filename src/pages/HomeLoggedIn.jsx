@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+import Navbarpro from '../components/Navbarpro';
+import Footer from '../components/Footer';
+
+=======
+>>>>>>> origin/develop
 import { motion } from 'framer-motion';
 // import heroImage from '../assets/image/badelha2.png';
 // import bater from '../assets/image/barter-animation-realistic.html';
@@ -44,7 +50,11 @@ function Counter({ end, duration = 2000 }) {
   return <>{count.toLocaleString('ar-EG')}</>;
 }
 
+<<<<<<< HEAD
+function Home() {
+=======
 function HomeLoggedin() {
+>>>>>>> origin/develop
   const [showAll, setShowAll] = useState(false);
   const sectionVariants = {
     hidden: { opacity: 0, y: 25 },
@@ -100,6 +110,10 @@ function HomeLoggedin() {
   };
   return (
     <>
+<<<<<<< HEAD
+      <Navbarpro />
+=======
+>>>>>>> origin/develop
       <main>
         {/* HERO SECTION */}
 
@@ -176,7 +190,11 @@ function HomeLoggedin() {
         {/*THE END HERO SECTION */}
         {/* section two */}
         <section
+<<<<<<< HEAD
+          id="how-it-works"
+=======
           id="hoow-it-works"
+>>>>>>> origin/develop
           className="bg-[#eff7fc] px-4 py-[50px] sm:px-6 md:px-10 lg:px-[60px] lg:py-[60px]">
           {/* Section Header */}
           <motion.div
@@ -456,7 +474,11 @@ function HomeLoggedin() {
               ))}
           </div>
         </section>
+<<<<<<< HEAD
+        {/*the end section threee */}
+=======
         {/*the end section three */}
+>>>>>>> origin/develop
 
         {/* section four */}
         <motion.section
@@ -712,11 +734,60 @@ function HomeLoggedin() {
           </div>
         </section>
         {/*the end section five */}
+<<<<<<< HEAD
+        {/* section six */}
+        <motion.section
+          variants={ctaSectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          className=" bg-[#eff7fc] px-4 py-[45px] sm:px-6 sm:py-[55px] md:px-10 lg:px-[60px] lg:py-[60px] ">
+          {' '}
+          <div className=" mx-auto flex max-w-[1100px] flex-col items-center justify-between gap-7 rounded-[25px] bg-[#4a9596] px-5 py-7 text-center shadow-[0_8px_30px_rgba(74,149,150,0.15)] sm:px-7 sm:py-8 md:px-10 md:py-9 lg:flex-row lg:gap-10 lg:rounded-[30px] lg:px-12 lg:py-9 lg:text-right ">
+            {' '}
+            {/* Text */}{' '}
+            <motion.div variants={ctaTextVariants} className="flex-1">
+              {' '}
+              <h2 className=" m-0 text-[23px] font-bold leading-[1.5] text-white sm:text-[27px] md:text-[30px] ">
+                {' '}
+                جاهز تبدأ أول صفقة إلك؟{' '}
+              </h2>{' '}
+              <p className=" mt-2 text-[13px] leading-7 text-[#e5eeee] sm:text-[14px] md:text-[15px] ">
+                {' '}
+                انضم لآلاف المستخدمين اللي وفروا وقتهم وفلوسهم عن طريق بدّلها.{' '}
+              </p>{' '}
+            </motion.div>{' '}
+            {/* Button */}{' '}
+            <motion.div variants={ctaButtonVariants}>
+              {' '}
+              <Link
+                to="/register"
+                className=" flex w-full items-center justify-center gap-2 rounded-[30px] bg-white px-6 py-3 text-center font-bold transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:w-auto sm:min-w-[190px] sm:px-7 ">
+                {' '}
+                <i className="fa-solid fa-plus text-[#4a9596]"></i>{' '}
+                <span className=" text-[14px] text-[#4a9596] sm:text-[15px] ">
+                  {' '}
+                  أنشئ حسابك الآن{' '}
+                </span>{' '}
+              </Link>{' '}
+            </motion.div>{' '}
+          </div>{' '}
+        </motion.section>
+        {/*the end section six */}
       </main>
 
+      <Footer />
+=======
+      </main>
+
+>>>>>>> origin/develop
       <link rel="stylesheet" href="menagehad" />
     </>
   );
 }
 
+<<<<<<< HEAD
+export default Home;
+=======
 export default HomeLoggedin;
+>>>>>>> origin/develop
