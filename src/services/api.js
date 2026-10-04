@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 const configuredBaseUrl = (import.meta.env.VITE_API_URL || 'https://backend-6fgq.onrender.com').trim();
 const parsedBaseUrl = new URL(configuredBaseUrl);
