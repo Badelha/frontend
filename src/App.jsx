@@ -2,10 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 
-// ===== Components =====
-import Navbarpro from './components/Navbarpro';
-import ProtectedRoute from './components/ProtectedRoute';
-
 // ===== Authentication =====
 import Login from './pages/Login';
 import Register from './pages/register';
@@ -28,10 +24,11 @@ import MainLayout from './pages/MainLayout';
 // ===== Listing Pages =====
 import Listing from './pages/Listing';
 import AddListing from './pages/AddListing';
-
-// ===== صفحاتك - Store =====
-import Store from './pages/Store';
 import AddProduct from './pages/AddProduct';
+import Market from './pages/Market';
+
+// ===== Store Pages =====
+import Store from './pages/Store';
 import ManageTags from './pages/ManageTags';
 import CategoriesPage from './pages/CategoriesPage';
 
@@ -46,64 +43,133 @@ import Orders from './pages/Orders';
 import PurchaseOrders from './pages/PurchaseOrders';
 import Users from './pages/Users';
 
+// ===== Components =====
+import ProtectedRoute from './components/ProtectedRoute';
+
 function App() {
   return (
-    <div>
-      <Navbarpro />
+    <Routes>
+      {/* ========== Auth ========== */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-      <Routes>
-        {/* ========== شغلك - Store ========== */}
-        <Route path="/" element={<Store />} />
-        <Route path="/store" element={<Store />} />
-        <Route path="/products" element={<Store />} />
-        <Route path="/add-product" element={<AddProduct />} />
-        <Route path="/manage-tags" element={<ManageTags />} />
-        <Route path="/categories" element={<CategoriesPage />} />
+      {/* ========== Store ========== */}
+      <Route path="/store" element={<Store />} />
+      <Route path="/products" element={<Store />} />
+      <Route path="/manage-tags" element={<ManageTags />} />
+      <Route path="/categories" element={<CategoriesPage />} />
 
-        {/* ========== Auth ========== */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+      {/* ========== Listing ========== */}
+      <Route path="/listing" element={<Listing />} />
+      <Route path="/addListing" element={<AddListing />} />
 
-        {/* ========== Listing ========== */}
-        <Route path="/listing" element={<Listing />} />
-        <Route path="/addListing" element={<AddListing />} />
+      {/* ========== Protected Profile ========== */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/profilePage" element={<ProfilePage />} />
+        <Route path="/profile" element={<Navigate to="/profilePage" replace />} />
+        <Route
+          path="/add-product"
+          element={<Navigate to="/profilePage?tab=products&addProduct=1" replace />}
+        />
+      </Route>
 
-        {/* ========== Protected (Profile) ========== */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/profilePage" element={<ProfilePage />} />
-          <Route path="/profile" element={<Navigate to="/profilePage" replace />} />
-          <Route path="/my-products" element={<Navigate to="/profilePage?tab=products" replace />} />
-          <Route path="/personalinfoform" element={<Personalinfoform />} />
-        </Route>
+      <Route path="/my-products" element={<Navigate to="/profilePage?tab=products" replace />} />
 
-        {/* ========== Dashboard Pages ========== */}
-        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-        <Route path="/ads" element={<Layout><Ads /></Layout>} />
-        <Route path="/messages" element={<Layout><Messages /></Layout>} />
-        <Route path="/messages-empty" element={<Layout><MessagesEmpty /></Layout>} />
-        <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
-        <Route path="/orders" element={<Layout><Orders /></Layout>} />
-        <Route path="/purchase-orders" element={<Layout><PurchaseOrders /></Layout>} />
-        <Route path="/users" element={<Layout><Users /></Layout>} />
+      <Route path="/personalinfoform" element={<Personalinfoform />} />
+      <Route path="/addproduct" element={<AddProduct />} />
 
-        {/* ========== Shared Pages ========== */}
-        <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
-          <Route path="/aboutUs" element={<AboutUs />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/helpCenter" element={<HelpCenter />} />
-          <Route path="/platformRules" element={<PlatformRules />} />
-          <Route path="/reportaproblem" element={<Reportaproblem />} />
-        </Route>
+      {/* ========== Dashboard ========== */}
+      <Route
+        path="/dashboard"
+        element={
+          <Layout>
+            <Dashboard />
+          </Layout>
+        }
+      />
 
-        {/* ========== Fallback ========== */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+      <Route
+        path="/ads"
+        element={
+          <Layout>
+            <Ads />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/messages"
+        element={
+          <Layout>
+            <Messages />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/messages-empty"
+        element={
+          <Layout>
+            <MessagesEmpty />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          <Layout>
+            <Notifications />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/orders"
+        element={
+          <Layout>
+            <Orders />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/purchase-orders"
+        element={
+          <Layout>
+            <PurchaseOrders />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/users"
+        element={
+          <Layout>
+            <Users />
+          </Layout>
+        }
+      />
+
+      {/* ========== Shared Pages ========== */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/homeLoggedIn" element={<HomeLoggedIn />} />
+        <Route path="/aboutUs" element={<AboutUs />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/helpCenter" element={<HelpCenter />} />
+        <Route path="/platformRules" element={<PlatformRules />} />
+        <Route path="/reportaproblem" element={<Reportaproblem />} />
+        <Route path="/market" element={<Market />} />
+      </Route>
+
+      {/* ========== Fallback ========== */}
+      <Route path="*" element={<Navigate to="/home" replace />} />
+    </Routes>
   );
 }
 

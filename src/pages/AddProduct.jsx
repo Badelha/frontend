@@ -1,359 +1,429 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { FaPlus, FaChevronDown, FaHome, FaImage, FaTimes } from 'react-icons/fa';
-import Navbarpro from '../components/Navbarpro'; 
+import { useState, useRef } from 'react';
 
-const AddProduct = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState(null);
-  const [keywordList, setKeywordList] = useState([]);
-  const [keywordInput, setKeywordInput] = useState('');
+import Footer from '../components/Footer';
+import Navbarpro from '../components/Navbarpro';
 
-  const [formData, setFormData] = useState({
+const CATEGORIES = ['سيارات', 'موبايلات', 'ملابس', 'أثاث', 'خدمات', 'ألعاب', 'أخرى'];
+
+const LOCATIONS = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
+
+const OPERATIONS = ['بيع', 'مقايضة', 'بيع أو مقايضة'];
+
+const CONDITIONS = ['جديد', 'كالجديد', 'مستعمل'];
+
+const input =
+  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:bg-white focus:border-[#4F9D9E] focus:ring-4 focus:ring-[#4F9D9E]/20';
+
+export default function AddProduct() {
+  const fileRef = useRef(null);
+
+  const [images, setImages] = useState([]);
+  const [mainIdx, setMainIdx] = useState(0);
+  const [keywords, setKeywords] = useState([]);
+  const [kw, setKw] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const [form, setForm] = useState({
     name: '',
     price: '',
-    quantity: '',
+    qty: 1,
     category: '',
-    operationType: '',
+    operation: '',
     location: '',
-    extraInfo: '',
-    status: '',
+    condition: '',
     description: '',
-    image: null,
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({ ...formData, image: file });
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const addKeyword = (word) => {
-    const trimmed = word.trim();
-    if (trimmed && !keywordList.includes(trimmed)) {
-      setKeywordList([...keywordList, trimmed]);
-    }
-  };
-
-  const removeKeyword = (word) => {
-    setKeywordList(keywordList.filter((w) => w !== word));
-  };
-
-  const handleKeywordKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (keywordInput.trim()) {
-        addKeyword(keywordInput);
-        setKeywordInput('');
-      }
-    }
-    if (e.key === 'Backspace' && !keywordInput && keywordList.length > 0) {
-      removeKeyword(keywordList[keywordList.length - 1]);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key]) data.append(key, formData[key]);
+  const set = (key, value) => {
+    setForm({
+      ...form,
+      [key]: value,
     });
-    data.append('keywords', keywordList.join(', '));
+  };
 
-    try {
-      await api.post('/products', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      alert('✨ تم حفظ المنتج بنجاح!');
-      navigate('/products');
-    } catch (error) {
-      console.error(error);
-      alert('حدث خطأ أثناء الإضافة');
-    } finally {
-      setLoading(false);
+  // =========================
+  // إضافة الصور حتى 6 صور
+  // =========================
+  const addFiles = (files) => {
+    const urls = Array.from(files)
+      .filter((file) => file.type.startsWith('image/'))
+      .slice(0, 6 - images.length)
+      .map((file) => URL.createObjectURL(file));
+
+    if (urls.length > 0) {
+      setImages([...images, ...urls]);
     }
   };
+
+  // =========================
+  // إضافة كلمة مفتاحية
+  // =========================
+  const addKeyword = () => {
+    const word = kw.trim();
+
+    if (word && !keywords.includes(word)) {
+      setKeywords([...keywords, word]);
+    }
+
+    setKw('');
+  };
+
+  // =========================
+  // حفظ المنتج
+  // =========================
+  const save = () => {
+    if (images.length === 0) {
+      setError('ضيفي صورة وحدة على الأقل');
+      return;
+    }
+
+    if (!form.name.trim()) {
+      setError('اكتبي اسم المنتج');
+      return;
+    }
+
+    if (!form.price) {
+      setError('حطي سعر المنتج');
+      return;
+    }
+
+    if (!form.category || !form.operation || !form.location || !form.condition) {
+      setError('عبّي كل الحقول المطلوبة');
+      return;
+    }
+
+    setError('');
+    setSaving(true);
+
+    // مؤقتًا إلى حين ربط الباك إند
+    setTimeout(() => {
+      setSaving(false);
+      setSaved(true);
+    }, 1200);
+  };
+
+  // =========================
+  // زر الخيارات
+  // =========================
+  const Pill = ({ value, field }) => (
+    <button
+      type="button"
+      onClick={() => set(field, value)}
+      className={`px-4 py-2 rounded-full text-sm border transition active:scale-95 ${
+        form[field] === value
+          ? 'bg-[#4F9D9E] border-[#4F9D9E] text-white shadow'
+          : 'bg-slate-50 border-slate-200 hover:border-[#4F9D9E]'
+      }`}>
+      {value}
+    </button>
+  );
 
   return (
-    <div className="min-h-screen bg-brand-bg pb-16">
-      
-      {/* 1. إضافة شريط التنقل هنا */}
+    <>
       <Navbarpro />
 
-      {/* 2. إضافة pt-24 لتعويض ارتفاع الناف بار */}
-      <div className="container mx-auto px-4 pt-24 pb-10 max-w-3xl">
+      <div dir="rtl" className="min-h-screen text-slate-700 pb-12">
+        <main className="max-w-2xl mx-auto px-4 pt-24">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e4a63] mt-8 mb-5">أضف منتج جديد</h1>
 
-        <h1 className="text-4xl font-extrabold text-center text-brand-dark mb-8">
-          اضف منتج جديد
-        </h1>
+          {/* ========================= */}
+          {/* رفع الصور */}
+          {/* ========================= */}
 
-        <div className="bg-brand-border/40 rounded-2xl p-5 mb-6">
-          <label
-            htmlFor="image-upload"
-            className="cursor-pointer flex flex-col items-center justify-center w-full h-64 bg-brand-input border-2 border-brand-border rounded-xl hover:bg-white transition relative overflow-hidden"
-          >
-            {preview ? (
-              <img src={preview} alt="preview" className="w-full h-full object-cover rounded-xl" />
-            ) : (
-              <div className="flex flex-col items-center text-gray-400">
-                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-3">
-                  <FaPlus className="text-brand" size={18} />
+          <section className="bg-[#c9dde3] rounded-2xl p-3">
+            <div
+              onClick={() => fileRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                addFiles(e.dataTransfer.files);
+              }}
+              className="h-48 sm:h-64 rounded-xl bg-[#e8edf0] grid place-items-center cursor-pointer overflow-hidden hover:bg-[#dfe9ee] transition">
+              {images.length ? (
+                <img
+                  src={images[mainIdx]}
+                  alt="صورة المنتج"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-center text-sm text-slate-500 px-4">
+                  <div className="animate-bounce w-11 h-11 mx-auto mb-2 rounded-full bg-white shadow grid place-items-center text-xl text-[#4F9D9E]">
+                    +
+                  </div>
+                  اسحب وأفلت صورة هنا، أو انقر للتحميل
                 </div>
-                <FaImage className="text-gray-400 mb-2" size={24} />
-                <p className="text-sm font-medium text-gray-500 text-center leading-relaxed">
-                  اسحب وأفلت صورة هنا،<br />
-                  أو انقر لتحميلها
-                </p>
-              </div>
-            )}
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
-          </label>
+              )}
 
-          <div className="flex items-center justify-between mt-4">
-            <button type="button" className="w-14 h-12 rounded-lg bg-white flex items-center justify-center text-brand shadow-sm">
-              <FaHome size={16} />
-            </button>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-16 h-12 bg-white rounded-lg shadow-sm"></div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onChange={(e) => addFiles(e.target.files)}
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {images.map((url, index) => (
+                <button
+                  key={url}
+                  type="button"
+                  onClick={() => setMainIdx(index)}
+                  className={`w-14 h-11 rounded-lg overflow-hidden border-2 transition hover:scale-110 ${
+                    index === mainIdx ? 'border-[#2f6f8f]' : 'border-transparent opacity-70'
+                  }`}>
+                  <img src={url} alt="" className="w-full h-full object-cover" />
+                </button>
               ))}
-              <button type="button" className="w-10 h-12 rounded-lg bg-brand text-white flex items-center justify-center shadow-md hover:bg-brand-dark transition">
-                <FaPlus size={12} />
-              </button>
+
+              <span className="mr-auto text-xs text-slate-500">{images.length}/6 صور</span>
             </div>
-            <p className="text-xs text-gray-500 font-medium">اضف حتى 5 صور</p>
-          </div>
-        </div>
+          </section>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 text-right">تفاصيل المنتج</h2>
+          {/* ========================= */}
+          {/* تفاصيل المنتج */}
+          {/* ========================= */}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <section className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mt-5 space-y-4">
+            <h2 className="font-bold text-[#1e4a63]">تفاصيل المنتج</h2>
+
+            {/* اسم المنتج */}
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">اسم المنتج</label>
+              <label className="text-xs text-slate-500">اسم المنتج</label>
+
               <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="سماعات رأس لاسلكية"
-                className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 text-right focus:outline-none focus:border-brand focus:bg-white transition"
-                required
+                className={input}
+                placeholder="مثال: سماعات رأس لاسلكية"
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* السعر والعدد */}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2 text-right">سعر المنتج</label>
+                <label className="text-xs text-slate-500">السعر (₪)</label>
+
                 <input
                   type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
+                  min="0"
+                  className={input}
                   placeholder="0.00"
-                  className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 text-right focus:outline-none focus:border-brand focus:bg-white transition"
-                  required
+                  value={form.price}
+                  onChange={(e) => set('price', e.target.value)}
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2 text-right">العدد</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleChange}
-                  placeholder="0"
-                  className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 text-right focus:outline-none focus:border-brand focus:bg-white transition"
-                />
+                <label className="text-xs text-slate-500">العدد</label>
+
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-1.5">
+                  <button
+                    type="button"
+                    onClick={() => set('qty', Math.max(1, form.qty - 1))}
+                    className="w-8 h-8 rounded-lg bg-white shadow-sm hover:bg-[#4F9D9E] hover:text-white transition">
+                    −
+                  </button>
+
+                  <span className="font-bold">{form.qty}</span>
+
+                  <button
+                    type="button"
+                    onClick={() => set('qty', form.qty + 1)}
+                    className="w-8 h-8 rounded-lg bg-white shadow-sm hover:bg-[#4F9D9E] hover:text-white transition">
+                    +
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">الفئة</label>
-              <div className="relative">
+            {/* الفئة والموقع */}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-slate-500">الفئة</label>
+
                 <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 pr-10 text-right focus:outline-none focus:border-brand focus:bg-white transition appearance-none cursor-pointer"
-                >
+                  className={input}
+                  value={form.category}
+                  onChange={(e) => set('category', e.target.value)}>
                   <option value="">اختر الفئة</option>
-                  <option value="إلكترونيات">إلكترونيات</option>
-                  <option value="ملابس">ملابس</option>
-                  <option value="أثاث">أثاث</option>
-                  <option value="أدوات">أدوات</option>
-                  <option value="عطور">عطور</option>
-                </select>
-                <FaChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={12} />
-              </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">نوع العملية</label>
-              <div className="relative">
+                  {CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-500">الموقع</label>
+
                 <select
-                  name="operationType"
-                  value={formData.operationType}
-                  onChange={handleChange}
-                  className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 pr-10 text-right focus:outline-none focus:border-brand focus:bg-white transition appearance-none cursor-pointer"
-                >
-                  <option value="">اختر نوع العملية</option>
-                  <option value="بيع">بيع</option>
-                  <option value="إيجار">إيجار</option>
-                  <option value="مقايضة">مقايضة</option>
+                  className={input}
+                  value={form.location}
+                  onChange={(e) => set('location', e.target.value)}>
+                  <option value="">اختر الموقع</option>
+
+                  {LOCATIONS.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
                 </select>
-                <FaChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={12} />
               </div>
             </div>
 
+            {/* نوع العملية */}
+
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">الموقع</label>
-              <div className="relative">
-                <select
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 pr-10 text-right focus:outline-none focus:border-brand focus:bg-white transition appearance-none cursor-pointer"
-                >
-                  <option value="">الموقع</option>
-                  <option value="غزة">غزة</option>
-                  <option value="دير البلح">دير البلح</option>
-                  <option value="خان يونس">خان يونس</option>
-                  <option value="رفح">رفح</option>
-                </select>
-                <FaChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={12} />
+              <label className="text-xs text-slate-500 block mb-1.5">نوع العملية</label>
+
+              <div className="flex flex-wrap gap-2">
+                {OPERATIONS.map((operation) => (
+                  <Pill key={operation} value={operation} field="operation" />
+                ))}
               </div>
             </div>
 
+            {/* الحالة */}
+
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">معلومات إضافية</label>
-              <input
-                type="text"
-                name="extraInfo"
-                value={formData.extraInfo}
-                onChange={handleChange}
-                placeholder="مثال: يفضل ان يكون في غزة"
-                className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 text-right focus:outline-none focus:border-brand focus:bg-white transition"
-              />
+              <label className="text-xs text-slate-500 block mb-1.5">الحالة</label>
+
+              <div className="flex flex-wrap gap-2">
+                {CONDITIONS.map((condition) => (
+                  <Pill key={condition} value={condition} field="condition" />
+                ))}
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">كلمات مفتاحية</label>
+            {/* الكلمات المفتاحية */}
 
-              <div className="w-full bg-brand-input border border-brand-border rounded-lg py-2.5 px-4 focus-within:border-brand focus-within:bg-white transition min-h-[52px] flex flex-wrap gap-2 items-center">
-                {keywordList.map((word, idx) => (
+            <div>
+              <label className="text-xs text-slate-500">كلمات مفتاحية (Enter للإضافة)</label>
+
+              <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                {keywords.map((keyword) => (
                   <span
-                    key={idx}
-                    className="inline-flex items-center gap-1.5 bg-brand text-white text-xs px-3 py-1.5 rounded-full"
-                  >
-                    {word}
+                    key={keyword}
+                    className="bg-[#d5ebec] text-[#2f6f8f] text-xs px-2.5 py-1 rounded-full">
+                    {keyword}
+
                     <button
                       type="button"
-                      onClick={() => removeKeyword(word)}
-                      className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition"
-                    >
-                      <FaTimes size={10} />
+                      className="mr-1 hover:text-red-500"
+                      onClick={() => setKeywords(keywords.filter((item) => item !== keyword))}>
+                      ×
                     </button>
                   </span>
                 ))}
 
                 <input
-                  type="text"
-                  value={keywordInput}
-                  onChange={(e) => setKeywordInput(e.target.value)}
-                  onKeyDown={handleKeywordKeyDown}
-                  placeholder={keywordList.length === 0 ? "مثال: لاسلكي" : "أضف كلمة..."}
-                  className="flex-1 bg-transparent outline-none text-right min-w-[100px] text-sm py-1"
+                  className="flex-1 min-w-[90px] bg-transparent outline-none text-sm"
+                  placeholder="مثل: لاسلكي"
+                  value={kw}
+                  onChange={(e) => setKw(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addKeyword();
+                    }
+                  }}
                 />
               </div>
-
-              <div className="flex gap-2 mt-2 justify-end flex-wrap">
-                {['عالي الصوت', 'صوت', 'لاسلكي']
-                  .filter((w) => !keywordList.includes(w))
-                  .map((word) => (
-                    <button
-                      key={word}
-                      type="button"
-                      onClick={() => addKeyword(word)}
-                      className="bg-brand-border/50 text-gray-600 text-xs px-3 py-1.5 rounded-md hover:bg-brand hover:text-white transition"
-                    >
-                      + {word}
-                    </button>
-                  ))}
-              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">الحالة</label>
-              <div className="relative">
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 pr-10 text-right focus:outline-none focus:border-brand focus:bg-white transition appearance-none cursor-pointer"
-                >
-                  <option value="">اختر الحالة</option>
-                  <option value="جديد">جديد</option>
-                  <option value="مستعمل">مستعمل</option>
-                  <option value="ممتاز">ممتاز</option>
-                </select>
-                <FaChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={12} />
-              </div>
-            </div>
+            {/* الوصف */}
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2 text-right">الوصف</label>
+              <label className="text-xs text-slate-500">الوصف</label>
+
               <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows="4"
-                placeholder="صف منتجك - المميزات، المواد، الأبعاد..."
-                className="w-full bg-brand-input border border-brand-border rounded-lg py-3 px-4 text-right focus:outline-none focus:border-brand focus:bg-white transition resize-none"
-              ></textarea>
+                rows={4}
+                maxLength={500}
+                className={`${input} resize-none`}
+                placeholder="صف ملاحظاتك - المواد، المزايا، الأبعاد..."
+                value={form.description}
+                onChange={(e) => set('description', e.target.value)}
+              />
+
+              <p className="text-xs text-slate-400 text-left">{form.description.length}/500</p>
             </div>
-          </form>
-        </div>
+          </section>
 
-        <div className="flex gap-4 mt-6">
-          
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex-1 bg-brand text-white py-4 rounded-xl font-bold hover:bg-brand-dark transition shadow-md disabled:opacity-50"
-          >
-            {loading ? 'جاري الحفظ...' : 'حفظ المنتج'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/products')}
-            className="flex-1 bg-white border border-gray-200 text-gray-600 py-4 rounded-xl font-bold hover:bg-gray-50 transition"
-          >
-            إلغاء
-          </button>
-        </div>
+          {/* ========================= */}
+          {/* رسالة الخطأ */}
+          {/* ========================= */}
 
+          {error && (
+            <p className="mt-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2 animate-pulse">
+              {error}
+            </p>
+          )}
+
+          {/* ========================= */}
+          {/* الأزرار */}
+          {/* ========================= */}
+
+          <div className="flex flex-col-reverse sm:flex-row gap-3 mt-5">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="sm:w-40 py-3 rounded-xl bg-white border border-slate-200 text-sm hover:bg-slate-50 active:scale-95 transition">
+              إلغاء
+            </button>
+
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              className="flex-1 py-3 rounded-xl bg-[#4F9D9E] text-white font-bold shadow hover:bg-[#3f8c8d] hover:-translate-y-0.5 active:scale-95 transition disabled:opacity-70">
+              {saving ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  جاري الحفظ...
+                </span>
+              ) : (
+                'حفظ المنتج'
+              )}
+            </button>
+          </div>
+        </main>
+
+        {/* ========================= */}
+        {/* نافذة النجاح */}
+        {/* ========================= */}
+
+        {saved && (
+          <div className="fixed inset-0 bg-black/40 grid place-items-center px-4 z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#4F9D9E] text-white text-3xl grid place-items-center">
+                ✓
+              </div>
+
+              <h3 className="text-xl font-bold mb-1">تم نشر المنتج</h3>
+
+              <p className="text-sm text-slate-500 mb-5">"{form.name}" صار ظاهر في السوق.</p>
+
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="w-full py-3 rounded-xl bg-[#4F9D9E] text-white font-bold hover:bg-[#3f8c8d] transition">
+                إضافة منتج آخر
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  );
-};
 
-export default AddProduct;
+      <Footer />
+    </>
+  );
+}

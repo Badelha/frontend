@@ -142,7 +142,7 @@ function HomeLoggedin() {
             {/* ============================= */}{' '}
             <h1 className=" w-full text-white text-[29px] leading-[1.35] sm:text-[38px] sm:leading-[1.3] md:text-[48px] md:leading-[1.25] lg:text-[56px] lg:leading-[1.25] xl:text-[60px] font-extrabold tracking-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.12)] ">
               {' '}
-              بدّلها.. بادل، بيع، أو اشترِ <br />{' '}
+              بادل.. بدّلها بيع، أو اشترِ <br />{' '}
               <span className=" bg-[linear-gradient(90deg,#6FA6CC_0%,#79C2BE_100%)] bg-clip-text text-transparent ">
                 {' '}
                 كل احتياجاتك بمنصة واحدة.{' '}
@@ -206,7 +206,7 @@ function HomeLoggedin() {
             <motion.h3
               variants={itemVariants}
               className="my-2 text-[26px] font-bold text-[#306061] sm:text-[30px] md:text-[33px]">
-              كيف تشتغل بدّلها؟
+              كيف تشتغل بادل؟
             </motion.h3>
 
             <motion.p
@@ -348,12 +348,12 @@ function HomeLoggedin() {
           {/* Products Grid */}
           <div
             className="
-      mx-auto mt-8 grid max-w-[1200px]
-      grid-cols-2 gap-4
-      sm:mt-10 sm:grid-cols-2 sm:gap-5
-      md:grid-cols-4
-      lg:grid-cols-5 lg:gap-5
-    ">
+            mx-auto mt-8 grid max-w-[1200px]
+            grid-cols-2 gap-4
+            sm:mt-10 sm:grid-cols-2 sm:gap-5
+            md:grid-cols-4
+            lg:grid-cols-5 lg:gap-5
+          ">
             {[
               {
                 image: one,
@@ -408,69 +408,70 @@ function HomeLoggedin() {
             ]
               .slice(0, showAll ? 10 : 5)
               .map((product, index) => (
-                <motion.div
-                  key={product.title}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.9,
-                    y: 12,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    scale: 1,
-                    y: 0,
-                  }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: (index % 5) * 0.08,
-                    ease: 'easeOut',
-                  }}
-                  whileHover={{
-                    y: -5,
-                    scale: 1.02,
-                    transition: { duration: 0.25 },
-                  }}
-                  className="
-            group flex h-[165px] w-full cursor-pointer
-            flex-col items-center justify-center
-            rounded-2xl border border-[#ecebeb]
-            bg-white px-2
-            shadow-[0_0_15px_#80808033]
-            transition-colors duration-300 ease-in-out
-            hover:bg-gradient-to-r
-            hover:from-[#4F9D9E]
-            hover:to-[#3A73AA]
-            hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)]
-            sm:h-[175px]
-          ">
-                  {/* Product Image */}
-                  <motion.img
-                    src={product.image}
-                    alt={product.title}
-                    whileHover={{ scale: 1.08 }}
-                    transition={{ duration: 0.3 }}
-                    className={`
-              ${
-                index < 3
-                  ? 'h-[68px] w-[68px] sm:h-[75px] sm:w-[75px]'
-                  : 'h-[65px] w-[65px] sm:h-[72px] sm:w-[72px]'
-              }
-              ${index < 3 ? 'rounded-full' : ''}
-              object-cover
-            `}
-                  />
+                <Link key={product.title} to="/market" className="block">
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      scale: 0.9,
+                      y: 12,
+                    }}
+                    whileInView={{
+                      opacity: 1,
+                      scale: 1,
+                      y: 0,
+                    }}
+                    viewport={{ once: true, amount: 0.15 }}
+                    transition={{
+                      duration: 0.45,
+                      delay: (index % 5) * 0.08,
+                      ease: 'easeOut',
+                    }}
+                    whileHover={{
+                      y: -5,
+                      scale: 1.02,
+                      transition: { duration: 0.25 },
+                    }}
+                    className="
+                    group flex h-[165px] w-full cursor-pointer
+                    flex-col items-center justify-center
+                    rounded-2xl border border-[#ecebeb]
+                    bg-white px-2
+                    shadow-[0_0_15px_#80808033]
+                    transition-colors duration-300 ease-in-out
+                    hover:bg-gradient-to-r
+                    hover:from-[#4F9D9E]
+                    hover:to-[#3A73AA]
+                    hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)]
+                    sm:h-[175px]
+                  ">
+                    {/* Product Image */}
+                    <motion.img
+                      src={product.image}
+                      alt={product.title}
+                      whileHover={{ scale: 1.08 }}
+                      transition={{ duration: 0.3 }}
+                      className={`
+                      ${
+                        index < 3
+                          ? 'h-[68px] w-[68px] sm:h-[75px] sm:w-[75px]'
+                          : 'h-[65px] w-[65px] sm:h-[72px] sm:w-[72px]'
+                      }
+                      ${index < 3 ? 'rounded-full' : ''}
+                      object-cover
+                    `}
+                    />
 
-                  {/* Product Title */}
-                  <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
-                    {product.title}
-                  </h4>
+                    {/* Product Title */}
+                    <h4 className="mt-2 text-center text-[14px] font-bold text-[#4181A6] transition-colors duration-300 group-hover:text-white sm:text-[16px]">
+                      {product.title}
+                    </h4>
 
-                  {/* Product Count */}
-                  <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
-                    {product.count}
-                  </p>
-                </motion.div>
+                    {/* Product Count */}
+                    <p className="mt-1 text-[12px] text-[#b9b7b7] transition-colors duration-300 group-hover:text-white sm:text-[13px]">
+                      {product.count}
+                    </p>
+                  </motion.div>
+                </Link>
               ))}
           </div>
         </section>
@@ -494,7 +495,7 @@ function HomeLoggedin() {
             {' '}
             <h3 className=" my-2 text-[26px] font-bold text-[#306061] sm:text-[30px] md:text-[33px] ">
               {' '}
-              لماذا بدّلها؟{' '}
+              لماذا بادل؟{' '}
             </h3>{' '}
             <p className=" max-w-[850px] text-[14px] leading-7 text-[#989797] sm:text-[15px] ">
               {' '}
