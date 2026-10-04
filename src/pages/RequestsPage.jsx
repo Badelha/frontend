@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import requests from '../services/requests';
 import { getApiError } from '../services/api';
 import Navbarpro from '../components/Navbarpro';
 import Footer from '../components/Footer';
+
+const normalizeRequestList = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+};
 
 function RequestsPage() {
   const [searchParams] = useSearchParams();
@@ -29,7 +36,7 @@ function RequestsPage() {
       .exchanges()
       .then((data) => {
         if (active) {
-          setExchanges(Array.isArray(data) ? data : data?.data || []);
+          setExchanges(normalizeRequestList(data));
           setErrorExchanges('');
         }
       })
@@ -55,7 +62,7 @@ function RequestsPage() {
       .purchases()
       .then((data) => {
         if (active) {
-          setPurchases(Array.isArray(data) ? data : data?.data || []);
+          setPurchases(normalizeRequestList(data));
           setErrorPurchases('');
         }
       })
@@ -86,32 +93,42 @@ function RequestsPage() {
   const submitAction = async () => {
     if (!showReasonModal) return;
 
-    const isReject = showReasonModal.toString().startsWith('reject-');
-    const exchangeId = isReject
-      ? showReasonModal.replace('reject-', '')
-      : showReasonModal;
+    const modalValue = showReasonModal.toString();
+    const isReject = modalValue.startsWith('reject-');
+    const isComplete = modalValue.startsWith('complete-');
+    const requestId = modalValue.replace(/^reject-|^complete-/, '');
 
     setSubmitting(true);
 
     try {
       if (activeTab === 'exchanges') {
         if (isReject) {
-          await requests.rejectExchange(exchangeId, reason);
+          await requests.rejectExchange(requestId, reason);
+          const updated = await requests.exchanges();
+          setExchanges(normalizeRequestList(updated));
+        } else if (isComplete) {
+          await requests.completeExchange(requestId);
+          const updated = await requests.exchanges();
+          setExchanges(normalizeRequestList(updated));
         } else {
-          await requests.acceptExchange(exchangeId, reason);
+          await requests.acceptExchange(requestId, reason);
+          const updated = await requests.exchanges();
+          setExchanges(normalizeRequestList(updated));
         }
-        // Refresh exchanges
-        const updated = await requests.exchanges();
-        setExchanges(Array.isArray(updated) ? updated : updated?.data || []);
       } else {
         if (isReject) {
-          await requests.rejectPurchase(exchangeId, reason);
+          await requests.rejectPurchase(requestId, reason);
+          const updated = await requests.purchases();
+          setPurchases(normalizeRequestList(updated));
+        } else if (isComplete) {
+          await requests.completePurchase(requestId);
+          const updated = await requests.purchases();
+          setPurchases(normalizeRequestList(updated));
         } else {
-          await requests.acceptPurchase(exchangeId, reason);
+          await requests.acceptPurchase(requestId, reason);
+          const updated = await requests.purchases();
+          setPurchases(normalizeRequestList(updated));
         }
-        // Refresh purchases
-        const updated = await requests.purchases();
-        setPurchases(Array.isArray(updated) ? updated : updated?.data || []);
       }
 
       setShowReasonModal(null);
@@ -222,24 +239,24 @@ function RequestsPage() {
 
           {/* Tabs */}
           <div className="mb-6 flex gap-4 border-b border-[#d8e4e8]">
-            <a
-              href="?tab=exchanges"
+            <Link
+              to="/requests?tab=exchanges"
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'exchanges'
                   ? 'border-b-2 border-[#4F9D9E] text-[#4F9D9E]'
                   : 'text-[#718692] hover:text-[#306061]'
               }`}>
               طلبات التبادل
-            </a>
-            <a
-              href="?tab=purchases"
+            </Link>
+            <Link
+              to="/requests?tab=purchases"
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'purchases'
                   ? 'border-b-2 border-[#4F9D9E] text-[#4F9D9E]'
                   : 'text-[#718692] hover:text-[#306061]'
               }`}>
               طلبات الشراء
-            </a>
+            </Link>
           </div>
 
           {/* Exchanges Tab */}
