@@ -1,23 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
+import marketplace from '../services/marketplace';
 
 const NAV = [
-  { label: 'الرئيسية', href: '/homeLoggedIn' },
-  { label: 'كيف تعمل', href: '/homeLoggedIn#how-it-works' },
-  { label: 'السوق', href: '/homeLoggedIn#market' },
-  { label: 'من نحن', href: '/aboutUs' },
-  { label: 'اتصل بنا', href: '/homeLoggedIn#contact' },
+  { label: 'الرئيسية', href: '/' },
+  { label: 'كيف تعمل', href: '/#about' },
+  { label: 'السوق', href: '/#market' },
+  { label: 'من نحن', href: '/#why-badelha' },
+  { label: 'اتصل بنا', href: '/#contact' },
 ];
 
-const CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
+const DEFAULT_CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
 
-function Navbarpro() {
+function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [city, setCity] = useState('');
+  const [cities, setCities] = useState(DEFAULT_CITIES);
+  const [loadingCities, setLoadingCities] = useState(true);
 
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -25,6 +28,27 @@ function Navbarpro() {
   const profileRef = useRef(null);
   const cityRef = useRef(null);
   const mobileRef = useRef(null);
+
+  /* ================= FETCH CITIES ================= */
+
+  useEffect(() => {
+    marketplace
+      .cities()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCities(data);
+        } else if (Array.isArray(data?.data)) {
+          setCities(data.data);
+        }
+      })
+      .catch(() => {
+        // Use default cities on error
+        setCities(DEFAULT_CITIES);
+      })
+      .finally(() => {
+        setLoadingCities(false);
+      });
+  }, []);
 
   /* ================= SCROLL ================= */
 
@@ -136,7 +160,7 @@ function Navbarpro() {
         {/* ================= LOGO ================= */}
 
         <Link
-          to="/homeLoggedIn"
+          to="/"
           aria-label="بدّلها - الرئيسية"
           className="
             group flex shrink-0
@@ -306,7 +330,7 @@ function Navbarpro() {
                 ">
                 <p className="px-3 py-2 text-xs font-semibold text-[#78909c]">اختاري منطقتك</p>
 
-                {CITIES.map((item) => (
+                {cities.map((item) => (
                   <button
                     key={item}
                     type="button"
@@ -486,7 +510,7 @@ function Navbarpro() {
                 <div className="border-b border-[#e8eeee] px-3 py-3">
                   <p className="text-sm font-bold">أهلًا بكِ 👋</p>
 
-                  <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بادل</p>
+                  <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بدّلها</p>
                 </div>
 
                 <Link
@@ -506,7 +530,7 @@ function Navbarpro() {
                 </Link>
 
                 <Link
-                  to="/my-products"
+                  to="/profilePage"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -518,11 +542,11 @@ function Navbarpro() {
                     hover:text-[#287d80]
                   ">
                   <span>📦</span>
-                  منتجاتي
+                  إعلاناتي
                 </Link>
 
                 <Link
-                  to="/personalinfoform"
+                  to="/"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -543,13 +567,11 @@ function Navbarpro() {
                   type="button"
                   onClick={async () => {
                     setProfileOpen(false);
-
                     try {
                       await logout();
                     } catch (error) {
                       window.alert(error.message);
                     }
-
                     navigate('/login');
                   }}
                   className="
@@ -706,4 +728,4 @@ function Navbarpro() {
   );
 }
 
-export default Navbarpro;
+export default Navbar;

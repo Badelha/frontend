@@ -1,9 +1,10 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { getApiError } from '../services/api';
+import { getPostLoginPath } from '../utils/access';
 
 function Login() {
   const [rememberPassword, setRememberPassword] = useState(false);
@@ -41,8 +42,9 @@ function Login() {
 
     try {
       setLoading(true);
-      await login({ email: email.trim(), password });
-      navigate(location.state?.from || '/profilePage', { replace: true });
+      const session = await login({ email: email.trim(), password });
+      const requestedPath = location.state?.from;
+      navigate(requestedPath || getPostLoginPath(session.user), { replace: true });
     } catch (error) {
       setErrors({ general: getApiError(error) || 'تعذر تسجيل الدخول، حاول مرة أخرى' });
     } finally {

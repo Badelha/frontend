@@ -5,9 +5,14 @@ import api, { getApiError } from '../services/api';
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const [status, setStatus] = useState(token ? 'loading' : 'error');
+  const sent = searchParams.get('sent') === '1';
+  const [status, setStatus] = useState(token ? 'loading' : sent ? 'success' : 'error');
   const [message, setMessage] = useState(
-    token ? 'جارٍ التحقق من بريدك الإلكتروني...' : 'رابط التحقق غير صالح.'
+    token
+      ? 'جارٍ التحقق من بريدك الإلكتروني...'
+      : sent
+        ? 'تم إنشاء حسابك. تحقق من بريدك الإلكتروني وافتح رابط التحقق لتفعيل الحساب.'
+        : 'رابط التحقق غير صالح.'
   );
 
   useEffect(() => {

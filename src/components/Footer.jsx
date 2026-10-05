@@ -1,17 +1,17 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const quickLinks = [
-    { title: 'من نحن', path: '/aboutUs' },
-    { title: 'السوق', path: '#market' },
+    { title: 'من نحن', path: '/about' },
+    { title: 'السوق', path: '/#market' },
     { title: 'كيف تعمل المنصة', path: '/how-it-works' },
-    { title: 'الأسئلة الشائعة', path: '/helpCenter' },
+    { title: 'الأسئلة الشائعة', path: '/faq' },
   ];
 
   const supportLinks = [
-    { title: 'مركز المساعدة', path: '/helpCenter' },
-    { title: 'قوانين المنصة', path: '/PlatformRules' },
-    { title: 'الإبلاغ عن مشكلة', path: '/reportaproblem' },
+    { title: 'مركز المساعدة', path: '/help' },
+    { title: 'قوانين المنصة', path: '/terms' },
+    { title: 'الإبلاغ عن مشكلة', path: '/report' },
     { title: 'سياسة الخصوصية', path: '/privacy' },
   ];
 

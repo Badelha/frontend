@@ -74,7 +74,7 @@ export function AuthProvider({ children }) {
       },
       async register(details) {
         const session = await auth.register(details);
-        saveSession(session);
+        clearSession();
         return session;
       },
       async logout() {
