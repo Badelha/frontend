@@ -1,41 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbarpro from '../components/Navbarpro';
-
-// الألوان: EDF4F6 خلفية أساسية، 4F9D9E اللون المميز
-
-async function submitProfile(payload) {
-  // استبدلي هذا بطلب fetch حقيقي لباك اندك
-  return new Promise((resolve) => setTimeout(resolve, 900));
-}
+import auth from '../services/auth';
+import { getApiError } from '../services/api';
 
 const REQUIRED_MSG = 'يجب تعبئة هذا الحقل';
 
-const initialInfo = {
-  firstName: 'أحمد',
-  fatherName: 'محمد',
-  lastName: 'البدلحي',
-  username: 'ahmed_badelha',
-  email: 'ahmed@example.com',
-  phone: '+970 59 000 0000',
-  location: 'دير البلح، فلسطين',
-  bio: 'بائع معتمد في سوق دير البلح المحلي، متخصص في التطريز الفلسطيني والمنتجات الحرفية اليدوية، أكثر من 4 سنوات خبرة',
-  website: '',
-  contactHours: 'السبت - الخميس، ٩ص - ٥م',
-};
-
-// كل حقول المعلومات الشخصية إلزامية الآن
-const REQUIRED_INFO_FIELDS = [
-  'firstName',
-  'fatherName',
-  'lastName',
-  'username',
-  'email',
-  'phone',
-  'location',
-  'bio',
-  'website',
-  'contactHours',
-];
+// الحقول الإلزامية الأساسية للمعلومات الشخصية
+const REQUIRED_INFO_FIELDS = ['firstName', 'lastName', 'username', 'email', 'phone'];
 
 const initialSecurity = {
   currentPassword: '',
@@ -63,12 +35,91 @@ const inputBase =
   'w-full font-inherit text-[14.5px] text-[#1F2A2B] bg-[#EDF4F6] border rounded-[10px] px-[13px] py-[11px] outline-none focus:border-[#4F9D9E]';
 
 export default function ProfileEditPage() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState('info');
-  const [info, setInfo] = useState(initialInfo);
-  const [tags, setTags] = useState(['تطريز', 'حرف يدوية', 'عدلية']);
+  const [loading, setLoading] = useState(true);
+  const [info, setInfo] = useState({
+    firstName: '',
+    fatherName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    phone: '',
+    location: '',
+    bio: '',
+    website: '',
+    contactHours: '',
+  });
+  const [tags, setTags] = useState([]);
+  const [avatar, setAvatar] = useState(null);
+  const [cover, setCover] = useState(null);
   const [security, setSecurity] = useState(initialSecurity);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle'); // idle | saving | success | error
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    auth
+      .profile()
+      .then((data) => {
+        if (!active || !data) return;
+
+        let fName = data.first_name || data.firstName || '';
+        let fatherName = data.father_name || data.fatherName || '';
+        let lName = data.last_name || data.lastName || '';
+
+        if (!fName && data.full_name) {
+          const parts = data.full_name.trim().split(/\s+/);
+          fName = parts[0] || '';
+          if (parts.length === 2) {
+            lName = parts[1] || '';
+          } else if (parts.length > 2) {
+            fatherName = parts[1] || '';
+            lName = parts.slice(2).join(' ') || '';
+          }
+        }
+
+        setInfo({
+          firstName: fName,
+          fatherName: fatherName,
+          lastName: lName,
+          username: data.username || (data.email ? data.email.split('@')[0] : ''),
+          email: data.email || '',
+          phone: data.phone_number || data.phone || data.phoneNumber || '',
+          location: data.location || data.address || data.city || '',
+          bio: data.bio || '',
+          website: data.website || '',
+          contactHours: data.contact_hours || data.contactHours || '',
+        });
+
+        if (data.tags) {
+          if (Array.isArray(data.tags)) {
+            setTags(data.tags);
+          } else if (typeof data.tags === 'string') {
+            setTags(data.tags.split(',').map((t) => t.trim()).filter(Boolean));
+          }
+        }
+
+        if (data.avatar_url || data.avatarUrl || data.avatar) {
+          setAvatar(data.avatar_url || data.avatarUrl || data.avatar);
+        }
+        if (data.cover_url || data.coverUrl || data.cover) {
+          setCover(data.cover_url || data.coverUrl || data.cover);
+        }
+      })
+      .catch((err) => {
+        console.error('Error loading profile:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const setFieldError = (field, message) =>
     setErrors((prev) => {
@@ -111,43 +162,131 @@ export default function ProfileEditPage() {
     if (Object.keys(newErrors).length > 0) return;
 
     setStatus('saving');
+    setErrorMessage('');
+
     try {
-      await submitProfile({ tab, info, tags, security });
+      const fullName = [info.firstName, info.fatherName, info.lastName].filter(Boolean).join(' ');
+
+      const payload = {
+        full_name: fullName,
+        fullName: fullName,
+        first_name: info.firstName,
+        firstName: info.firstName,
+        father_name: info.fatherName,
+        fatherName: info.fatherName,
+        last_name: info.lastName,
+        lastName: info.lastName,
+        username: info.username,
+        email: info.email,
+        phone_number: info.phone,
+        phoneNumber: info.phone,
+        phone: info.phone,
+        location: info.location,
+        address: info.location,
+        city: info.location,
+        bio: info.bio,
+        website: info.website,
+        contact_hours: info.contactHours,
+        contactHours: info.contactHours,
+        tags: tags,
+      };
+
+      if (avatar) {
+        payload.avatar_url = avatar;
+        payload.avatarUrl = avatar;
+      }
+      if (cover) {
+        payload.cover_url = cover;
+        payload.coverUrl = cover;
+      }
+
+      if (tab === 'security') {
+        if (security.currentPassword && security.newPassword) {
+          payload.currentPassword = security.currentPassword;
+          payload.newPassword = security.newPassword;
+          payload.password = security.newPassword;
+          payload.oldPassword = security.currentPassword;
+        }
+        payload.twoFactor = security.twoFactor;
+        payload.showPhone = security.showPhone;
+        payload.showEmail = security.showEmail;
+        payload.loginAlerts = security.loginAlerts;
+      }
+
+      const updated = await auth.updateProfile(payload);
+
+      try {
+        const stored = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...stored, ...(updated || payload) };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (e) {
+        console.warn('Failed to update session storage', e);
+      }
+
       setStatus('success');
-      setTimeout(() => setStatus('idle'), 2200);
+      setTimeout(() => setStatus('idle'), 3000);
     } catch (e) {
+      console.error('Save profile failed:', e);
+      setErrorMessage(getApiError(e) || 'حصل خطأ أثناء الحفظ، حاولي مرة ثانية');
       setStatus('error');
     }
   };
 
+  const displayName =
+    [info.firstName, info.fatherName, info.lastName].filter(Boolean).join(' ') || 'المستخدم';
+  const displayInitials =
+    displayName
+      .split(/\s+/)
+      .map((n) => n[0])
+      .join('')
+      .slice(0, 2) || 'أب';
+
+  if (loading) {
+    return (
+      <>
+        <Navbarpro />
+        <div dir="rtl" className="min-h-screen bg-[#EDF4F6] pt-32 pb-12 px-4 flex items-center justify-center">
+          <div className="text-center text-[#4F9D9E] font-bold text-base flex items-center gap-3 bg-white px-6 py-4 rounded-2xl shadow-sm border border-[#D7E4E6]">
+            <span className="w-5 h-5 border-2 border-[#4F9D9E] border-t-transparent rounded-full animate-spin" />
+            جارٍ تحميل البيانات...
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      {/* Navbar في أعلى الصفحة تمامًا */}
       <Navbarpro />
-      <div dir="rtl" className="min-h-full bg-[#EDF4F6] p-25 text-[#1F2A2B]">
+      <div dir="rtl" className="min-h-screen bg-[#EDF4F6] pt-28 pb-16 px-4 text-[#1F2A2B]">
         {/* محتوى تعديل الملف الشخصي */}
         <div className="max-w-[640px] mx-auto mb-3.5 flex items-center justify-between gap-3">
-          <a
-            href="#"
-            className="flex items-center gap-1 text-[#6C7A7B] text-[13.5px] font-bold no-underline">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1 text-[#6C7A7B] hover:text-[#1F2A2B] text-[13.5px] font-bold border-none bg-transparent cursor-pointer transition-colors">
             <span className="text-base">›</span> رجوع
-          </a>
+          </button>
           <h1 className="m-0 text-[19px] font-extrabold flex-1 text-center">تعديل الملف الشخصي</h1>
           <button
-            className="bg-[#4F9D9E] hover:bg-[#3E7E7F] text-white border-none rounded-[10px] px-[18px] py-2 font-bold text-[13.5px] cursor-pointer disabled:opacity-60"
+            className="bg-[#4F9D9E] hover:bg-[#3E7E7F] text-white border-none rounded-[10px] px-[18px] py-2 font-bold text-[13.5px] cursor-pointer disabled:opacity-60 transition-colors shadow-sm"
             onClick={handleSave}
             disabled={status === 'saving'}>
             {status === 'saving' ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
           </button>
         </div>
 
-        <div className="max-w-[640px] mx-auto mb-4 bg-[#4F9D9E] rounded-2xl px-5 py-4 flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-[#3E7E7F] text-white flex items-center justify-center font-extrabold text-[15px] shrink-0">
-            أب
+        <div className="max-w-[640px] mx-auto mb-4 bg-[#4F9D9E] rounded-2xl px-5 py-4 flex items-center gap-3 shadow-sm">
+          <div className="w-11 h-11 rounded-full bg-[#3E7E7F] text-white flex items-center justify-center font-extrabold text-[15px] shrink-0 overflow-hidden">
+            {avatar ? (
+              <img src={avatar} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              displayInitials
+            )}
           </div>
           <div>
-            <div className="text-white font-bold text-[15px]">أحمد البدلحي</div>
-            <div className="text-[#E4F3F3] text-[12.5px]">@ahmed_badelha</div>
+            <div className="text-white font-bold text-[15px]">{displayName}</div>
+            <div className="text-[#E4F3F3] text-[12.5px]">@{info.username || 'user'}</div>
           </div>
         </div>
 
@@ -162,8 +301,9 @@ export default function ProfileEditPage() {
               onClick={() => {
                 setTab(key);
                 setErrors({});
+                setErrorMessage('');
               }}
-              className={`flex-1 py-[11px] rounded-[10px] border font-bold text-[13px] cursor-pointer ${
+              className={`flex-1 py-[11px] rounded-[10px] border font-bold text-[13px] cursor-pointer transition-colors ${
                 tab === key
                   ? 'bg-[#DCEEEE] text-[#3E7E7F] border-[#4F9D9E]'
                   : 'bg-white text-[#6C7A7B] border-[#D7E4E6] hover:bg-[#DCEEEE]'
@@ -173,7 +313,7 @@ export default function ProfileEditPage() {
           ))}
         </div>
 
-        <div className="max-w-[640px] mx-auto bg-white border border-[#D7E4E6] rounded-2xl px-7 py-[26px]">
+        <div className="max-w-[640px] mx-auto bg-white border border-[#D7E4E6] rounded-2xl px-7 py-[26px] shadow-sm">
           {tab === 'info' && (
             <InfoTab
               info={info}
@@ -184,7 +324,9 @@ export default function ProfileEditPage() {
               setFieldError={setFieldError}
             />
           )}
-          {tab === 'photos' && <PhotosTab />}
+          {tab === 'photos' && (
+            <PhotosTab avatar={avatar} setAvatar={setAvatar} cover={cover} setCover={setCover} />
+          )}
           {tab === 'security' && (
             <SecurityTab
               security={security}
@@ -195,13 +337,13 @@ export default function ProfileEditPage() {
           )}
 
           {status === 'success' && (
-            <div className="mt-4 text-left text-[#3E7E7F] text-[13px] font-bold">
-              تم حفظ التغييرات ✓
+            <div className="mt-4 text-center bg-[#E8F5F4] border border-[#4F9D9E] p-3 rounded-lg text-[#3E7E7F] text-[13px] font-bold animate-fadeIn">
+              تم حفظ التغييرات بنجاح ✓
             </div>
           )}
           {status === 'error' && (
-            <div className="mt-4 text-left text-[#C0392B] text-[13px] font-bold">
-              حصل خطأ أثناء الحفظ، حاولي مرة ثانية
+            <div className="mt-4 text-center bg-[#FADBD8] border border-[#C0392B] p-3 rounded-lg text-[#C0392B] text-[13px] font-bold">
+              {errorMessage || 'حصل خطأ أثناء الحفظ، حاولي مرة ثانية'}
             </div>
           )}
         </div>
@@ -217,8 +359,11 @@ function InfoTab({ info, setInfo, tags, setTags, errors, setFieldError }) {
 
   const handleChange = (field) => (e) => setInfo((p) => ({ ...p, [field]: e.target.value }));
   const handleBlur = (field) => (e) => {
-    if (!e.target.value.trim()) setFieldError(field, REQUIRED_MSG);
-    else setFieldError(field, null);
+    if (REQUIRED_INFO_FIELDS.includes(field) && !e.target.value.trim()) {
+      setFieldError(field, REQUIRED_MSG);
+    } else {
+      setFieldError(field, null);
+    }
   };
   const addTag = (e) => {
     if (e.key === 'Enter' && tagDraft.trim()) {
@@ -287,7 +432,7 @@ function InfoTab({ info, setInfo, tags, setTags, errors, setFieldError }) {
         />
       </div>
       <Field
-        label="الموقع الجغرافي"
+        label="الموقع الجغرافي / المدينة"
         value={info.location}
         onChange={handleChange('location')}
         onBlur={handleBlur('location')}
@@ -334,6 +479,7 @@ function InfoTab({ info, setInfo, tags, setTags, errors, setFieldError }) {
               className="flex items-center gap-1.5 bg-[#DCEEEE] border border-[#4F9D9E] text-[#3E7E7F] rounded-full ps-3 pe-1.5 py-1 text-[13px]">
               {t}
               <button
+                type="button"
                 onClick={() => removeTag(i)}
                 className="bg-[#4F9D9E] hover:opacity-80 text-white border-none rounded-full w-[17px] h-[17px] text-[11px] leading-none cursor-pointer">
                 ✕
@@ -379,9 +525,7 @@ function Field({ label, value, onChange, onBlur, type = 'text', placeholder = ''
 }
 
 /* ---------- تبويب الصور ---------- */
-function PhotosTab() {
-  const [avatar, setAvatar] = useState(null);
-  const [cover, setCover] = useState(null);
+function PhotosTab({ avatar, setAvatar, cover, setCover }) {
   const handleUpload = (setter) => (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -434,7 +578,7 @@ function PhotoCard({ heading, note, preview, shape, onChange }) {
           </span>
         )}
       </div>
-      <label className="inline-block bg-[#4F9D9E] hover:bg-[#3E7E7F] text-white text-[13px] font-bold px-4 py-2 rounded-lg cursor-pointer">
+      <label className="inline-block bg-[#4F9D9E] hover:bg-[#3E7E7F] text-white text-[13px] font-bold px-4 py-2 rounded-lg cursor-pointer transition-colors">
         اختيار صورة
         <input type="file" accept="image/*" className="hidden" onChange={onChange} />
       </label>

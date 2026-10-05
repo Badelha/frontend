@@ -563,7 +563,7 @@ function Navbar() {
                 </Link>
 
                 <Link
-                  to="/"
+                  to="/edit-profile"
                   onClick={() => setProfileOpen(false)}
                   className="
                     flex items-center gap-3
@@ -575,7 +575,7 @@ function Navbar() {
                     hover:text-[#287d80]
                   ">
                   <span>⚙️</span>
-                  الإعدادات
+                  تعديل الملف / الإعدادات
                 </Link>
 
                 <div className="my-1 border-t border-[#e8eeee]" />
