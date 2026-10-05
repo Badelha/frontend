@@ -1,102 +1,228 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbarpro from '../components/Navbarpro';
+import AdminNavbar from '../components/AdminNavbar';
 import { getApiError } from '../services/api';
 import requests from '../services/requests';
 import marketplace from '../services/marketplace';
-
-const dashboardCards = [
-  { key: 'users', label: 'المستخدمين', value: '—', accent: 'from-[#3A73AA] to-[#4F9D9E]' },
-  { key: 'products', label: 'المنتجات', value: '—', accent: 'from-[#4F9D9E] to-[#3A73AA]' },
-  { key: 'reports', label: 'التقارير', value: '—', accent: 'from-[#2a7f7e] to-[#5ab7b6]' },
-  { key: 'notifications', label: 'الإشعارات', value: '—', accent: 'from-[#4a90b2] to-[#78b5c2]' },
-  { key: 'transactions', label: 'المعاملات', value: '—', accent: 'from-[#3a5f8f] to-[#4f9d9e]' },
-];
+import usersService from '../services/users';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState({
+    usersCount: 0,
+    productsCount: 0,
+    categoriesCount: 0,
+    transactionsCount: 0,
+  });
+  const [recentUsers, setRecentUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let active = true;
 
-    const loadStats = async () => {
+    const loadAdminData = async () => {
       try {
-        const [productsResult, transactionsResult] = await Promise.allSettled([
+        setLoading(true);
+        const [productsRes, transactionsRes, usersRes, categoriesRes] = await Promise.allSettled([
           marketplace.products({ limit: 1000 }),
           requests.transactionStats(),
+          usersService.getAllUsers({ limit: 5 }),
+          marketplace.categories(),
         ]);
 
-        const productCount = Array.isArray(productsResult.value)
-          ? productsResult.value.length
-          : Array.isArray(productsResult.value?.products)
-            ? productsResult.value.products.length
-            : 0;
+        const products = productsRes.status === 'fulfilled' ? productsRes.value : [];
+        const productList = Array.isArray(products)
+          ? products
+          : Array.isArray(products?.products)
+          ? products.products
+          : [];
 
-        const transactionStats = transactionsResult.status === 'fulfilled'
-          ? transactionsResult.value
-          : {};
+        const txStats = transactionsRes.status === 'fulfilled' ? transactionsRes.value || {} : {};
 
-        const data = {
-          users: Number(transactionStats.users ?? 0),
-          products: Number(productCount || transactionStats.products || 0),
-          reports: Number(transactionStats.reports ?? 0),
-          notifications: Number(transactionStats.notifications ?? 0),
-          transactions: Number(transactionStats.transactions ?? transactionStats.total ?? 0),
-        };
+        const usersData = usersRes.status === 'fulfilled' ? usersRes.value : {};
+        const userList = Array.isArray(usersData)
+          ? usersData
+          : Array.isArray(usersData?.users)
+          ? usersData.users
+          : [];
+        const totalUsers = Number(usersData?.total || userList.length || 0);
+
+        const catsData = categoriesRes.status === 'fulfilled' ? categoriesRes.value : [];
+        const catList = Array.isArray(catsData) ? catsData : Array.isArray(catsData?.categories) ? catsData.categories : [];
 
         if (active) {
-          setStats(data);
+          setStats({
+            usersCount: totalUsers,
+            productsCount: productList.length,
+            categoriesCount: catList.length,
+            transactionsCount: Number(txStats.transactions || txStats.total || 0),
+          });
+          setRecentUsers(userList);
           setError('');
         }
       } catch (err) {
         if (active) {
-          setError(getApiError(err) || 'تعذر تحميل لوحة الإدارة');
+          setError(getApiError(err) || 'تعذر تحميل بيانات لوحة التحكم');
         }
       } finally {
         if (active) setLoading(false);
       }
     };
 
-    loadStats();
-    return () => { active = false; };
+    loadAdminData();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const cards = dashboardCards.map((card) => ({
-    ...card,
-    value: loading ? '...' : Number(stats[card.key] ?? 0).toLocaleString('ar-EG'),
-  }));
+  const cards = [
+    { key: 'users', label: 'المستخدمين المسجلين', value: stats.usersCount, icon: '👥', color: 'from-[#3A73AA] to-[#4F9D9E]', link: '/admin/users' },
+    { key: 'products', label: 'المنتجات في السوق', value: stats.productsCount, icon: '📦', color: 'from-[#4F9D9E] to-[#3A73AA]', link: '/market' },
+    { key: 'categories', label: 'الفئات المعتمدة', value: stats.categoriesCount, icon: '📁', color: 'from-[#2a7f7e] to-[#5ab7b6]', link: '/admin/categories' },
+    { key: 'transactions', label: 'إجمالي المعاملات', value: stats.transactionsCount, icon: '🔄', color: 'from-[#3a5f8f] to-[#4f9d9e]', link: '/requests' },
+  ];
 
   return (
     <>
-      <Navbarpro />
-      <main className="min-h-screen bg-[#f7f9fb] pt-[100px] pb-10">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-          <div className="mb-6 flex items-center justify-between gap-3">
+      <AdminNavbar />
+      <main dir="rtl" className="min-h-screen bg-[#F7FAFB] pt-24 pb-12">
+        <div className="mx-auto max-w-[1300px] px-4 sm:px-6">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-[#4F9D9E]">لوحة الإدارة</p>
-              <h1 className="text-3xl font-bold text-[#306061]">إحصاءات النظام</h1>
+              <p className="text-sm font-semibold text-[#4F9D9E]">لوحة الإدارة المركزية</p>
+              <h1 className="text-3xl font-bold text-[#16384F]">إحصاءات ونشاط النظام</h1>
             </div>
-            <Link to="/profilePage" className="rounded-xl bg-[#3A73AA] px-4 py-2 text-sm font-semibold text-white">
-              العودة للملف الشخصي
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/admin/users" className="rounded-xl bg-[#3A73AA] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#315F8B]">
+                إدارة المستخدمين
+              </Link>
+              <Link to="/admin/categories" className="rounded-xl bg-[#4F9D9E] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#3f8f91]">
+                إدارة الفئات
+              </Link>
+            </div>
           </div>
 
           {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
+            <div role="alert" className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+              {error}
+            </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {/* Metric Cards */}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             {cards.map((card) => (
-              <div key={card.key} className="overflow-hidden rounded-2xl border border-[#dfe9ed] bg-white shadow-sm">
-                <div className={`h-2 bg-gradient-to-r ${card.accent}`} />
-                <div className="p-5">
-                  <p className="text-sm text-[#718692]">{card.label}</p>
-                  <h3 className="mt-3 text-3xl font-bold text-[#306061]">{card.value}</h3>
+              <Link
+                key={card.key}
+                to={card.link}
+                className="group overflow-hidden rounded-2xl border border-[#DFE9ED] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl">{card.icon}</span>
+                  <span className="rounded-full bg-[#F0F6F8] px-3 py-1 text-xs font-bold text-[#3A73AA]">عرض</span>
                 </div>
-              </div>
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-[#718692]">{card.label}</p>
+                  <h3 className="mt-2 text-3xl font-bold text-[#16384F]">
+                    {loading ? '...' : card.value.toLocaleString('ar-EG')}
+                  </h3>
+                </div>
+              </Link>
             ))}
+          </div>
+
+          {/* Quick Management Grid */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Recent Users Table */}
+            <div className="lg:col-span-2 rounded-2xl border border-[#DFE9ED] bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-[#16384F]">أحدث المستخدمين المسجلين</h2>
+                <Link to="/admin/users" className="text-sm font-bold text-[#4F9D9E] hover:underline">
+                  عرض الكل ←
+                </Link>
+              </div>
+
+              {loading ? (
+                <div className="py-10 text-center text-[#718692]">جارٍ التحميل...</div>
+              ) : recentUsers.length === 0 ? (
+                <div className="py-10 text-center text-[#718692]">لا يوجد مستخدمون مسجلون بعد.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-sm">
+                    <thead>
+                      <tr className="border-b border-[#EEF3F5] text-xs font-bold text-[#718692]">
+                        <th className="pb-3">الاسم</th>
+                        <th className="pb-3">البريد الإلكتروني</th>
+                        <th className="pb-3">الهاتف</th>
+                        <th className="pb-3">الحالة</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F0F5F7]">
+                      {recentUsers.slice(0, 5).map((user) => (
+                        <tr key={user.user_id || user.id} className="hover:bg-[#F8FBFD]">
+                          <td className="py-3 font-bold text-[#16384F]">{user.full_name || 'مستخدم'}</td>
+                          <td className="py-3 text-[#5A7A84]">{user.email}</td>
+                          <td className="py-3 text-[#5A7A84]">{user.phone_number || '—'}</td>
+                          <td className="py-3">
+                            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                              {user.account_status || 'نشط'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Admin Actions Panel */}
+            <div className="rounded-2xl border border-[#DFE9ED] bg-white p-6 shadow-sm space-y-4">
+              <h2 className="text-lg font-bold text-[#16384F] mb-4">إجراءات الإدارة الإدارية</h2>
+
+              <Link
+                to="/admin/categories"
+                className="flex items-center gap-3 rounded-xl border border-[#E4EDF1] p-4 text-[#16384F] hover:bg-[#F4F9FA] transition"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F5] text-xl">📁</span>
+                <div>
+                  <h3 className="font-bold">إدارة الفئات والاقسام</h3>
+                  <p className="text-xs text-[#718692]">إضافة وتعديل فئات المنتجات</p>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/tags"
+                className="flex items-center gap-3 rounded-xl border border-[#E4EDF1] p-4 text-[#16384F] hover:bg-[#F4F9FA] transition"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F5] text-xl">🏷️</span>
+                <div>
+                  <h3 className="font-bold">إدارة الوسوم والكلمات</h3>
+                  <p className="text-xs text-[#718692]">إدارة الكلمات المفتاحية</p>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/ads"
+                className="flex items-center gap-3 rounded-xl border border-[#E4EDF1] p-4 text-[#16384F] hover:bg-[#F4F9FA] transition"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F5] text-xl">📢</span>
+                <div>
+                  <h3 className="font-bold">إدارة الإعلانات الترويجية</h3>
+                  <p className="text-xs text-[#718692]">إنشاء وتخصيص الحملات</p>
+                </div>
+              </Link>
+
+              <Link
+                to="/report"
+                className="flex items-center gap-3 rounded-xl border border-[#E4EDF1] p-4 text-[#16384F] hover:bg-[#F4F9FA] transition"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F5] text-xl">🚨</span>
+                <div>
+                  <h3 className="font-bold">تقديم بلاغ جديد</h3>
+                  <p className="text-xs text-[#718692]">الإبلاغ عن مخالفة أو محتوى</p>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </main>

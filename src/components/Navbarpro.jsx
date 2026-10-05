@@ -1,14 +1,14 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
+import { isAdminUser } from '../utils/access';
 import marketplace from '../services/marketplace';
 
 const NAV = [
   { label: 'الرئيسية', href: '/' },
-  { label: 'كيف تعمل', href: '/#about' },
-  { label: 'السوق', href: '/#market' },
-  { label: 'من نحن', href: '/#why-badelha' },
-  { label: 'اتصل بنا', href: '/#contact' },
+  { label: 'السوق', href: '/market' },
+  { label: 'الطلبات والمعاملات', href: '/requests' },
+  { label: 'الإشعارات', href: '/notifications' },
 ];
 
 const DEFAULT_CITIES = ['غزة', 'شمال غزة', 'دير البلح', 'خان يونس', 'رفح'];
@@ -23,7 +23,7 @@ function Navbar() {
   const [loadingCities, setLoadingCities] = useState(true);
 
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const profileRef = useRef(null);
   const cityRef = useRef(null);
@@ -512,6 +512,23 @@ function Navbar() {
 
                   <p className="mt-1 text-xs text-[#78909c]">إدارة حسابك في بدّلها</p>
                 </div>
+
+                {isAdminUser(user) && (
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={() => setProfileOpen(false)}
+                    className="
+                      flex items-center gap-3
+                      rounded-xl
+                      bg-amber-50 px-3 py-3
+                      text-sm font-bold text-amber-800
+                      transition-colors
+                      hover:bg-amber-100
+                    ">
+                    <span>🛡️</span>
+                    لوحة تحكم الأدمن
+                  </Link>
+                )}
 
                 <Link
                   to="/profilePage"

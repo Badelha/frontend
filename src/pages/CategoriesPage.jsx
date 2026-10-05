@@ -3,7 +3,7 @@ import { FaPlus } from 'react-icons/fa';
 import CategoryCard from '../components/categories/CategoryCard';
 import CategoryModal from '../components/categories/CategoryModal';
 import DeleteCategoryModal from '../components/categories/DeleteCategoryModal';
-import Navbarpro from '../components/Navbarpro';
+import AdminNavbar from '../components/AdminNavbar';
 import marketplace from '../services/marketplace';
 import { getApiError } from '../services/api';
 
@@ -92,7 +92,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-brand-bg pb-16" dir="rtl">
-      <Navbarpro />
+      <AdminNavbar />
       <main className="mx-auto max-w-6xl px-4 pb-10 pt-28">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-2xl font-bold text-[#2c5f7c]">إدارة الفئات</h1>

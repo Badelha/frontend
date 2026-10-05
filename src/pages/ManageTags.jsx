@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FaTrash } from 'react-icons/fa';
-import Navbarpro from '../components/Navbarpro'; 
+import AdminNavbar from '../components/AdminNavbar'; 
 
 const ManageTags = () => {
   const [tagName, setTagName] = useState('');
@@ -57,8 +56,8 @@ const ManageTags = () => {
   return (
     <div className="min-h-screen bg-brand-bg pb-16" dir="rtl">
       
-      {/* 1. إضافة شريط التنقل هنا */}
-      <Navbarpro />
+      {/* 1. إضافة شريط التنقل للأدمن */}
+      <AdminNavbar />
 
       {/* 2. إضافة pt-24 لتعويض ارتفاع الناف بار */}
       <div className="py-8 px-4 pt-24">
@@ -173,7 +172,7 @@ const ManageTags = () => {
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                  <FaTrash className="text-[#e74c3c]" size={18} />
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#e74c3c]" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-row-reverse justify-end mb-6 mt-4">

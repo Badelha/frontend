@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AdminNavbar from '../components/AdminNavbar';
 
 function Ads() {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -97,10 +98,11 @@ function Ads() {
 
   return (
     <div
-      dir="ltr"
-      className="min-h-screen bg-[#F7FAFB]"
+      dir="rtl"
+      className="min-h-screen bg-[#F7FAFB] pt-20"
       style={{ fontFamily: "Cairo, sans-serif" }}
     >
+      <AdminNavbar />
       {/* ================= المحتوى ================= */}
 
       <main className="min-h-screen bg-[#F8FBFC] px-[40px] pt-[24px]">
