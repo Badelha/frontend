@@ -24,8 +24,10 @@ function ForgotPassword() {
     setError('');
     setSuccess('');
     setLoading(true);
+
     try {
       await auth.forgotPassword(email.trim());
+
       setSuccess('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.');
     } catch (requestError) {
       setError(getApiError(requestError) || 'تعذر إرسال رابط إعادة التعيين');
@@ -72,6 +74,7 @@ function ForgotPassword() {
               onChange={(e) => {
                 setEmail(e.target.value);
                 setError('');
+                setSuccess('');
               }}
               className={`w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none transition-all duration-200 ${
                 error
@@ -82,13 +85,19 @@ function ForgotPassword() {
 
             {/* Error */}
             {error && <p className="text-red-500 text-[12px] mt-[-5px] mb-[10px]">{error}</p>}
-            {success && <p role="status" className="text-green-700 text-[12px] mb-[10px]">{success}</p>}
+
+            {/* Success */}
+            {success && (
+              <p role="status" className="text-green-700 text-[12px] mb-[10px]">
+                {success}
+              </p>
+            )}
 
             {/* Button */}
             <button
               type="submit"
               disabled={loading}
-              className="block mx-auto w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white cursor-pointer transition-all text-center duration-300 bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] hover:from-[#4f8ac1] hover:to-[#6ccacc]">
+              className="block mx-auto w-full p-[10px] rounded-[10px] mt-[10px] mb-[10px] text-white cursor-pointer transition-all text-center duration-300 bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] hover:from-[#4f8ac1] hover:to-[#6ccacc] disabled:opacity-60 disabled:cursor-not-allowed">
               {loading ? 'جارٍ الإرسال...' : 'إرسال رابط إعادة التعيين'}
             </button>
           </form>

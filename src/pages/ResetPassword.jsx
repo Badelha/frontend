@@ -12,6 +12,7 @@ function ResetPassword() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [requestError, setRequestError] = useState('');
 
@@ -77,15 +78,23 @@ function ResetPassword() {
     // إذا كل شيء صحيح
     if (valid && password === confirmPassword) {
       const token = searchParams.get('token');
+
       if (!token) {
         setRequestError('رابط إعادة التعيين غير صالح أو منتهي الصلاحية.');
         return;
       }
+
       setLoading(true);
       setRequestError('');
+
       try {
         await auth.resetPassword(token, password);
-        navigate('/login', { state: { message: 'تم تغيير كلمة المرور بنجاح. سجل الدخول الآن.' } });
+
+        navigate('/login', {
+          state: {
+            message: 'تم تغيير كلمة المرور بنجاح. سجل الدخول الآن.',
+          },
+        });
       } catch (error) {
         setRequestError(getApiError(error) || 'تعذر تغيير كلمة المرور');
       } finally {
@@ -119,7 +128,12 @@ function ResetPassword() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-[5px] sm:px-[10px] mt-[20px]">
-            {requestError && <p role="alert" className="mb-3 text-center text-[12px] text-red-600">{requestError}</p>}
+            {requestError && (
+              <p role="alert" className="mb-3 text-center text-[12px] text-red-600">
+                {requestError}
+              </p>
+            )}
+
             {/* Password */}
             <div className="relative">
               <label htmlFor="password" className="block text-[14px] sm:text-[15px]">
@@ -227,6 +241,7 @@ function ResetPassword() {
                     ? 'bottom-[38px]'
                     : 'bottom-[23px]'
                 } text-[#b7b4b4] cursor-pointer`}></i>
+
               {/* Success */}
               {confirmPassword &&
                 password === confirmPassword &&

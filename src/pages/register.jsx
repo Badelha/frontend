@@ -1,16 +1,22 @@
+<<<<<<< HEAD
 import { useEffect, useState } from 'react';
+=======
+﻿import { useEffect, useState } from 'react';
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { getApiError } from '../services/api';
 import marketplace from '../services/marketplace';
-
-function Register() {
+function Sigin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { register } = useAuth();
+<<<<<<< HEAD
 
+=======
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
   // بيانات الفورم
   const [formData, setFormData] = useState({
     name: '',
@@ -28,34 +34,22 @@ function Register() {
 
   // إظهار وإخفاء كلمة المرور
   const [showPassword, setShowPassword] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+<<<<<<< HEAD
   // جلب المدن
+=======
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
   useEffect(() => {
     let active = true;
-
-    marketplace
-      .cities()
+    marketplace.cities()
       .then((data) => {
         const items = Array.isArray(data) ? data : data?.cities;
-
-        if (!Array.isArray(items)) {
-          throw new Error('Unexpected cities response');
-        }
-
-        if (active) {
-          setCities(items);
-        }
+        if (!Array.isArray(items)) throw new Error('Unexpected cities response');
+        if (active) setCities(items);
       })
       .catch((error) => {
-        if (active) {
-          setErrors((current) => ({
-            ...current,
-            general: getApiError(error) || 'تعذر تحميل المدن',
-          }));
-        }
+        if (active) setErrors((current) => ({ ...current, general: getApiError(error) || 'تعذر تحميل المدن' }));
       });
-
     return () => {
       active = false;
     };
@@ -65,6 +59,7 @@ function Register() {
   const handleChange = (e) => {
     const { id, value } = e.target;
 
+<<<<<<< HEAD
     setFormData((current) => ({
       ...current,
       [id]: value,
@@ -75,6 +70,18 @@ function Register() {
       [id]: '',
       general: '',
     }));
+=======
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
+
+    // إزالة الخطأ بمجرد أن يبدأ المستخدم بالكتابة
+    setErrors({
+      ...errors,
+      [id]: '',
+    });
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
   };
 
   // إرسال الفورم
@@ -114,29 +121,17 @@ function Register() {
       const hasNumber = /[0-9]/.test(formData.password);
       const hasSymbol = /[^A-Za-z0-9]/.test(formData.password);
 
-      if (
-        formData.password.length < 8 ||
-        !hasUpperCase ||
-        !hasLowerCase ||
-        !hasNumber ||
-        !hasSymbol
-      ) {
-        newErrors.password =
-          'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وصغير ورقم ورمز';
+      if (formData.password.length < 8 || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSymbol) {
+        newErrors.password = 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وصغير ورقم ورمز';
       }
     }
 
-    // الشروط والأحكام
-    if (!acceptedTerms) {
-      newErrors.terms = 'يجب الموافقة على الشروط والأحكام';
-    }
-
+    // وضع الأخطاء
     setErrors(newErrors);
 
-    // إذا لم يوجد أخطاء
+    // إذا لم يوجد أي خطأ
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
-
       try {
         await register({
           fullName: formData.name.trim(),
@@ -146,12 +141,16 @@ function Register() {
           address: formData.address.trim(),
           password: formData.password,
         });
+<<<<<<< HEAD
 
-        navigate(location.state?.from || '/profilePage', { replace: true });
-      } catch (error) {
-        setErrors({
-          general: getApiError(error) || 'تعذر إنشاء الحساب، حاول مرة أخرى',
+        navigate(location.state?.from || '/profilePage', {
+          replace: true,
         });
+=======
+        navigate('/verify-email?sent=1', { replace: true });
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
+      } catch (error) {
+        setErrors({ general: getApiError(error) || 'تعذر إنشاء الحساب، حاول مرة أخرى' });
       } finally {
         setLoading(false);
       }
@@ -169,9 +168,7 @@ function Register() {
       <main className="flex-1 flex justify-center items-center px-[15px] py-[30px]">
         <div
           className="
-            w-full max-w-[500px]
-            border rounded-[15px]
-            p-[10px] sm:p-[15px]
+           w-full max-w-[500px] border rounded-[15px] p-[10px] sm:p-[15px]
             border-[#E5E5E5]
             bg-white
             shadow-[0_4px_20px_rgba(0,0,0,0.05)]
@@ -188,33 +185,24 @@ function Register() {
           {/* ================= TITLE ================= */}
           <h1
             className="
-              text-center m-[3px]
-              font-bold
-              text-[#013b59]
-              text-[20px] sm:text-[25px]
+            text-center m-[3px] font-bold text-[#013b59] text-[20px] sm:text-[25px]
             ">
             إنشاء حساب جديد
           </h1>
 
           <p
             className="
-              text-center mt-[5px]
-              text-[#817f7f]
-              text-[13px] sm:text-[15px]
+             text-center mt-[5px] text-[#817f7f] text-[13px] sm:text-[15px]
             ">
             أدخل بياناتك لإنشاء حساب جديد
           </p>
+<<<<<<< HEAD
 
           {/* General Error */}
+=======
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
           {errors.general && (
-            <p
-              role="alert"
-              className="
-                mt-4 rounded-lg
-                bg-red-50 p-3
-                text-center text-sm
-                text-red-600
-              ">
+            <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">
               {errors.general}
             </p>
           )}
@@ -234,12 +222,9 @@ function Register() {
                 value={formData.name}
                 onChange={handleChange}
                 className={`
-                  w-full p-[8px] my-[10px]
-                  bg-[#f1f4f9]
-                  border rounded-[10px]
-                  outline-none
+                  w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.name ? 'border-red-500' : 'border-[#D8D8D8]'}
+                  ${errors.name ? 'border-red-500' : 'border-[#D8D8D8] '}
                 `}
               />
 
@@ -259,10 +244,7 @@ function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 className={`
-                  w-full p-[8px] my-[10px]
-                  bg-[#f1f4f9]
-                  border rounded-[10px]
-                  outline-none
+                w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
                   ${errors.email ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
               />
@@ -283,10 +265,7 @@ function Register() {
                 value={formData.phone}
                 onChange={handleChange}
                 className={`
-                  w-full p-[8px] my-[10px]
-                  bg-[#f1f4f9]
-                  border rounded-[10px]
-                  outline-none
+                   w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
                   ${errors.phone ? 'border-red-500' : 'border-[#D8D8D8]'}
                 `}
@@ -295,34 +274,23 @@ function Register() {
               {errors.phone && <p className="text-red-500 text-[12px] mt-[5px]">{errors.phone}</p>}
             </div>
 
+<<<<<<< HEAD
             {/* ================= CITY ================= */}
+=======
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
             <div className="mb-[15px]">
               <label htmlFor="city" className="block text-[14px] sm:text-[15px] mb-[10px]">
                 المدينة
               </label>
-
               <select
                 id="city"
                 value={formData.city}
                 onChange={handleChange}
-                className="
-                  w-full p-[8px] my-[10px]
-                  bg-[#f1f4f9]
-                  border border-[#D8D8D8]
-                  rounded-[10px]
-                  outline-none
-                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                ">
+                className="w-full rounded-[10px] border border-[#D8D8D8] bg-[#f1f4f9] p-[8px] my-[10px]">
                 <option value="">اختر المدينة (اختياري)</option>
-
                 {cities.map((item) => {
                   const cityName = item.city || item.city_name || item.name;
-
-                  return (
-                    <option key={item.city_id ?? item.id ?? cityName} value={cityName}>
-                      {cityName}
-                    </option>
-                  );
+                  return <option key={item.city_id ?? item.id ?? cityName} value={cityName}>{cityName}</option>;
                 })}
               </select>
             </div>
@@ -340,12 +308,9 @@ function Register() {
                 value={formData.address}
                 onChange={handleChange}
                 className={`
-                  w-full p-[8px] my-[10px]
-                  bg-[#f1f4f9]
-                  border rounded-[10px]
-                  outline-none
+                   w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
                   focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                  ${errors.address ? 'border-red-500' : 'border-[#D8D8D8]'}
+                  ${errors.address ? 'border-red-500' : 'border-[#D8D8D8] '}
                 `}
               />
 
@@ -360,6 +325,7 @@ function Register() {
                 كلمة المرور
               </label>
 
+              {/* input + eye */}
               <div className="relative">
                 <input
                   id="password"
@@ -368,15 +334,13 @@ function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`
-                    w-full p-[8px] my-[10px]
-                    bg-[#f1f4f9]
-                    border rounded-[10px]
-                    outline-none
-                    focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
-                    ${errors.password ? 'border-red-500' : 'border-[#D8D8D8]'}
+                    w-full p-[8px] my-[10px] bg-[#f1f4f9] border rounded-[10px] outline-none
+                  focus:shadow-[0_0_12px_rgba(200,200,200,0.35)]
+                    ${errors.password ? 'border-red-500' : 'border-[#D8D8D8] '}
                   `}
                 />
 
+                {/* Eye Icon */}
                 <i
                   onClick={() => setShowPassword(!showPassword)}
                   className={`
@@ -397,6 +361,7 @@ function Register() {
             </div>
 
             {/* ================= TERMS ================= */}
+<<<<<<< HEAD
             <div className="mb-[20px]">
               <label className="flex items-center gap-[8px] cursor-pointer select-none">
                 <input
@@ -445,6 +410,18 @@ function Register() {
               </label>
 
               {errors.terms && <p className="text-red-500 text-[12px] mt-[6px]">{errors.terms}</p>}
+=======
+            <div className="flex items-center gap-[8px] mb-[20px]">
+              <i
+                className="
+                  fa-regular
+                  fa-square
+                  text-[#777]
+                  cursor-pointer
+                "></i>
+
+              <p className="text-[12px] sm:text-[13px] text-[#777]">أوافق على الشروط والأحكام</p>
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
             </div>
 
             {/* ================= REGISTER BUTTON ================= */}
@@ -461,18 +438,25 @@ function Register() {
                 transition
                 bg-[linear-gradient(90deg,#3A73AA_0%,#4F9D9E_100%)]
                 hover:opacity-90
+<<<<<<< HEAD
                 disabled:opacity-60
                 disabled:cursor-not-allowed
+=======
+>>>>>>> d868e954bd1c2dec4267d049830bdae2c7218d0a
               ">
               {loading ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
             </button>
           </form>
 
           {/* ================= LOGIN LINK ================= */}
-          <div className="text-center mt-[20px] mb-[18px] flex items-center justify-center gap-[5px]">
-            <p className="text-[#777]">لديك حساب بالفعل؟</p>
+          <div className="text-center mt-[20px] flex text-center items-center justify-center mt-[20px] mb-[18px] gap-[5px]">
+            <p className=" text-[#777] "> لديك حساب بالفعل؟</p>
 
-            <Link to="/login" className="line-clamp-1 text-[#041167] underline font-bold">
+            <Link
+              to="/login"
+              className="
+                 line-clamp-1 text-[#041167] underline font-bold
+                ">
               تسجيل الدخول
             </Link>
           </div>
@@ -488,39 +472,20 @@ function Register() {
               <div className="h-[1px] bg-[#E5E5E5] flex-1"></div>
             </div>
 
+            {/* Facebook */}
             {/* Social Login */}
             <div className="sm:flex sm:justify-center sm:items-center gap-[15px] m-[11px]">
               {/* Facebook */}
               <div
-                className="
-                  border border-[#e1e1e1]
-                  rounded-[11px]
-                  cursor-pointer
-                  px-[27px] py-[8px]
-                  gap-[5px]
-                  flex justify-center items-center
-                  hover:scale-[1.03]
-                  transition-all duration-300
-                  sm:mb-[0]
-                  mb-[10px]
-                ">
+                className="border border-[#e1e1e1] rounded-[11px] cursor-pointer px-[27px] py-[8px] gap-[5px] flex justify-center items-center hover:scale-[1.03] transition-all duration-300  sm:mb-[0]
+                  mb-[10px]">
                 <i className="fa-brands fa-facebook text-[24px] bg-gradient-to-b from-[#00B2FF] to-[#006AFF] bg-clip-text text-transparent"></i>
 
                 <p className="text-[12px] text-[#00B2FF]">الدخول باستخدام فيسبوك</p>
               </div>
 
               {/* Google */}
-              <div
-                className="
-                  border border-[#e1e1e1]
-                  rounded-[11px]
-                  px-[27px] py-[10px]
-                  gap-[6px]
-                  cursor-pointer
-                  flex justify-center items-center
-                  hover:scale-[1.03]
-                  transition-all
-                ">
+              <div className="border border-[#e1e1e1] rounded-[11px] px-[27px] py-[10px] gap-[6px] cursor-pointer flex justify-center items-center hover:scale-[1.03] transition-all">
                 <img src={googleIcon} className="w-[20px] h-[20px]" alt="Google" />
 
                 <p className="text-[12px] text-[#6f6d6d]">Google الدخول باستخدام</p>
@@ -533,4 +498,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default Sigin;

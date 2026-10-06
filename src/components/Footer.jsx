@@ -1,17 +1,17 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const quickLinks = [
     { title: 'من نحن', path: '/aboutUs' },
-    { title: 'السوق', path: '#market' },
-    { title: 'كيف تعمل المنصة', path: '/how-it-works' },
+    { title: 'السوق', path: '/market' },
+    { title: 'كيف تعمل المنصة', path: '/home#how-it-works' },
     { title: 'الأسئلة الشائعة', path: '/helpCenter' },
   ];
 
   const supportLinks = [
     { title: 'مركز المساعدة', path: '/helpCenter' },
     { title: 'قوانين المنصة', path: '/PlatformRules' },
-    { title: 'الإبلاغ عن مشكلة', path: '/reportaproblem' },
+    { title: 'الإبلاغ عن مشكلة', path: '/report' },
     { title: 'سياسة الخصوصية', path: '/privacy' },
   ];
 
@@ -93,7 +93,7 @@ const Footer = () => {
           ">
           {/* ================= BRAND ================= */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="group mb-4 flex w-fit items-center gap-3">
+            <Link to="/home" className="group mb-4 flex w-fit items-center gap-3">
               <span
                 className="
                   flex h-11 w-11 shrink-0 items-center justify-center
@@ -121,7 +121,7 @@ const Footer = () => {
                 </svg>
               </span>
 
-              <span className="text-[28px] font-bold sm:text-[30px]">بادل</span>
+              <span className="text-[28px] font-bold sm:text-[30px]">بدّلها</span>
             </Link>
 
             <p className="max-w-[390px] text-[13px] leading-7 text-white/85 sm:text-[14px]">
@@ -340,7 +340,7 @@ const Footer = () => {
           <p>© جميع الحقوق محفوظة – صنعت بحب في غزة.</p>
 
           <div className="flex items-center gap-4 sm:gap-5">
-            <Link to="/terms" className="transition-colors hover:text-white">
+            <Link to="/PlatformRules" className="transition-colors hover:text-white">
               الشروط والأحكام
             </Link>
 

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbarpro from '../components/Navbarpro';
-
 import auth from '../services/auth';
 import marketplace from '../services/marketplace';
 import { getApiError } from '../services/api';
@@ -63,7 +62,7 @@ function Icon({ name, size = 20, stroke = 2 }) {
 }
 
 /* =========================================================
-   الصورة الشخصية
+   الصورة
 ========================================================= */
 
 function Picture({ url, alt = '' }) {
@@ -88,24 +87,29 @@ function Picture({ url, alt = '' }) {
 }
 
 /* =========================================================
-   زر رفع الملفات
+   زر اختيار صورة
 ========================================================= */
 
 function FileButton({ onPick, label, className, children }) {
   const inputRef = useRef(null);
 
-  const handleChange = (e) => {
-    const file = e.target.files?.[0];
+  const handleChange = (event) => {
+    const file = event.target.files?.[0];
 
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
+      alert('اختاري ملف صورة فقط');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('حجم الصورة يجب أن يكون أقل من 5 ميغابايت');
       return;
     }
 
     onPick(file);
-
-    e.target.value = '';
+    event.target.value = '';
   };
 
   return (
@@ -128,24 +132,36 @@ function FileButton({ onPick, label, className, children }) {
 ========================================================= */
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const [profile, setProfile] = useState(null);
   const [products, setProducts] = useState([]);
+
   const [profileLoading, setProfileLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
+
   const [profileError, setProfileError] = useState('');
   const [productsError, setProductsError] = useState('');
+
   const [editOpen, setEditOpen] = useState(false);
+
   const [editForm, setEditForm] = useState({
     fullName: '',
     phoneNumber: '',
     address: '',
     city: '',
   });
+
   const [editError, setEditError] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+
   const [profileCities, setProfileCities] = useState([]);
   const [citiesError, setCitiesError] = useState('');
+
+  /* =========================================================
+     تحميل البيانات
+  ========================================================= */
 
   useEffect(() => {
     let active = true;
@@ -153,7 +169,9 @@ export default function ProfilePage() {
     auth
       .profile()
       .then((data) => {
-        if (active) setProfile(data);
+        if (active) {
+          setProfile(data);
+        }
       })
       .catch((error) => {
         if (active) {
@@ -161,7 +179,9 @@ export default function ProfilePage() {
         }
       })
       .finally(() => {
-        if (active) setProfileLoading(false);
+        if (active) {
+          setProfileLoading(false);
+        }
       });
 
     marketplace
@@ -173,7 +193,9 @@ export default function ProfilePage() {
           throw new Error('Unexpected listings response');
         }
 
-        if (active) setProducts(items);
+        if (active) {
+          setProducts(items);
+        }
       })
       .catch((error) => {
         if (active) {
@@ -181,7 +203,9 @@ export default function ProfilePage() {
         }
       })
       .finally(() => {
-        if (active) setProductsLoading(false);
+        if (active) {
+          setProductsLoading(false);
+        }
       });
 
     marketplace
@@ -205,27 +229,31 @@ export default function ProfilePage() {
   }, []);
 
   const displayProfile = {
-    name: profile?.full_name,
-    city: profile?.city,
-    memberSince: profile?.created_at,
-    verified: profile?.is_verified,
-    averageRating: profile?.average_rating,
-    totalTransactions: profile?.total_transactions,
+    name: profile?.full_name || profile?.fullName || '',
+    city: profile?.city || profile?.city_name || '',
+    region: profile?.region || '',
+    memberSince: profile?.created_at || profile?.createdAt,
+    verified: profile?.is_verified ?? profile?.isVerified ?? false,
+    averageRating: profile?.average_rating ?? profile?.averageRating ?? 0,
+    totalTransactions: profile?.total_transactions ?? profile?.totalTransactions ?? 0,
+    avatarUrl: profile?.avatar_url || profile?.avatarUrl || '',
+    avatarEditable: false,
   };
 
-  /* =======================================================
+  /* =========================================================
      مشاركة الملف
-  ======================================================= */
+  ========================================================= */
 
   const handleShare = async () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: profile?.full_name || 'Badelha',
+          title: profile?.full_name || profile?.fullName || 'Badelha',
           url: window.location.href,
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
+
         alert('تم نسخ رابط الملف');
       }
     } catch {
@@ -233,24 +261,25 @@ export default function ProfilePage() {
     }
   };
 
-  /* =======================================================
+  /* =========================================================
      تعديل الملف
-  ======================================================= */
+  ========================================================= */
 
   const handleEdit = () => {
-    setEditForm({
-      fullName: profile?.full_name || '',
-      phoneNumber: profile?.phone_number || '',
-      address: profile?.address || '',
-      city: profile?.city || '',
-    });
-
-    setEditError('');
-    setEditOpen(true);
+    /*
+      صفحة تعديل الملف أصبحت مستقلة:
+      /edit-profile
+    */
+    navigate('/edit-profile');
   };
 
+  /*
+    هذا الجزء يبقى متاحًا في حال استخدام
+    نموذج التعديل الداخلي مستقبلًا.
+  */
   const handleProfileSubmit = async (event) => {
     event.preventDefault();
+
     setSavingProfile(true);
     setEditError('');
 
@@ -282,7 +311,7 @@ export default function ProfilePage() {
         font-[IBM_Plex_Sans_Arabic,Segoe_UI,Tahoma,sans-serif]
       ">
       {/* =====================================================
-          الهيدر
+          Navbar
       ===================================================== */}
 
       <Navbarpro />
@@ -305,9 +334,8 @@ export default function ProfilePage() {
             sm:h-[260px]
             md:h-[280px]
             lg:h-[300px]
-          ">
-          {/* صورة الغلاف */}
-        </div>
+          "
+        />
       </section>
 
       {/* =====================================================
@@ -315,15 +343,17 @@ export default function ProfilePage() {
       ===================================================== */}
 
       <Identity
-        p={{
-          ...displayProfile,
-        }}
+        p={displayProfile}
         loading={profileLoading}
         isOwner={true}
         uploading={false}
         onShare={handleShare}
         onEdit={handleEdit}
       />
+
+      {/* =====================================================
+          تعديل الملف الداخلي
+      ===================================================== */}
 
       {editOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
@@ -335,7 +365,7 @@ export default function ProfilePage() {
             {[
               ['fullName', 'الاسم الكامل'],
               ['phoneNumber', 'رقم الهاتف'],
-              ['city', 'المدينة (من مدن غزة المعتمدة)'],
+              ['city', 'المدينة'],
               ['address', 'العنوان'],
             ].map(([field, label]) => (
               <label key={field} className="block text-sm">
@@ -351,7 +381,14 @@ export default function ProfilePage() {
                         city: event.target.value,
                       })
                     }
-                    className="mt-1 w-full rounded-lg border border-[#d8d8d8] p-2">
+                    className="
+                      mt-1
+                      w-full
+                      rounded-lg
+                      border
+                      border-[#d8d8d8]
+                      p-2
+                    ">
                     <option value="">اختر المدينة</option>
 
                     {profileCities.map((city) => {
@@ -374,7 +411,14 @@ export default function ProfilePage() {
                         [field]: event.target.value,
                       })
                     }
-                    className="mt-1 w-full rounded-lg border border-[#d8d8d8] p-2"
+                    className="
+                      mt-1
+                      w-full
+                      rounded-lg
+                      border
+                      border-[#d8d8d8]
+                      p-2
+                    "
                   />
                 )}
               </label>
@@ -395,7 +439,14 @@ export default function ProfilePage() {
             <div className="flex gap-2">
               <button
                 disabled={savingProfile || !profileCities.length}
-                className="rounded-lg bg-[#347f81] px-4 py-2 text-white disabled:opacity-60">
+                className="
+                  rounded-lg
+                  bg-[#347f81]
+                  px-4
+                  py-2
+                  text-white
+                  disabled:opacity-60
+                ">
                 {savingProfile ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
               </button>
 
@@ -428,6 +479,10 @@ export default function ProfilePage() {
 
       <ProfileAbout />
 
+      {/* =====================================================
+          التبويبات
+      ===================================================== */}
+
       <ProfileTabs
         initialTab={searchParams.get('tab')}
         openAddProduct={searchParams.get('addProduct') === '1'}
@@ -443,7 +498,6 @@ export default function ProfilePage() {
 
 /* =========================================================
    الهوية
-   الصورة الشخصية + الاسم + الموقع + الأزرار
 ========================================================= */
 
 function Identity({
@@ -456,8 +510,6 @@ function Identity({
   onEdit = () => {},
 }) {
   const location = [p.city, p.region].filter(Boolean).join('، ');
-
-  const navigate = useNavigate();
 
   return (
     <section
@@ -472,9 +524,7 @@ function Identity({
         gap-[18px]
         px-5
       ">
-      {/* =====================================================
-          الصورة الشخصية
-      ===================================================== */}
+      {/* الصورة الشخصية */}
 
       <div className="relative h-[110px] w-[110px] flex-none">
         <div
@@ -495,16 +545,7 @@ function Identity({
           ">
           <Picture url={p.avatarUrl} alt={p.name ? `صورة ${p.name}` : ''} />
 
-          {uploading === 'avatar' && (
-            <div
-              className="
-                absolute
-                inset-0
-                animate-pulse
-                bg-white/40
-              "
-            />
-          )}
+          {uploading === 'avatar' && <div className="absolute inset-0 animate-pulse bg-white/40" />}
         </div>
 
         {/* زر تغيير الصورة */}
@@ -538,16 +579,9 @@ function Identity({
         )}
       </div>
 
-      {/* =====================================================
-          الاسم والمعلومات
-      ===================================================== */}
+      {/* الاسم */}
 
-      <div
-        className="
-          min-w-[220px]
-          flex-1
-          pb-1.5
-        ">
+      <div className="min-w-[220px] flex-1 pb-1.5">
         <div className="flex flex-wrap items-center gap-2.5">
           <h1
             className="
@@ -609,9 +643,7 @@ function Identity({
         </div>
       </div>
 
-      {/* =====================================================
-          الأزرار
-      ===================================================== */}
+      {/* الأزرار */}
 
       <div
         className="
@@ -624,7 +656,7 @@ function Identity({
         {isOwner && (
           <button
             type="button"
-            onClick={() => navigate('/Personalinfoform')}
+            onClick={onEdit}
             className="
               inline-flex
               items-center
@@ -648,7 +680,7 @@ function Identity({
               active:scale-[.97]
             ">
             <Icon name="edit" size={17} />
-            تعديل الملف الشخصي
+            تعديل الملف
           </button>
         )}
 
@@ -734,7 +766,7 @@ function AnimatedNumber({ value, duration = 1400, decimals = 0 }) {
 }
 
 /* =========================================================
-   إحصائيات الملف الشخصي
+   إحصائيات الملف
 ========================================================= */
 
 function ProfileStats({ profile, productsCount, loading }) {
@@ -802,6 +834,8 @@ function ProfileStats({ profile, productsCount, loading }) {
                   : ''
               }
             `}>
+            {/* خط متحرك */}
+
             <span
               className="
                 absolute
@@ -820,6 +854,8 @@ function ProfileStats({ profile, productsCount, loading }) {
               "
             />
 
+            {/* الرقم */}
+
             <span
               className="
                 flex
@@ -832,18 +868,7 @@ function ProfileStats({ profile, productsCount, loading }) {
                 duration-300
                 group-hover:scale-105
               ">
-              {stat.rating && (
-                <span
-                  className="
-                    mr-[3px]
-                    text-[#e4a52f]
-                    transition-transform
-                    duration-300
-                    group-hover:rotate-12
-                  ">
-                  ★
-                </span>
-              )}
+              {stat.rating && <span className="mr-[3px] text-[#e4a52f]">★</span>}
 
               {loading && index === 0 ? (
                 '…'
@@ -851,6 +876,8 @@ function ProfileStats({ profile, productsCount, loading }) {
                 <AnimatedNumber value={stat.value} decimals={stat.decimals || 0} />
               )}
             </span>
+
+            {/* اسم الإحصائية */}
 
             <span
               className="
@@ -869,6 +896,10 @@ function ProfileStats({ profile, productsCount, loading }) {
     </section>
   );
 }
+
+/* =========================================================
+   نبذة
+========================================================= */
 
 function ProfileAbout() {
   return (
@@ -918,7 +949,7 @@ function ProfileAbout() {
 }
 
 /* =========================================================
-   تبويبات الملف الشخصي
+   تبويبات الملف
 ========================================================= */
 
 function ProfileTabs({
@@ -932,29 +963,56 @@ function ProfileTabs({
 }) {
   const [activeTab, setActiveTab] = useState(initialTab === 'products' ? 'products' : 'info');
 
+  useEffect(() => {
+    if (initialTab === 'products') {
+      setActiveTab('products');
+    }
+  }, [initialTab]);
+
   const tabs = [
-    { id: 'info', label: 'المعلومات' },
-    { id: 'reviews', label: 'التقييمات' },
-    { id: 'products', label: 'منتجاتي' },
+    {
+      id: 'info',
+      label: 'المعلومات',
+    },
+    {
+      id: 'reviews',
+      label: 'التقييمات',
+    },
+    {
+      id: 'products',
+      label: 'منتجاتي',
+    },
   ];
 
   return (
-    <section className="mx-auto mt-6 w-full max-w-[1100px] px-5 pb-12">
+    <section
+      className="
+        mx-auto
+        mt-6
+        w-full
+        max-w-[1100px]
+        px-5
+        pb-12
+      ">
       <div
         className="
           overflow-hidden
           rounded-[18px]
-          border border-[#e1ebec]
+          border
+          border-[#e1ebec]
           bg-white
           shadow-[0_4px_18px_rgba(22,56,79,0.05)]
         ">
+        {/* أزرار التبويبات */}
+
         <div
           className="
             flex
             items-center
             gap-2
             overflow-x-auto
-            border-b border-[#e8eeee]
+            border-b
+            border-[#e8eeee]
             px-4
             pt-3
             sm:px-6
@@ -978,9 +1036,12 @@ function ProfileTabs({
                 transition-all
                 duration-300
                 sm:px-7
+
                 ${activeTab === tab.id ? 'text-[#347f81]' : 'text-[#81939d] hover:text-[#347f81]'}
               `}>
               {tab.label}
+
+              {/* الخط المتحرك */}
 
               <span
                 className={`
@@ -995,12 +1056,15 @@ function ProfileTabs({
                   to-[#4F9D9E]
                   transition-all
                   duration-300
+
                   ${activeTab === tab.id ? 'w-[65%]' : 'w-0'}
                 `}
               />
             </button>
           ))}
         </div>
+
+        {/* محتوى التبويب */}
 
         <div
           key={activeTab}
@@ -1031,7 +1095,7 @@ function ProfileTabs({
 }
 
 /* =========================================================
-   تبويب المعلومات
+   المعلومات
 ========================================================= */
 
 function InfoTab({ profile }) {
@@ -1081,7 +1145,7 @@ function InfoTab({ profile }) {
 }
 
 /* =========================================================
-   تبويب التقييمات
+   التقييمات
 ========================================================= */
 
 function ReviewsTab({ averageRating }) {
@@ -1188,12 +1252,9 @@ function ReviewsTab({ averageRating }) {
             bg-white
             p-6
             shadow-[0_4px_14px_rgba(22,56,79,0.04)]
-            transition-all
-            duration-300
-            hover:shadow-[0_10px_25px_rgba(22,56,79,0.07)]
-            lg:sticky
-            lg:top-5
           ">
+          {/* المعدل العام */}
+
           <div className="flex flex-col items-center text-center">
             <span
               className="
@@ -1206,16 +1267,18 @@ function ReviewsTab({ averageRating }) {
               {Number(averageRating || 0).toFixed(1)}
             </span>
 
+            {/* النجوم */}
+
             <div className="mt-4 flex flex-row-reverse gap-1 text-[24px] text-[#b9771d]">
               {[1, 2, 3, 4, 5].map((star) => (
-                <span key={star} className="transition-transform duration-300 hover:scale-125">
-                  ★
-                </span>
+                <span key={star}>★</span>
               ))}
             </div>
 
             <p className="mt-4 text-[15px] text-[#81939d]">متوسط التقييم المسجّل</p>
           </div>
+
+          {/* توزيع التقييمات */}
 
           <div className="mt-8 flex flex-col gap-5">
             {ratingStats.map((item, index) => (
@@ -1264,12 +1327,11 @@ function ReviewsTab({ averageRating }) {
 }
 
 /* =========================================================
-   تبويب منتجاتي
+   منتجاتي
 ========================================================= */
 
 function ProductsTab({ products, loading, error, onProductsChange, openAddProduct }) {
   const [categories, setCategories] = useState([]);
-
   const [cities, setCities] = useState([]);
 
   const [formOpen, setFormOpen] = useState(openAddProduct);
@@ -1284,11 +1346,18 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
     condition: 'GOOD',
     price: '',
     exchangePreference: 'BOTH',
+    image: null,
   });
+
+  const [imagePreview, setImagePreview] = useState('');
 
   const [saving, setSaving] = useState(false);
 
   const [formError, setFormError] = useState('');
+
+  /* =========================================================
+     تحميل الفئات والمدن
+  ========================================================= */
 
   useEffect(() => {
     let active = true;
@@ -1321,6 +1390,10 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
     };
   }, []);
 
+  /* =========================================================
+     فتح النموذج
+  ========================================================= */
+
   const openForm = (product = null) => {
     setFormOpen(true);
     setEditing(product);
@@ -1333,10 +1406,46 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
       condition: product?.condition || 'GOOD',
       price: product?.price ?? '',
       exchangePreference: product?.exchange_preference || 'BOTH',
+      image: null,
     });
+
+    setImagePreview(product?.images?.[0]?.image_url || '');
 
     setFormError('');
   };
+
+  /* =========================================================
+     اختيار صورة
+  ========================================================= */
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setFormError('اختاري ملف صورة فقط');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError('حجم الصورة يجب أن يكون أقل من 5 ميغابايت');
+      return;
+    }
+
+    setForm({
+      ...form,
+      image: file,
+    });
+
+    setImagePreview(URL.createObjectURL(file));
+
+    setFormError('');
+  };
+
+  /* =========================================================
+     تحديث المنتجات
+  ========================================================= */
 
   const refreshProducts = async () => {
     const result = await marketplace.myProducts();
@@ -1350,16 +1459,25 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
     onProductsChange(items);
   };
 
+  /* =========================================================
+     حفظ المنتج
+  ========================================================= */
+
   const saveProduct = async (event) => {
     event.preventDefault();
+
     setSaving(true);
     setFormError('');
 
     const payload = {
-      ...form,
+      title: form.title,
+      description: form.description,
       categoryId: Number(form.categoryId),
       cityId: Number(form.cityId),
+      condition: form.condition,
       price: form.price === '' ? null : Number(form.price),
+      exchangePreference: form.exchangePreference,
+      image: form.image,
     };
 
     try {
@@ -1373,12 +1491,28 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
 
       setFormOpen(false);
       setEditing(null);
+      setImagePreview('');
+
+      setForm({
+        title: '',
+        description: '',
+        categoryId: '',
+        cityId: '',
+        condition: 'GOOD',
+        price: '',
+        exchangePreference: 'BOTH',
+        image: null,
+      });
     } catch (requestError) {
       setFormError(getApiError(requestError) || 'تعذر حفظ المنتج');
     } finally {
       setSaving(false);
     }
   };
+
+  /* =========================================================
+     حذف المنتج
+  ========================================================= */
 
   const removeProduct = async (product) => {
     if (!window.confirm('هل تريد حذف هذا المنتج؟')) {
@@ -1396,7 +1530,7 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
 
   return (
     <section className="w-full">
-      {/* عنوان القسم */}
+      {/* العنوان */}
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -1405,17 +1539,41 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
           <p className="mt-1 text-[13px] text-[#81939d]">المنتجات التي تعرضينها في السوق</p>
         </div>
 
-        <span className="rounded-full bg-[#e3f2f1] px-4 py-2 text-[13px] font-semibold text-[#347f81]">
+        <span
+          className="
+            rounded-full
+            bg-[#e3f2f1]
+            px-4
+            py-2
+            text-[13px]
+            font-semibold
+            text-[#347f81]
+          ">
           {products.length} منتجات
         </span>
 
         <button
           type="button"
           onClick={() => openForm()}
-          className="rounded-full bg-gradient-to-r from-[#3A73AA] to-[#4F9D9E] px-4 py-2 text-sm font-semibold text-white">
-          إضافة منتج
+          className="
+            rounded-full
+            bg-gradient-to-r
+            from-[#3A73AA]
+            to-[#4F9D9E]
+            px-4
+            py-2
+            text-sm
+            font-semibold
+            text-white
+            transition-all
+            hover:-translate-y-0.5
+            hover:shadow-md
+          ">
+          + إضافة منتج
         </button>
       </div>
+
+      {/* الأخطاء */}
 
       {(error || formError) && (
         <p role="alert" className="mb-4 text-sm text-red-600">
@@ -1423,10 +1581,97 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
         </p>
       )}
 
+      {/* =====================================================
+          نموذج المنتج
+      ===================================================== */}
+
       {formOpen && (
         <form
           onSubmit={saveProduct}
-          className="mb-6 grid gap-3 rounded-xl border border-[#e1ebec] bg-[#f7fafa] p-4 sm:grid-cols-2">
+          className="
+            mb-6
+            grid
+            gap-4
+            rounded-2xl
+            border
+            border-[#e1ebec]
+            bg-[#f7fafa]
+            p-5
+            sm:grid-cols-2
+          ">
+          {/* صورة المنتج */}
+
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium">صورة المنتج</label>
+
+            <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div
+                className="
+                  relative
+                  flex
+                  h-[190px]
+                  w-full
+                  max-w-[260px]
+                  items-center
+                  justify-center
+                  overflow-hidden
+                  rounded-2xl
+                  border-2
+                  border-dashed
+                  border-[#b9d5d5]
+                  bg-white
+                ">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="معاينة المنتج"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="text-center text-[#81939d]">
+                    <div className="mb-2 text-4xl">📷</div>
+
+                    <p className="text-sm">لم يتم اختيار صورة</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label
+                  className="
+                    inline-flex
+                    cursor-pointer
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-gradient-to-r
+                    from-[#3A73AA]
+                    to-[#4F9D9E]
+                    px-5
+                    py-3
+                    text-sm
+                    font-semibold
+                    text-white
+                    transition-all
+                    hover:-translate-y-0.5
+                    hover:shadow-md
+                  ">
+                  اختيار صورة
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </label>
+
+                <p className="mt-2 text-xs text-[#81939d]">JPG / PNG / WEBP — حتى 5MB</p>
+              </div>
+            </div>
+          </div>
+
+          {/* اسم المنتج */}
+
           <label className="text-sm">
             اسم المنتج
             <input
@@ -1440,9 +1685,21 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   title: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2"
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+                outline-none
+                focus:border-[#4F9D9E]
+              "
             />
           </label>
+
+          {/* الفئة */}
 
           <label className="text-sm">
             الفئة
@@ -1455,7 +1712,17 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   categoryId: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2">
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+                outline-none
+                focus:border-[#4F9D9E]
+              ">
               <option value="">اختر الفئة</option>
 
               {categories.map((item) => (
@@ -1465,6 +1732,8 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
               ))}
             </select>
           </label>
+
+          {/* المدينة */}
 
           <label className="text-sm">
             المدينة
@@ -1477,7 +1746,17 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   cityId: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2">
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+                outline-none
+                focus:border-[#4F9D9E]
+              ">
               <option value="">اختر المدينة</option>
 
               {cities.map((item) => (
@@ -1487,6 +1766,8 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
               ))}
             </select>
           </label>
+
+          {/* الحالة */}
 
           <label className="text-sm">
             الحالة
@@ -1498,14 +1779,28 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   condition: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2">
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+              ">
               <option value="NEW">جديد</option>
+
               <option value="LIKE_NEW">كالجديد</option>
+
               <option value="GOOD">جيد</option>
+
               <option value="FAIR">مقبول</option>
+
               <option value="POOR">مستهلك</option>
             </select>
           </label>
+
+          {/* السعر */}
 
           <label className="text-sm">
             السعر (اختياري)
@@ -1520,9 +1815,19 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   price: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2"
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+              "
             />
           </label>
+
+          {/* نوع العرض */}
 
           <label className="text-sm">
             نوع العرض
@@ -1534,7 +1839,15 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   exchangePreference: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2">
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+              ">
               <option value="BOTH">تبديل أو شراء</option>
 
               <option value="EXCHANGE_ONLY">تبديل فقط</option>
@@ -1542,6 +1855,8 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
               <option value="PURCHASE_ONLY">شراء فقط</option>
             </select>
           </label>
+
+          {/* الوصف */}
 
           <label className="text-sm sm:col-span-2">
             الوصف
@@ -1555,16 +1870,37 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   description: event.target.value,
                 })
               }
-              className="mt-1 w-full rounded-lg border p-2"
-              rows="3"
+              className="
+                mt-1
+                w-full
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                p-2.5
+              "
+              rows="4"
             />
           </label>
 
+          {/* الأزرار */}
+
           <div className="flex gap-2 sm:col-span-2">
             <button
+              type="submit"
               disabled={saving || !categories.length || !cities.length}
-              className="rounded-lg bg-[#347f81] px-4 py-2 text-white disabled:opacity-50">
-              {saving ? 'جارٍ الحفظ...' : 'حفظ'}
+              className="
+                rounded-lg
+                bg-[#347f81]
+                px-5
+                py-2.5
+                font-semibold
+                text-white
+                transition-all
+                hover:shadow-md
+                disabled:opacity-50
+              ">
+              {saving ? 'جارٍ الحفظ...' : editing ? 'حفظ التعديلات' : 'إضافة المنتج'}
             </button>
 
             <button
@@ -1572,15 +1908,25 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
               onClick={() => {
                 setFormOpen(false);
                 setEditing(null);
+                setImagePreview('');
               }}
-              className="rounded-lg border px-4 py-2">
+              className="
+                rounded-lg
+                border
+                border-[#d8d8d8]
+                bg-white
+                px-5
+                py-2.5
+              ">
               إلغاء
             </button>
           </div>
         </form>
       )}
 
-      {/* شبكة المنتجات */}
+      {/* =====================================================
+          شبكة المنتجات
+      ===================================================== */}
 
       <div
         className="
@@ -1591,10 +1937,29 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
           lg:grid-cols-3
           xl:grid-cols-4
         ">
-        {/* كروت المنتجات */}
-
         {loading ? (
           <p>جارٍ تحميل المنتجات...</p>
+        ) : products.length === 0 ? (
+          <div
+            className="
+              rounded-2xl
+              border
+              border-dashed
+              border-[#cbdcdc]
+              bg-[#f8fbfb]
+              p-10
+              text-center
+              text-[#718692]
+              sm:col-span-2
+              lg:col-span-3
+              xl:col-span-4
+            ">
+            <div className="mb-3 text-5xl">📦</div>
+
+            <p className="font-semibold">لا توجد منتجات حتى الآن</p>
+
+            <p className="mt-1 text-sm">أضيفي أول منتج ليظهر هنا.</p>
+          </div>
         ) : (
           products.map((product) => (
             <article
@@ -1628,26 +1993,22 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                   from-[#e2f2ef]
                   to-[#f5f0df]
                 ">
-                <span
-                  className="
-                    text-[58px]
-                    transition-transform
-                    duration-500
-                    group-hover:scale-110
-                    group-hover:-rotate-3
-                  ">
-                  {product.images?.[0]?.image_url ? (
-                    <img
-                      src={product.images[0].image_url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    '📦'
-                  )}
-                </span>
-
-                {/* حالة المنتج */}
+                {product.images?.[0]?.image_url ? (
+                  <img
+                    src={product.images[0].image_url}
+                    alt={product.title || 'صورة المنتج'}
+                    className="
+                      h-full
+                      w-full
+                      object-cover
+                      transition-transform
+                      duration-500
+                      group-hover:scale-105
+                    "
+                  />
+                ) : (
+                  <span className="text-[58px]">📦</span>
+                )}
 
                 <span
                   className="
@@ -1668,7 +2029,7 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                 </span>
               </div>
 
-              {/* تفاصيل المنتج */}
+              {/* التفاصيل */}
 
               <div className="p-4">
                 <h3
@@ -1722,14 +2083,32 @@ function ProductsTab({ products, loading, error, onProductsChange, openAddProduc
                       event.stopPropagation();
                       openForm(product);
                     }}
-                    className="rounded border px-3 py-1 text-xs">
+                    className="
+                      rounded
+                      border
+                      px-3
+                      py-1
+                      text-xs
+                      transition
+                      hover:bg-[#f4fafa]
+                    ">
                     تعديل
                   </button>
 
                   <button
                     type="button"
                     onClick={() => removeProduct(product)}
-                    className="rounded border border-red-200 px-3 py-1 text-xs text-red-600">
+                    className="
+                      rounded
+                      border
+                      border-red-200
+                      px-3
+                      py-1
+                      text-xs
+                      text-red-600
+                      transition
+                      hover:bg-red-50
+                    ">
                     حذف
                   </button>
                 </div>

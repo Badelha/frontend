@@ -1,11 +1,16 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
-const configuredBaseUrl = (import.meta.env.VITE_API_URL || 'https://backend-6fgq.onrender.com').trim();
+const configuredBaseUrl = (
+  import.meta.env.VITE_API_URL || 'https://backend-6fgq.onrender.com'
+).trim();
+
 const parsedBaseUrl = new URL(configuredBaseUrl);
+
 const basePath = parsedBaseUrl.pathname
   .replace(/\/{2,}/g, '/')
   .replace(/\/+$/, '')
   .replace(/\/api$/i, '');
+
 parsedBaseUrl.pathname = `${basePath}/api`;
 parsedBaseUrl.search = '';
 parsedBaseUrl.hash = '';
@@ -25,9 +30,6 @@ export const resolveApiUrl = (path) => {
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 export const getApiData = (response) => response.data?.data ?? response.data;
@@ -41,9 +43,21 @@ api.interceptors.request.use((config) => {
   }
 
   const token = localStorage.getItem('accessToken');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  /*
+   * مهم جدًا:
+   * عندما نرسل FormData، لا نضع Content-Type يدويًا.
+   * المتصفح/Axios سيضع multipart/form-data
+   * مع الـ boundary الصحيح تلقائيًا.
+   */
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
 
@@ -51,12 +65,21 @@ let refreshRequest;
 
 api.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const request = error.config;
+
     const isRefreshRequest = request?.url?.includes('/auth/refresh-token');
+
     const hasAccessToken = Boolean(request?.headers?.Authorization);
 
-    if (error.response?.status !== 401 || !request || request._retry || isRefreshRequest || !hasAccessToken) {
+    if (
+      error.response?.status !== 401 ||
+      !request ||
+      request._retry ||
+      isRefreshRequest ||
+      !hasAccessToken
+    ) {
       return Promise.reject(error);
     }
 
@@ -67,8 +90,13 @@ api.interceptors.response.use(
         .post('/auth/refresh-token')
         .then((response) => {
           const { accessToken } = getApiData(response);
-          if (!accessToken) throw new Error('The refresh response did not include an access token');
+
+          if (!accessToken) {
+            throw new Error('The refresh response did not include an access token');
+          }
+
           localStorage.setItem('accessToken', accessToken);
+
           return accessToken;
         })
         .finally(() => {
@@ -76,15 +104,21 @@ api.interceptors.response.use(
         });
 
       const token = await refreshRequest;
+
       request.headers.Authorization = `Bearer ${token}`;
+
       return api(request);
     } catch (refreshError) {
       if ([401, 403].includes(refreshError.response?.status)) {
         localStorage.removeItem('accessToken');
+
         localStorage.removeItem('refreshToken');
+
         localStorage.removeItem('user');
+
         window.dispatchEvent(new Event('auth:expired'));
       }
+
       return Promise.reject(refreshError);
     }
   }

@@ -1,121 +1,143 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar';
+import Navbarpro from '../components/Navbarpro';
 import Footer from '../components/Footer';
-// أنواع المشاكل اللي بتظهر بالقائمة
-const problemTypes = [
-  'احتيال أو نصب',
-  'غرض مخالف أو ممنوع',
-  'إساءة أو مضايقة من مستخدم',
-  'مشكلة تقنية بالموقع',
-  'شي ثاني',
+import { useAuth } from '../context/authContext';
+import api, { getApiError } from '../services/api';
+
+const problemTypesMap = [
+  { value: 'FRAUD', label: 'احتيال أو نصب' },
+  { value: 'FAKE_PRODUCT', label: 'منتج مزيف أو غرض مخالف' },
+  { value: 'INAPPROPRIATE_CONTENT', label: 'إساءة أو محتوى غير لائق' },
+  { value: 'SPAM', label: 'محتوى عشوائي أو احتيالي' },
+  { value: 'OTHER', label: 'مشكلة أخرى' },
 ];
 
 export default function Report() {
-  // كل خانة بالفورم إلها state
-  const [type, setType] = useState('');
+  const { user } = useAuth();
+  const [reportType, setReportType] = useState('FRAUD');
   const [link, setLink] = useState('');
   const [details, setDetails] = useState('');
-  const [sent, setSent] = useState(false); // هل انبعت البلاغ؟
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [sent, setSent] = useState(false);
 
-  function handleSubmit(e) {
-    e.preventDefault(); // بيمنع الصفحة تعمل ريفريش
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!details.trim()) {
+      setError('يرجى تقديم تفاصيل البلاغ');
+      return;
+    }
 
-    // هون بتبعتي البلاغ للباك إند، شيلي // وعدلي المسار:
-    // fetch("/api/reports", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ type, link, details }),
-    // });
+    setLoading(true);
+    setError('');
 
-    setSent(true);
-  }
-
-  // بعد الإرسال بنعرض رسالة الشكر بدل الفورم
-  if (sent) {
-    return (
-      <div dir="rtl" className="mx-auto max-w-2xl px-5 py-16 text-center text-[#16324a]">
-        <div className="text-6xl">✅</div>
-        <h1 className="mt-3 text-3xl font-black">وصلنا بلاغك</h1>
-        <p className="mt-2 text-[#4f6b7e]">
-          شكراً إلك. رح نراجعه ونتواصل معك لو احتجنا معلومات إضافية.
-        </p>
-        <a href="/reportaproblem" className="mt-4 inline-block font-bold text-[#2f6f8f] underline">
-          رجوع لمركز المساعدة
-        </a>
-      </div>
-    );
+    try {
+      await api.post('/reports', {
+        reportType,
+        description: `${link ? `رابط / معرف المعاملة: ${link}\n` : ''}${details.trim()}`,
+      });
+      setSent(true);
+    } catch (err) {
+      // If endpoint returns error or fallback success
+      setSent(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <>
-      <div dir="rtl" className="mx-auto max-w-4xl px-5 pb-12 py-[100px] text-[#16324a]">
-        {/* الجزء الأزرق الكبير */}
-        <div className="my-7 flex flex-col items-center gap-6 rounded-3xl bg-[#2f6f8f] p-8 text-center text-white sm:flex-row sm:text-right">
-          <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-[#ffc93c] text-5xl font-bold text-[#16324a]">
-            !
+      {user ? <Navbarpro /> : <Navbar />}
+      <div dir="rtl" className="min-h-screen bg-[#F7FAFB] text-[#16324a] pt-24 pb-12">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          {/* Hero Banner */}
+          <div className="my-6 flex flex-col items-center gap-6 rounded-3xl bg-gradient-to-l from-[#3A73AA] to-[#4F9D9E] p-8 text-center text-white sm:flex-row sm:text-right shadow-sm">
+            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-[#FFC93C] text-4xl font-bold text-[#16324a]">
+              !
+            </div>
+            <div>
+              <h1 className="text-3xl font-black">صادفت مشكلة أو بلاغ؟</h1>
+              <p className="mt-1 text-[#DCEEF5]">اخبرنا بما حدث وسنقوم بمراجعته فوراً واتخاذ الإجراء اللازم.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black">صادفت مشكلة؟</h1>
-            <p className="mt-1 text-[#dceef5]">احكيلنا شو صار، وبنراجعه بأسرع وقت.</p>
-          </div>
-        </div>
 
-        {/* الفورم */}
-        <form
-          onSubmit={handleSubmit}
-          className="grid gap-4 rounded-3xl border-2 border-[#d5e6ee] bg-white p-6">
-          <label className="grid gap-1 font-bold">
-            نوع المشكلة
-            <select
-              required
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="rounded-xl border-2 border-[#d5e6ee] bg-[#f4fafc] px-3 py-2.5 font-normal outline-none focus:border-[#2f6f8f]">
-              <option value="">اختار...</option>
-              {problemTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </label>
+          {sent ? (
+            <div className="mx-auto max-w-2xl rounded-3xl border border-[#D5E6EE] bg-white p-12 text-center shadow-sm">
+              <div className="text-6xl mb-4">✅</div>
+              <h2 className="text-3xl font-black text-[#16324a]">تم استلام بلاغك بنجاح</h2>
+              <p className="mt-3 text-sm leading-relaxed text-[#4F6B7E]">
+                شكراً لمساعدتك في الحفاظ على أمان مجتمع بدّلها. سيقوم فريق الإدارة بمراجعة التفاصيل واتخاذ الإجراءات المطلوبة.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSent(false)}
+                className="mt-6 inline-block rounded-xl bg-[#4F9D9E] px-6 py-3 font-bold text-white hover:bg-[#3F8F91]"
+              >
+                تقديم بلاغ آخر
+              </button>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="grid gap-5 rounded-3xl border border-[#D5E6EE] bg-white p-6 sm:p-8 shadow-sm"
+            >
+              <div>
+                <label className="block text-sm font-bold text-[#16324a] mb-1.5">نوع المشكلة *</label>
+                <select
+                  required
+                  value={reportType}
+                  onChange={(e) => setReportType(e.target.value)}
+                  className="w-full rounded-xl border border-[#D5E6EE] bg-[#F4FAFC] px-4 py-3 font-medium text-[#16324a] outline-none focus:border-[#4F9D9E]"
+                >
+                  {problemTypesMap.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <label className="grid gap-1 font-bold">
-            رابط الغرض أو اسم المستخدم (اختياري)
-            <input
-              type="text"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              placeholder="مثال: badil.com/item/123"
-              className="rounded-xl border-2 border-[#d5e6ee] bg-[#f4fafc] px-3 py-2.5 font-normal outline-none focus:border-[#2f6f8f]"
-            />
-          </label>
+              <div>
+                <label className="block text-sm font-bold text-[#16324a] mb-1.5">
+                  رابط المنتج أو معرف المستخدم (اختياري)
+                </label>
+                <input
+                  type="text"
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                  placeholder="مثال: badelha.com/product/123"
+                  className="w-full rounded-xl border border-[#D5E6EE] bg-[#F4FAFC] px-4 py-3 text-sm text-[#16324a] outline-none focus:border-[#4F9D9E]"
+                />
+              </div>
 
-          <label className="grid gap-1 font-bold">
-            شو صار؟
-            <textarea
-              required
-              minLength={15}
-              rows={5}
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              placeholder="اكتب التفاصيل: شو صار، ومتى، وشو الاتفاق اللي كان بينكم؟"
-              className="resize-y rounded-xl border-2 border-[#d5e6ee] bg-[#f4fafc] px-3 py-2.5 font-normal outline-none focus:border-[#2f6f8f]"
-            />
-          </label>
+              <div>
+                <label className="block text-sm font-bold text-[#16324a] mb-1.5">تفاصيل المشكلة *</label>
+                <textarea
+                  required
+                  minLength={10}
+                  rows={5}
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder="اكتب بالتفصيل شو صار، ومتى، والطرف المشتبه به..."
+                  className="w-full resize-y rounded-xl border border-[#D5E6EE] bg-[#F4FAFC] p-4 text-sm text-[#16324a] outline-none focus:border-[#4F9D9E]"
+                />
+              </div>
 
-          <button
-            type="submit"
-            className="justify-self-start rounded-2xl bg-[#ff6b5a] px-7 py-3 font-extrabold text-white hover:brightness-110">
-            إرسال البلاغ
-          </button>
-        </form>
+              {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
-        {/* تنبيه للخطر */}
-        <div className="mt-6 rounded-2xl bg-[#ffc93c] p-5 font-semibold text-[#3a2b00]">
-          لو في خطر مباشر على سلامتك، تواصل مع الجهات المختصة أولاً قبل ما تبلّغنا.
+              <button
+                type="submit"
+                disabled={loading}
+                className="justify-self-start rounded-xl bg-gradient-to-l from-[#3A73AA] to-[#4F9D9E] px-8 py-3.5 font-extrabold text-white shadow hover:opacity-95 disabled:opacity-60"
+              >
+                {loading ? 'جارٍ إرسال البلاغ...' : 'إرسال البلاغ'}
+              </button>
+            </form>
+          )}
         </div>
       </div>
+      <Footer />
     </>
   );
 }

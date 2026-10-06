@@ -1,9 +1,10 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import badelhaLogo from '../assets/images/badelha.png';
 import googleIcon from '../assets/images/search 1.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { getApiError } from '../services/api';
+import { getPostLoginPath } from '../utils/access';
 
 function Login() {
   const [rememberPassword, setRememberPassword] = useState(false);
@@ -15,6 +16,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -41,10 +43,21 @@ function Login() {
 
     try {
       setLoading(true);
-      await login({ email: email.trim(), password });
-      navigate(location.state?.from || '/profilePage', { replace: true });
+
+      const session = await login({
+        email: email.trim(),
+        password,
+      });
+
+      const requestedPath = location.state?.from;
+
+      navigate(requestedPath || getPostLoginPath(session.user), {
+        replace: true,
+      });
     } catch (error) {
-      setErrors({ general: getApiError(error) || 'تعذر تسجيل الدخول، حاول مرة أخرى' });
+      setErrors({
+        general: getApiError(error) || 'تعذر تسجيل الدخول، حاول مرة أخرى',
+      });
     } finally {
       setLoading(false);
     }
@@ -103,12 +116,24 @@ function Login() {
               </p>
             </div>
 
-            {/* General Error */}
+            {/* Success Message */}
             {location.state?.message && (
-              <p role="status" className="mt-[15px] rounded-[10px] bg-green-50 p-[10px] text-center text-[13px] text-green-700">
+              <p
+                role="status"
+                className="
+                  mt-[15px]
+                  rounded-[10px]
+                  bg-green-50
+                  p-[10px]
+                  text-center
+                  text-[13px]
+                  text-green-700
+                ">
                 {location.state.message}
               </p>
             )}
+
+            {/* General Error */}
             {errors.general && (
               <div
                 className="
@@ -139,7 +164,6 @@ function Login() {
                 onChange={(e) => {
                   setEmail(e.target.value);
 
-                  // إزالة الخطأ عند الكتابة
                   if (errors.email) {
                     setErrors((prev) => ({
                       ...prev,
@@ -180,7 +204,6 @@ function Login() {
                   onChange={(e) => {
                     setPassword(e.target.value);
 
-                    // إزالة الخطأ عند الكتابة
                     if (errors.password) {
                       setErrors((prev) => ({
                         ...prev,
@@ -231,7 +254,13 @@ function Login() {
                         ? 'fa-square-check text-[#5CBA9D]'
                         : 'fa-square text-transparent'
                     } text-[25px]`}
-                    style={rememberPassword ? {} : { WebkitTextStroke: '1px #4F9D9E' }}></i>
+                    style={
+                      rememberPassword
+                        ? {}
+                        : {
+                            WebkitTextStroke: '1px #4F9D9E',
+                          }
+                    }></i>
 
                   <p className="mr-[8px] text-[#a09c9c] text-[16px]">تذكر كلمة المرور</p>
                 </div>
@@ -294,7 +323,7 @@ function Login() {
             </div>
 
             {/* Social Login */}
-            <div className="sm:flex sm:justify-center sm:items-center  gap-[15px] m-[11px]">
+            <div className="sm:flex sm:justify-center sm:items-center gap-[15px] m-[11px]">
               {/* Facebook */}
               <div
                 className="
