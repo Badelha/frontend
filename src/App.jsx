@@ -95,78 +95,17 @@ function App() {
       <Route path="/listing" element={<Listing />} />
       <Route path="/addListing" element={<AddListing />} />
 
-      {/* Dashboard Pages */}
-      <Route
-        path="/dashboard"
-        element={
-          <Layout>
-            <Dashboard />
-          </Layout>
-        }
-      />
 
-      <Route
-        path="/ads"
-        element={
-          <Layout>
-            <Ads />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/messages"
-        element={
-          <Layout>
-            <Messages />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/messages-empty"
-        element={
-          <Layout>
-            <MessagesEmpty />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/notifications"
-        element={
-          <Layout>
-            <Notifications />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/orders"
-        element={
-          <Layout>
-            <Orders />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/purchase-orders"
-        element={
-          <Layout>
-            <PurchaseOrders />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/users"
-        element={
-          <Layout>
-            <Users />
-          </Layout>
-        }
-      />
+{/* Dashboard Pages */}
+<Route element={<Layout />}>
+  <Route path="/Dashboard" element={<Dashboard />} />
+  <Route path="/Ads" element={<Ads />} />
+  <Route path="/messages" element={<Messages />} />
+  <Route path="/messages-empty" element={<MessagesEmpty />} />
+  <Route path="/notifications" element={<Notifications />} />
+  <Route path="/Orders" element={<Orders />} />
+  <Route path="/Users" element={<Users />} />
+</Route>
 
       {/* Any unknown route */}
       <Route path="*" element={<Navigate to="/" replace />} />
