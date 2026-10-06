@@ -1,5 +1,5 @@
-﻿import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbarpro from '../components/Navbarpro';
 import auth from '../services/auth';
 import marketplace from '../services/marketplace';
@@ -127,6 +127,7 @@ function FileButton({ onPick, label, className, children }) {
 ========================================================= */
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState(null);
   const [products, setProducts] = useState([]);
@@ -215,14 +216,7 @@ export default function ProfilePage() {
   ======================================================= */
 
   const handleEdit = () => {
-    setEditForm({
-      fullName: profile?.full_name || '',
-      phoneNumber: profile?.phone_number || '',
-      address: profile?.address || '',
-      city: profile?.city || '',
-    });
-    setEditError('');
-    setEditOpen(true);
+    navigate('/edit-profile');
   };
 
   const handleProfileSubmit = async (event) => {

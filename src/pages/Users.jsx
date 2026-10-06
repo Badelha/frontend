@@ -1,413 +1,253 @@
-import { useState } from "react";
+import { useEffect, useState } from 'react';
+import AdminNavbar from '../components/AdminNavbar';
+import usersService from '../services/users';
+import { getApiError } from '../services/api';
 
-const users = [
-  {
-    name: "سارة محمد",
-    initial: "س",
-    phone: "0599123456",
-    status: "نشط",
-    orders: "12",
-    rating: "4.8 ★",
-    location: "غزة",
-    date: "2026-01-15",
-  },
-  {
-    name: "خالد العمري",
-    initial: "خ",
-    phone: "0592456789",
-    status: "نشط",
-    orders: "5",
-    rating: "3.9 ★",
-    location: "رفح",
-    date: "2026-02-20",
-  },
-  {
-    name: "فاطمة الزهراء",
-    initial: "ف",
-    phone: "0598765432",
-    status: "موقوف",
-    orders: "8",
-    rating: "4.2 ★",
-    location: "خان يونس",
-    date: "2025-11-10",
-  },
-  {
-    name: "عمر حسن",
-    initial: "ع",
-    phone: "0591234567",
-    status: "نشط",
-    orders: "20",
-    rating: "4.5 ★",
-    location: "دير البلح",
-    date: "2025-10-05",
-  },
-  {
-    name: "نور الدين",
-    initial: "ن",
-    phone: "0597654321",
-    status: "محظور",
-    orders: "3",
-    rating: "2.1 ★",
-    location: "بيت لاهيا",
-    date: "2025-12-30",
-  },
-  {
-    name: "أمنة سالم",
-    initial: "أ",
-    phone: "0593456789",
-    status: "محظور",
-    orders: "15",
-    rating: "4.9 ★",
-    location: "غزة",
-    date: "2026-03-01",
-  },
-  {
-    name: "يوسف أحمد",
-    initial: "ي",
-    phone: "0594567890",
-    status: "نشط",
-    orders: "7",
-    rating: "3.5 ★",
-    location: "رفح",
-    date: "2026-04-12",
-  },
-];
+export default function Users() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [actionType, setActionType] = useState(''); // 'suspend' | 'ban' | 'activate' | 'delete'
+  const [submitting, setSubmitting] = useState(false);
 
-function Users() {
-  const [suspendUser, setSuspendUser] = useState(null);
-  const [blockUser, setBlockUser] = useState(null);
-
-  const [suspendSuccess, setSuspendSuccess] = useState(false);
-  const [blockSuccess, setBlockSuccess] = useState(false);
-
-  const getStatusStyle = (status) => {
-    if (status === "نشط") {
-      return {
-        container: "bg-[#DDF7E8]",
-        text: "text-[#008236]",
-      };
+  const loadUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await usersService.getAllUsers({ search, limit: 50 });
+      const list = Array.isArray(res) ? res : res?.users || [];
+      setUsers(list);
+    } catch (err) {
+      setError(getApiError(err) || 'تعذر تحميل قائمة المستخدمين');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (status === "موقوف") {
-      return {
-        container: "bg-[#FFF2C7]",
-        text: "text-[#D39A00]",
-      };
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    loadUsers();
+  };
+
+  const handleStatusChange = async (userId, newStatus) => {
+    setSubmitting(true);
+    try {
+      await usersService.updateUserStatus(userId, newStatus);
+      setSelectedUser(null);
+      setActionType('');
+      await loadUsers();
+    } catch (err) {
+      alert(getApiError(err) || 'حدث خطأ أثناء تغيير حالة المستخدم');
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    return {
-      container: "bg-[#FDE1E1]",
-      text: "text-[#E05252]",
-    };
+  const handleDeleteUser = async (userId) => {
+    setSubmitting(true);
+    try {
+      await usersService.deleteUser(userId);
+      setSelectedUser(null);
+      setActionType('');
+      await loadUsers();
+    } catch (err) {
+      alert(getApiError(err) || 'حدث خطأ أثناء حذف المستخدم');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    if (status === 'ACTIVE' || status === 'نشط') {
+      return <span className="rounded-full bg-[#DDF7E8] px-3 py-1 text-xs font-bold text-[#008236]">نشط</span>;
+    }
+    if (status === 'SUSPENDED' || status === 'موقوف') {
+      return <span className="rounded-full bg-[#FFF2C7] px-3 py-1 text-xs font-bold text-[#D39A00]">موقوف</span>;
+    }
+    return <span className="rounded-full bg-[#FDE1E1] px-3 py-1 text-xs font-bold text-[#E05252]">محظور</span>;
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#F7FAFB]">
+    <>
+      <AdminNavbar />
+      <main dir="rtl" className="min-h-screen bg-[#F8FBFC] px-4 pt-24 pb-12">
+        <div className="mx-auto max-w-[1300px]">
+          {/* Header & Search */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-[#4F9D9E]">لوحة الإدارة</p>
+              <h1 className="text-2xl font-bold text-[#285F88]">إدارة وتراخيص المستخدمين</h1>
+            </div>
 
-      {/* ================= المحتوى ================= */}
-      <main className="min-h-screen bg-[#F8FBFC] px-[19px] pt-[18px]">
-
-        {/* العنوان والبحث */}
-        <div className="mb-[12px] flex items-center justify-between">
-
-          {/* عنوان الصفحة - يمين */}
-          <h1 className="m-0 text-[16px] font-bold text-[#285F88]">
-            إدارة المستخدمين
-          </h1>
-
-          {/* البحث - يسار */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="  بحث بالاسم أو الهاتف أو الموقع...   "
-              className="h-[32px] w-[220px] rounded-[7px] border border-[#E6ECEF] bg-white px-[10px] text-right text-[14px] font-[300] text-[#74838C] outline-none placeholder:text-[#A7B1B7]"
-            />
+            <form onSubmit={handleSearchSubmit} className="flex gap-2">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="بحث بالاسم أو الهاتف أو البريد..."
+                className="h-10 w-[260px] rounded-xl border border-[#E6ECEF] bg-white px-3 text-sm text-[#306061] outline-none focus:border-[#4F9D9E]"
+              />
+              <button className="rounded-xl bg-[#3A73AA] px-5 py-2 text-sm font-bold text-white hover:bg-[#315F8B]">
+                بحث
+              </button>
+            </form>
           </div>
 
-        </div>
-
-        {/* كرت الجدول */}
-        <section className="overflow-hidden rounded-[10px] border border-[#E5EAEC] bg-white shadow-[0_2px_4px_-2px_#0000001A,0_4px_6px_-1px_#0000001A]">
-
-          {/* رأس الجدول */}
-          <div className="grid h-[28px] grid-cols-8 items-center bg-[#F5F8F9] px-[10px]">
-
-            <div className="h-[20px] w-[37px] text-right font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              الاسم
+          {error && (
+            <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
             </div>
+          )}
 
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              الهاتف
-            </div>
+          {/* Table Card */}
+          <section className="overflow-hidden rounded-2xl border border-[#E5EAEC] bg-white shadow-sm">
+            {loading ? (
+              <div className="py-16 text-center text-[#4F9D9E]">جارٍ تحميل المستخدمين...</div>
+            ) : users.length === 0 ? (
+              <div className="py-16 text-center text-[#718692]">لا يوجد مستخدمون مطابقون للبحث.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-right text-sm">
+                  <thead>
+                    <tr className="bg-[#F5F8F9] border-b border-[#E5EAEC] text-xs font-bold text-[#74838C]">
+                      <th className="py-3 px-4">المستخدم</th>
+                      <th className="py-3 px-4">الهاتف</th>
+                      <th className="py-3 px-4">البريد الإلكتروني</th>
+                      <th className="py-3 px-4 text-center">الحالة</th>
+                      <th className="py-3 px-4 text-center">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#EEF1F2]">
+                    {users.map((user) => {
+                      const id = user.user_id || user.id;
+                      return (
+                        <tr key={id} className="hover:bg-[#F9FBFB]">
+                          <td className="py-3.5 px-4 font-bold text-[#2E5F87]">
+                            <div className="flex items-center gap-2">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#4384A5] text-xs text-white">
+                                {user.full_name?.charAt(0) || 'م'}
+                              </span>
+                              <span>{user.full_name || 'مستخدم'}</span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-[#74838C]">{user.phone_number || '—'}</td>
+                          <td className="py-3.5 px-4 text-[#74838C]">{user.email}</td>
+                          <td className="py-3.5 px-4 text-center">{getStatusBadge(user.account_status)}</td>
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setActionType('activate');
+                                }}
+                                className="rounded-lg bg-[#DCFCE7] px-3 py-1 text-xs font-bold text-[#15803D] hover:bg-green-200"
+                              >
+                                تنشيط
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setActionType('suspend');
+                                }}
+                                className="rounded-lg bg-[#FEFCE8] px-3 py-1 text-xs font-bold text-[#A65F00] hover:bg-yellow-200"
+                              >
+                                إيقاف
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setActionType('ban');
+                                }}
+                                className="rounded-lg bg-[#FEF2F2] px-3 py-1 text-xs font-bold text-[#C10007] hover:bg-red-200"
+                              >
+                                حظر
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setActionType('delete');
+                                }}
+                                className="rounded-lg bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700 hover:bg-gray-200"
+                              >
+                                حذف
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
 
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              الحالة
-            </div>
+          {/* Action Modal */}
+          {selectedUser && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-[420px] rounded-2xl bg-white p-6 text-right shadow-2xl">
+                <h3 className="text-xl font-bold text-[#2E5F87]">
+                  {actionType === 'suspend' && 'إيقاف حساب المستخدم'}
+                  {actionType === 'ban' && 'حظر المستخدم'}
+                  {actionType === 'activate' && 'تنشيط حساب المستخدم'}
+                  {actionType === 'delete' && 'حذف المستخدم'}
+                </h3>
+                <p className="mt-3 text-sm text-[#6B7280]">
+                  هل أنت متأكد من تنفيذ الإجراء على المستخدم{' '}
+                  <span className="font-bold text-[#2E5F87]">{selectedUser.full_name || selectedUser.email}</span>؟
+                </p>
 
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              المنتجات
-            </div>
-
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              التقييم
-            </div>
-
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              الموقع
-            </div>
-
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              تاريخ الانضمام
-            </div>
-
-            <div className="text-center font-[Cairo] text-[14px] font-bold leading-[20px] tracking-[0px] text-[#74838C]">
-              الإجراءات
-            </div>
-
-          </div>
-
-          {/* المستخدمون */}
-          <div className="flex flex-col gap-[8px]">
-            <div className="flex flex-col gap-[12px]">
-
-              {users.map((user) => {
-                const statusStyle = getStatusStyle(user.status);
-
-                return (
-                  <div
-                    key={user.name}
-                    className="grid h-[40px] grid-cols-8 items-center border-b border-[#EEF1F2] px-[10px] text-[7px]"
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => {
+                      setSelectedUser(null);
+                      setActionType('');
+                    }}
+                    className="rounded-xl border border-gray-300 bg-white px-5 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50"
                   >
+                    إلغاء
+                  </button>
 
-                    {/* الاسم */}
-                    <div className="flex items-center gap-[6px] text-right font-[700] text-[16px] leading-[24px] text-[#2E5F87]">
-
-                      <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#4384A5] text-[10px] text-white">
-                        {user.initial}
-                      </span>
-
-                      {user.name}
-
-                    </div>
-
-                    {/* رقم الهاتف */}
-                    <div className="text-center font-[Cairo] text-[14px] font-light leading-[20px] tracking-[0px] text-[#89949B]">
-                      {user.phone}
-                    </div>
-
-                    {/* الحالة */}
-                    <div className="text-center">
-
-                      <span
-                        className={`inline-flex h-[30px] w-[49.21875px] items-center justify-center rounded-[22369600px] ${statusStyle.container}`}
-                      >
-                        <span
-                          className={`font-[Cairo] text-[12px] font-bold leading-[16px] tracking-[0px] text-right ${statusStyle.text}`}
-                        >
-                          {user.status}
-                        </span>
-                      </span>
-
-                    </div>
-
-                    {/* عدد المنتجات */}
-                    <div className="text-center font-[Cairo] text-[16px] font-light leading-[24px] tracking-[0px] text-[#6B7280]">
-                      {user.orders}
-                    </div>
-
-                    {/* التقييم */}
-                    <div className="text-center font-[Cairo] text-[16px] font-bold leading-[24px] tracking-[0px] text-[#F0B100]">
-                      {user.rating}
-                    </div>
-
-                    {/* المنطقة */}
-                    <div className="text-center font-[Cairo] text-[16px] font-light leading-[24px] tracking-[0px] text-[#6B7280]">
-                      {user.location}
-                    </div>
-
-                    {/* التاريخ */}
-                    <div className="text-center font-[Cairo] text-[14px] font-light leading-[20px] tracking-[0px] text-[#6B7280]">
-                      {user.date}
-                    </div>
-
-                    {/* الأزرار */}
-                    <div className="flex h-[28px] w-[172.17px] justify-center gap-[8px]">
-
-                      <button
-                        onClick={() => {
-                          setBlockUser(user.name);
-                          setBlockSuccess(false);
-                        }}
-                        className="block-btn rounded-[5px] bg-[#FEF2F2] px-[7px] py-[3px] text-[7px] font-bold text-[#C10007]"
-                      >
-                        حظر
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setSuspendUser(user.name);
-                          setSuspendSuccess(false);
-                        }}
-                        className="suspend-btn rounded-[5px] bg-[#FEFCE8] px-[7px] py-[3px] text-[7px] font-bold text-[#A65F00]"
-                      >
-                        إيقاف
-                      </button>
-
-                      <button
-                        className="rounded-[5px] bg-[#DCFCE7] px-[7px] py-[3px] text-[7px] font-bold text-[#15803D]"
-                      >
-                        تنشيط
-                      </button>
-
-                    </div>
-
-                  </div>
-                );
-              })}
-
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => {
+                      const id = selectedUser.user_id || selectedUser.id;
+                      if (actionType === 'delete') {
+                        handleDeleteUser(id);
+                      } else {
+                        const status = actionType === 'suspend' ? 'SUSPENDED' : actionType === 'ban' ? 'BANNED' : 'ACTIVE';
+                        handleStatusChange(id, status);
+                      }
+                    }}
+                    className={`rounded-xl px-5 py-2 text-sm font-bold text-white shadow ${
+                      actionType === 'delete' || actionType === 'ban'
+                        ? 'bg-red-600 hover:bg-red-700'
+                        : actionType === 'suspend'
+                        ? 'bg-amber-600 hover:bg-amber-700'
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    {submitting ? 'جارٍ التنفيذ...' : 'تأكيد'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-
-        </section>
-
+          )}
+        </div>
       </main>
-
-      {/* ================= مودال إيقاف المستخدم ================= */}
-      {suspendUser && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setSuspendUser(null);
-            }
-          }}
-        >
-          <div className="cairo-font mx-4 w-full max-w-[420px] rounded-2xl bg-white p-8 text-right shadow-2xl transition-all duration-300">
-
-            {!suspendSuccess ? (
-              <>
-                <h2 className="mb-4 text-[20px] font-bold leading-[28px] tracking-[0px] text-[#2E5F87]">
-                  إيقاف المستخدم
-                </h2>
-
-                <p className="mb-8 text-base leading-relaxed text-[#6B7280]">
-                  هل أنت متأكد من إيقاف المستخدم{" "}
-                  <span className="font-bold text-[#2E5F87]">
-                    {suspendUser}
-                  </span>
-                  ؟
-                </p>
-
-                <div className="flex justify-start gap-3">
-
-                  <button
-                    onClick={() => {
-                      setSuspendSuccess(true);
-
-                      setTimeout(() => {
-                        setSuspendUser(null);
-                        setSuspendSuccess(false);
-                      }, 1500);
-                    }}
-                    className="rounded-lg bg-[#f3b10b] px-7 py-2.5 text-base font-bold text-white transition active:scale-95 hover:bg-[#d99c09]"
-                  >
-                    إيقاف
-                  </button>
-
-                  <button
-                    onClick={() => setSuspendUser(null)}
-                    className="rounded-lg border border-gray-300 bg-white px-7 py-2.5 text-base font-bold text-[#7b838d] transition active:scale-95 hover:bg-gray-100"
-                  >
-                    إلغاء
-                  </button>
-
-                </div>
-              </>
-            ) : (
-              <div className="py-4 text-center text-lg font-bold text-[#1e3a67]">
-                <p>
-                  تم إيقاف المستخدم{" "}
-                  <span className="font-bold">
-                    {suspendUser}
-                  </span>{" "}
-                  بنجاح!
-                </p>
-              </div>
-            )}
-
-          </div>
-        </div>
-      )}
-
-      {/* ================= مودال حظر المستخدم ================= */}
-      {blockUser && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setBlockUser(null);
-            }
-          }}
-        >
-          <div className="cairo-font mx-4 w-full max-w-[420px] rounded-2xl bg-white p-8 text-right shadow-2xl transition-all duration-300">
-
-            {!blockSuccess ? (
-              <>
-                <h2 className="mb-4 text-[20px] font-bold leading-[28px] tracking-[0px] text-[#2E5F87]">
-                  حظر المستخدم
-                </h2>
-
-                <p className="mb-8 text-base leading-relaxed text-[#6B7280]">
-                  هل أنت متأكد من حظر المستخدم{" "}
-                  <span className="font-bold text-[#2E5F87]">
-                    {blockUser}
-                  </span>
-                  ؟
-                </p>
-
-                <div className="flex justify-start gap-3">
-
-                  <button
-                    onClick={() => {
-                      setBlockSuccess(true);
-
-                      setTimeout(() => {
-                        setBlockUser(null);
-                        setBlockSuccess(false);
-                      }, 1500);
-                    }}
-                    className="rounded-lg bg-[#FB2C36] px-7 py-2.5 text-base font-bold text-white transition active:scale-95 hover:bg-[#d9252e]"
-                  >
-                    حظر
-                  </button>
-
-                  <button
-                    onClick={() => setBlockUser(null)}
-                    className="rounded-lg border border-gray-300 bg-white px-7 py-2.5 text-base font-bold text-[#7b838d] transition active:scale-95 hover:bg-gray-100"
-                  >
-                    إلغاء
-                  </button>
-
-                </div>
-              </>
-            ) : (
-              <div className="py-4 text-center text-lg font-bold text-[#1e3a67]">
-                <p>
-                  تم حظر المستخدم{" "}
-                  <span className="font-bold">
-                    {blockUser}
-                  </span>{" "}
-                  بنجاح!
-                </p>
-              </div>
-            )}
-
-          </div>
-        </div>
-      )}
-
-    </div>
+    </>
   );
 }
-
-export default Users;
